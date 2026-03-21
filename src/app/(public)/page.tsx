@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { CivicItemCard } from '@/components/civic/CivicItemCard'
+import { renderIcon } from '@/lib/utils/icons'
 
 export default function LandingPage() {
   return (
@@ -148,7 +149,7 @@ export default function LandingPage() {
                 className="group flex flex-col items-center gap-3 rounded-xl border-2 border-slate-200 bg-white p-6 transition-all hover:border-orange-500 hover:shadow-lg"
               >
                 <div className={`rounded-lg ${category.color} p-3 text-2xl`}>
-                  {category.icon}
+                  {renderIcon(category.icon, 24, "h-6 w-6 text-white")}
                 </div>
                 <div className="text-center">
                   <h3 className="font-semibold text-slate-900">{category.label}</h3>
