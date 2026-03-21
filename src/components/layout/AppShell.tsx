@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import { UserRole } from '@prisma/client'
+import { FloatingContactButton } from './FloatingContactButton'
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>
@@ -333,6 +334,9 @@ export function AppShell({ user, children }: AppShellProps) {
           </div>
         </nav>
       </div>
+      
+      {/* Floating Contact Button */}
+      <FloatingContactButton />
     </div>
   )
 }
