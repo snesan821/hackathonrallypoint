@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
@@ -113,9 +114,11 @@ export function AppShell({ user, children }: AppShellProps) {
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-slate-200">
                   {user.avatarUrl ? (
-                    <img
+                    <Image
                       src={user.avatarUrl}
                       alt={user.displayName}
+                      width={40}
+                      height={40}
                       className="h-full w-full object-cover"
                     />
                   ) : (
