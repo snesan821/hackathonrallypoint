@@ -18,7 +18,10 @@ export default function IssueDetailPage() {
   const slug = params.slug as string
 
   const [item, setItem] = useState<any>(null)
+  const [comments, setComments] = useState<any[]>([])
+  const [commentCount, setCommentCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [activeTab, setActiveTab] = useState<'summary' | 'details' | 'discussion' | 'updates'>(
     'summary'
   )
@@ -26,14 +29,20 @@ export default function IssueDetailPage() {
   useEffect(() => {
     const fetchItem = async () => {
       try {
+        console.log('🔍 Fetching issue details for slug:', slug)
         const res = await fetch(`/api/civic-items/${slug}`)
         const data = await res.json()
 
         if (data.success) {
+          console.log('✅ Issue fetched successfully:', data.data.title)
+          console.log('📊 User engagement:', data.data.userEngagement)
           setItem(data.data)
+          setCommentCount(data.data.commentCount || 0)
+        } else {
+          console.error('❌ Failed to fetch issue:', data.error)
         }
       } catch (error) {
-        console.error('Failed to fetch item:', error)
+        console.error('❌ Failed to fetch item:', error)
       } finally {
         setIsLoading(false)
       }
@@ -41,6 +50,30 @@ export default function IssueDetailPage() {
 
     fetchItem()
   }, [slug])
+
+  // Fetch comments when discussion tab is opened
+  useEffect(() => {
+    if (activeTab === 'discussion' && comments.length === 0 && !isLoadingComments) {
+      fetchComments()
+    }
+  }, [activeTab])
+
+  const fetchComments = async () => {
+    setIsLoadingComments(true)
+    try {
+      const res = await fetch(`/api/civic-items/${slug}/comments?pageSize=20`)
+      const data = await res.json()
+
+      if (data.success) {
+        setComments(data.data)
+        setCommentCount(data.pagination.totalCount)
+      }
+    } catch (error) {
+      console.error('Failed to fetch comments:', error)
+    } finally {
+      setIsLoadingComments(false)
+    }
+  }
 
   const handleEngage = async (action: EngagementAction) => {
     if (!item) return
@@ -85,8 +118,9 @@ export default function IssueDetailPage() {
       throw new Error(data.error || 'Failed to post comment')
     }
 
-    // Refresh comments (in a real app, you'd update state optimistically)
-    window.location.reload()
+    // Refresh comments
+    await fetchComments()
+    setCommentCount((prev) => prev + 1)
   }
 
   if (isLoading) {
@@ -191,7 +225,7 @@ export default function IssueDetailPage() {
               {[
                 { id: 'summary', label: 'Summary' },
                 { id: 'details', label: 'Full Details' },
-                { id: 'discussion', label: `Discussion (${item.commentCount})` },
+                { id: 'discussion', label: `Discussion (${commentCount})` },
                 { id: 'updates', label: `Updates (${item.organizerUpdates?.length || 0})` },
               ].map((tab) => (
                 <button
@@ -245,8 +279,8 @@ export default function IssueDetailPage() {
           {activeTab === 'discussion' && (
             <CommunityDiscussion
               civicItemSlug={slug}
-              initialComments={[]} // Would be fetched from API
-              totalCount={item.commentCount}
+              initialComments={comments}
+              totalCount={commentCount}
               onPostComment={handlePostComment}
             />
           )}
