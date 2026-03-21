@@ -161,7 +161,7 @@ export async function GET(
         generatedAt: civicItem.aiSummary.generatedAt,
       } : null,
 
-      sourceUrl: civicItem.sourceDocuments[0]?.sourceUrl || null,
+      sourceUrl: civicItem.sourceUrl || civicItem.sourceDocuments[0]?.sourceUrl || null,
 
       organizerUpdates: civicItem.organizerUpdates.map((update) => ({
         id: update.id,

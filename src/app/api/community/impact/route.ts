@@ -52,7 +52,7 @@ export async function GET(req: Request) {
       SELECT ci.id as "civicItemId", ci.title, ci.slug, ci.type, COUNT(ee.id) as "engagementCount"
       FROM "CivicItem" ci
       JOIN "EngagementEvent" ee ON ci.id = ee."civicItemId"
-      WHERE ee.timestamp >= ${sevenDaysAgo}
+      WHERE ee."createdAt" >= ${sevenDaysAgo}
       GROUP BY ci.id, ci.title, ci.slug, ci.type
       ORDER BY "engagementCount" DESC
       LIMIT 5
@@ -66,23 +66,21 @@ export async function GET(req: Request) {
       engagementCount: Number(item.engagementCount),
     }))
 
-    // Engagement by category
-    const engagementsByCategory = await prisma.$queryRaw<Array<{
-      category: string
-      count: bigint
-    }>>`
-      SELECT DISTINCT unnest(ci.categories::text[]) as category, COUNT(*) as count
-      FROM "EngagementEvent" ee
-      JOIN "CivicItem" ci ON ee."civicItemId" = ci.id
-      WHERE ee.timestamp >= ${sevenDaysAgo}
-      GROUP BY category
-      ORDER BY count DESC
-    `
+    // Engagement by category — use Prisma instead of raw SQL for enum arrays
+    const allEngagementsWithItems = await prisma.engagementEvent.findMany({
+      where: { timestamp: { gte: sevenDaysAgo } },
+      select: { civicItem: { select: { categories: true } } },
+    })
 
-    const categoryBreakdown = engagementsByCategory.map((item) => ({
-      category: item.category,
-      count: Number(item.count),
-    }))
+    const catCounts: Record<string, number> = {}
+    for (const e of allEngagementsWithItems) {
+      for (const cat of e.civicItem.categories) {
+        catCounts[cat] = (catCounts[cat] || 0) + 1
+      }
+    }
+    const categoryBreakdown = Object.entries(catCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, count]) => ({ category, count }))
 
     // Calculate milestones
     const milestones: string[] = []
@@ -111,7 +109,6 @@ export async function GET(req: Request) {
     const highSupportItems = await prisma.civicItem.findMany({
       where: {
         targetSupport: { not: null },
-        currentSupport: { gte: prisma.civicItem.fields.targetSupport },
       },
       select: {
         title: true,
@@ -121,31 +118,32 @@ export async function GET(req: Request) {
       take: 3,
     })
 
-    highSupportItems.forEach((item) => {
+    highSupportItems
+      .filter((item) => item.targetSupport && item.currentSupport >= item.targetSupport)
+      .forEach((item) => {
       if (item.targetSupport) {
         const percentage = Math.round((item.currentSupport / item.targetSupport) * 100)
         milestones.push(`${item.title} reached ${percentage}% of target support`)
       }
     })
 
-    // Active districts (districts with most engagement)
-    const activeDistricts = await prisma.$queryRaw<Array<{
-      district: string
-      count: bigint
-    }>>`
-      SELECT DISTINCT unnest(ci."districtIds"::text[]) as district, COUNT(*) as count
-      FROM "EngagementEvent" ee
-      JOIN "CivicItem" ci ON ee."civicItemId" = ci.id
-      WHERE ee.timestamp >= ${sevenDaysAgo}
-      GROUP BY district
-      ORDER BY count DESC
-      LIMIT 5
-    `
+    // Active districts — use Prisma instead of raw SQL for JSON arrays
+    const engagementsWithDistricts = await prisma.engagementEvent.findMany({
+      where: { timestamp: { gte: sevenDaysAgo } },
+      select: { civicItem: { select: { districtIds: true } } },
+    })
 
-    const activeDistrictsList = activeDistricts.map((item) => ({
-      district: item.district,
-      engagementCount: Number(item.count),
-    }))
+    const districtCounts: Record<string, number> = {}
+    for (const e of engagementsWithDistricts) {
+      const ids = e.civicItem.districtIds as string[]
+      if (Array.isArray(ids)) {
+        for (const d of ids) { districtCounts[d] = (districtCounts[d] || 0) + 1 }
+      }
+    }
+    const activeDistrictsList = Object.entries(districtCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([district, engagementCount]) => ({ district, engagementCount }))
 
     const impact = {
       success: true,
