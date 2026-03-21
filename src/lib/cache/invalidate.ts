@@ -3,7 +3,7 @@
  * Provides utilities to invalidate related cache entries when data changes
  */
 
-import { redis } from '@/lib/db/redis'
+import { redis } from '@/lib/cache/redis'
 import {
   civicItemKeys,
   commentKeys,
