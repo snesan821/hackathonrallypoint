@@ -1,0 +1,422 @@
+// This is your Prisma schema file for RallyPoint
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [uuidOssp(map: "uuid-ossp")]
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  USER
+  ORGANIZER
+  MODERATOR
+  ADMIN
+}
+
+enum Category {
+  HOUSING
+  EDUCATION
+  TRANSIT
+  PUBLIC_SAFETY
+  HEALTHCARE
+  JOBS
+  ENVIRONMENT
+  CIVIL_RIGHTS
+  CITY_SERVICES
+  BUDGET
+  ZONING
+  OTHER
+}
+
+enum CivicItemType {
+  PETITION
+  BALLOT_INITIATIVE
+  ORDINANCE
+  PUBLIC_HEARING
+  COUNCIL_VOTE
+  SCHOOL_BOARD
+  STATE_BILL
+  CITY_POLICY
+  OTHER
+}
+
+enum CivicItemStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+  PASSED
+  FAILED
+  WITHDRAWN
+}
+
+enum JurisdictionLevel {
+  CITY
+  COUNTY
+  STATE
+  CAMPUS
+  DISTRICT
+}
+
+enum EngagementAction {
+  VIEW
+  SAVE
+  UNSAVE
+  SHARE
+  SUPPORT
+  UNSUPPORT
+  COMMENT
+  RSVP
+  VOLUNTEER
+  CONTACT_REP
+  SIGN
+  DOWNLOAD_FORM
+}
+
+enum CommentStatus {
+  VISIBLE
+  HIDDEN
+  FLAGGED
+  REMOVED
+}
+
+enum ThreadType {
+  QUESTION
+  SUPPORT
+  CONCERN
+  EVIDENCE
+}
+
+enum FlagReason {
+  SPAM
+  HARASSMENT
+  MISINFORMATION
+  OFF_TOPIC
+  OTHER
+}
+
+enum FlagStatus {
+  PENDING
+  REVIEWED
+  ACTIONED
+  DISMISSED
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SignalType {
+  RAPID_ACTIONS
+  DUPLICATE_IP
+  SUSPICIOUS_PATTERN
+  BOT_DETECTED
+}
+
+enum SignalSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+/// User model - represents a platform user
+model User {
+  id                   String            @id @default(uuid()) @db.Uuid
+  clerkId              String            @unique
+  email                String            @unique
+  displayName          String
+  avatarUrl            String?
+  role                 UserRole          @default(USER)
+  onboardingCompleted  Boolean           @default(false)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  // Relations
+  addresses            UserAddress[]
+  interests            UserInterest[]
+  engagements          EngagementEvent[]
+  comments             Comment[]
+  savedItems           EngagementEvent[] @relation("SavedItems")
+  organizedItems       CivicItem[]       @relation("Organizer")
+  organizerUpdates     OrganizerUpdate[]
+  uploadedDocuments    SourceDocument[]
+  reportedFlags        ModerationFlag[]  @relation("Reporter")
+  reviewedFlags        ModerationFlag[]  @relation("Reviewer")
+  auditLogs            AuditLog[]
+  fraudSignals         FraudSignal[]
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+/// UserAddress - stores user location info for district matching
+model UserAddress {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @db.Uuid
+  rawAddress          String
+  normalizedAddress   String
+  latitude            Float
+  longitude           Float
+  geocodeConfidence   Float
+  city                String?
+  state               String?
+  zip                 String?
+  county              String?
+  districtIds         Json     // Array of district IDs
+  jurisdictionTags    String[] // Array of jurisdiction tags
+  isPrimary           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([latitude, longitude])
+  @@index([zip])
+  @@index([userId])
+}
+
+/// UserInterest - tracks user's civic interest categories
+model UserInterest {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  category  Category
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([userId])
+}
+
+/// CivicItem - core model for civic issues, petitions, ordinances, etc.
+model CivicItem {
+  id                    String             @id @default(uuid()) @db.Uuid
+  title                 String
+  slug                  String             @unique
+  category              Category
+  type                  CivicItemType
+  status                CivicItemStatus    @default(ACTIVE)
+  jurisdiction          String
+  jurisdictionLevel     JurisdictionLevel
+  districtIds           Json               // Array of district IDs this affects
+  summary               String             @db.Text
+  fullDescription       String?            @db.Text
+  sourceUrl             String?
+  sourceDocumentId      String?            @unique @db.Uuid
+  aiSummaryId           String?            @unique @db.Uuid
+  deadline              DateTime?
+  effectiveDate         DateTime?
+  targetSupport         Int?
+  currentSupport        Int                @default(0)
+  allowsOnlineSignature Boolean            @default(false)
+  officialActionUrl     String?
+  organizerId           String?            @db.Uuid
+  isVerified            Boolean            @default(false)
+  latitude              Float?
+  longitude             Float?
+  tags                  String[]
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  // Relations
+  sourceDocument        SourceDocument?    @relation("CivicItemSource")
+  aiSummary             AISummary?
+  organizer             User?              @relation("Organizer", fields: [organizerId], references: [id])
+  engagements           EngagementEvent[]
+  comments              Comment[]
+  organizerUpdates      OrganizerUpdate[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+  @@index([jurisdiction])
+  @@index([deadline])
+  @@index([organizerId])
+}
+
+/// SourceDocument - uploaded or linked documents for civic items
+model SourceDocument {
+  id                String            @id @default(uuid()) @db.Uuid
+  civicItemId       String            @db.Uuid
+  title             String
+  originalUrl       String?
+  fileUrl           String?
+  contentType       String?
+  rawText           String            @db.Text
+  uploadedById      String            @db.Uuid
+  processingStatus  ProcessingStatus  @default(PENDING)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relations
+  civicItem         CivicItem         @relation("CivicItemSource", fields: [civicItemId], references: [id], onDelete: Cascade)
+  uploadedBy        User              @relation(fields: [uploadedById], references: [id])
+  aiSummaries       AISummary[]
+
+  @@index([civicItemId])
+  @@index([uploadedById])
+}
+
+/// AISummary - Claude-generated summaries of civic documents
+model AISummary {
+  id                  String          @id @default(uuid()) @db.Uuid
+  civicItemId         String          @unique @db.Uuid
+  sourceDocumentId    String?         @db.Uuid
+  modelVersion        String          // Track which Claude model was used
+  plainSummary        String          @db.Text
+  whoAffected         String          @db.Text
+  whatChanges         String          @db.Text
+  whyItMatters        String          @db.Text
+  argumentsFor        Json            // Array of argument strings
+  argumentsAgainst    Json            // Array of argument strings
+  importantDates      Json            // Array of {date, description} objects
+  nextActions         Json            // Array of action strings
+  disclaimer          String          @default("This summary was generated by AI to help make civic documents more accessible. It is not legal advice. Always refer to the official document for authoritative information.")
+  generatedAt         DateTime        @default(now())
+
+  // Relations
+  civicItem           CivicItem       @relation(fields: [civicItemId], references: [id], onDelete: Cascade)
+  sourceDocument      SourceDocument? @relation(fields: [sourceDocumentId], references: [id])
+
+  @@index([civicItemId])
+}
+
+/// EngagementEvent - tracks all user interactions with civic items
+model EngagementEvent {
+  id          String            @id @default(uuid()) @db.Uuid
+  userId      String            @db.Uuid
+  civicItemId String            @db.Uuid
+  action      EngagementAction
+  metadata    Json?
+  ipHash      String?
+  createdAt   DateTime          @default(now())
+
+  // Relations
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  civicItem   CivicItem         @relation(fields: [civicItemId], references: [id], onDelete: Cascade)
+  savedBy     User?             @relation("SavedItems", fields: [userId], references: [id])
+
+  @@unique([userId, civicItemId, action])
+  @@index([userId, createdAt])
+  @@index([civicItemId, action])
+}
+
+/// Comment - threaded comments on civic items
+model Comment {
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @db.Uuid
+  civicItemId     String        @db.Uuid
+  parentId        String?       @db.Uuid
+  threadType      ThreadType
+  body            String        @db.Text
+  sanitizedBody   String        @db.Text
+  status          CommentStatus @default(VISIBLE)
+  moderationScore Float?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  civicItem       CivicItem         @relation(fields: [civicItemId], references: [id], onDelete: Cascade)
+  parent          Comment?          @relation("CommentReplies", fields: [parentId], references: [id])
+  replies         Comment[]         @relation("CommentReplies")
+  flags           ModerationFlag[]
+
+  @@index([civicItemId, threadType, status])
+  @@index([userId])
+  @@index([parentId])
+}
+
+/// ModerationFlag - user-reported content flags
+model ModerationFlag {
+  id            String      @id @default(uuid()) @db.Uuid
+  commentId     String      @db.Uuid
+  reportedById  String      @db.Uuid
+  reason        FlagReason
+  details       String?
+  status        FlagStatus  @default(PENDING)
+  reviewedById  String?     @db.Uuid
+  reviewedAt    DateTime?
+  createdAt     DateTime    @default(now())
+
+  // Relations
+  comment       Comment     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reportedBy    User        @relation("Reporter", fields: [reportedById], references: [id])
+  reviewedBy    User?       @relation("Reviewer", fields: [reviewedById], references: [id])
+
+  @@index([commentId])
+  @@index([status])
+}
+
+/// OrganizerUpdate - updates posted by organizers on their civic items
+model OrganizerUpdate {
+  id          String    @id @default(uuid()) @db.Uuid
+  civicItemId String    @db.Uuid
+  authorId    String    @db.Uuid
+  title       String
+  body        String    @db.Text
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  civicItem   CivicItem @relation(fields: [civicItemId], references: [id], onDelete: Cascade)
+  author      User      @relation(fields: [authorId], references: [id])
+
+  @@index([civicItemId])
+  @@index([authorId])
+}
+
+/// AuditLog - append-only log of important actions
+model AuditLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String?   @db.Uuid
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  ipHash      String?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+}
+
+/// FraudSignal - tracks suspicious activity patterns
+model FraudSignal {
+  id         String          @id @default(uuid()) @db.Uuid
+  userId     String?         @db.Uuid
+  signalType SignalType
+  severity   SignalSeverity
+  details    Json
+  resolved   Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+
+  // Relations
+  user       User?           @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([resolved])
+}
