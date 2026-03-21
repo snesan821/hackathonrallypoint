@@ -232,6 +232,19 @@ export default function ProfilePage() {
             your city and state are visible to others.
           </p>
         </div>
+
+        {/* Legal Links */}
+        <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
+          <Link href="/privacy" className="hover:text-slate-900">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-slate-900">
+            Terms & Conditions
+          </Link>
+          <Link href="/contact" className="hover:text-slate-900">
+            Contact Us
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">

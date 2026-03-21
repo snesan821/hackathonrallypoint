@@ -6,6 +6,7 @@ import { CivicItemCard, CivicItemCardSkeleton } from '@/components/civic/CivicIt
 import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { Search, Filter } from 'lucide-react'
 import type { Category, EngagementAction } from '@prisma/client'
+import { renderIcon } from '@/lib/utils/icons'
 
 export default function DiscoverPage() {
   const searchParams = useSearchParams()
@@ -70,13 +71,13 @@ export default function DiscoverPage() {
           <button
             key={cat.value}
             onClick={() => updateFilter('category', cat.value)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
               category === cat.value
                 ? 'bg-orange-600 text-white'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            {cat.icon} {cat.label}
+            {renderIcon(cat.icon, 16, "h-4 w-4")} {cat.label}
           </button>
         ))}
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AI_SUMMARY_DISCLAIMER } from '@/lib/ai/jobs'
+import { AI_SUMMARY_DISCLAIMER } from '@/constants/ai'
 import { cn } from '@/lib/utils/cn'
 import { ChevronDown, Info, Calendar, CheckCircle } from 'lucide-react'
 import { CategoryBadge } from './CategoryBadge'
