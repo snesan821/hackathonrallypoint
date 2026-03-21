@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Instrument_Serif, DM_Sans } from 'next/font/google'
-import { ClerkProvider } from '@clerk/nextjs'
+import ClerkProviderWrapper from '@/components/ClerkProviderWrapper'
 import '@/styles/globals.css'
 import { Toaster } from '@/components/ui/Toaster'
 import { defaultMetadata } from '@/lib/seo/metadata'
@@ -27,13 +27,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProviderWrapper>
       <html lang="en" className={`${instrumentSerif.variable} ${dmSans.variable}`}>
         <body className="min-h-screen">
           {children}
           <Toaster />
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   )
 }

@@ -1,10 +1,24 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+
+const hasValidClerkKey =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_test_') ||
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_')
+
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+  },
+  webpack(config) {
+    if (!hasValidClerkKey) {
+      // Swap out @clerk/nextjs with a no-op stub so it never validates keys
+      config.resolve.alias['@clerk/nextjs'] = path.resolve('./src/lib/clerk-stub.tsx')
+      config.resolve.alias['@clerk/nextjs/server'] = path.resolve('./src/lib/clerk-stub-server.ts')
+    }
+    return config
   },
   async headers() {
     return [
