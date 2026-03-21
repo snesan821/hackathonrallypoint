@@ -265,6 +265,13 @@ export const ACTION_LABELS: Record<EngagementAction, ActionMeta> = {
     icon: 'ThumbsDown',
     level: 0,
   },
+  SKIP: {
+    action: 'SKIP',
+    label: 'Skip',
+    description: 'Skip this item',
+    icon: 'SkipForward',
+    level: 0,
+  },
   CONTACT_REP: {
     action: 'CONTACT_REP',
     label: 'Contact Representative',
