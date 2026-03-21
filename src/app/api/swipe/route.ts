@@ -55,6 +55,8 @@ export async function GET(req: Request) {
         allowsOnlineSignature: true,
         tags: true,
         isVerified: true,
+        sourceUrl: true,
+        officialActionUrl: true,
         aiSummary: {
           select: {
             plainSummary: true,
