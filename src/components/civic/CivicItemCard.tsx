@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Category, CivicItemType, CivicItemStatus, JurisdictionLevel, EngagementAction } from '@prisma/client'
 import { CategoryBadge } from './CategoryBadge'
 import { SupportBar } from './SupportBar'
@@ -40,23 +40,24 @@ interface CivicItemCardProps {
 }
 
 export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps) {
-  const [expanded, setExpanded] = useState(false)
+  const router = useRouter()
   const primaryCategory = item.categories[0]
   const jurisdiction = item.jurisdictionTags[0] || 'Unknown'
+
+  const handleCardClick = () => {
+    router.push(`/issues/${item.slug}`)
+  }
 
   return (
     <article
       className={cn(
-        'group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all',
-        expanded ? 'shadow-xl scale-[1.01] z-10' : 'hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1',
+        'group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all cursor-pointer',
+        'hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1',
         className
       )}
+      onClick={handleCardClick}
     >
-      {/* Clickable card body to expand/collapse */}
-      <div
-        className="cursor-pointer p-5 pb-0"
-        onClick={() => setExpanded(!expanded)}
-      >
+      <div className="p-5 pb-0">
         {/* Top metadata row */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {primaryCategory && <CategoryBadge category={primaryCategory} size="sm" />}
@@ -74,7 +75,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
           )}
         </div>
 
-        {/* Title — links to source URL (petition/bill page) if available, otherwise detail page */}
+        {/* Title — links to source URL if available, otherwise detail page */}
         {item.sourceUrl ? (
           <a
             href={item.sourceUrl}
@@ -102,20 +103,10 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
           </Link>
         )}
 
-        {/* Summary — shows truncated or full based on expanded state */}
-        <p className={cn(
-          'mb-4 text-sm leading-relaxed text-slate-600 transition-all duration-300',
-          expanded ? '' : 'line-clamp-3'
-        )}>
+        {/* Summary — truncated */}
+        <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-slate-600">
           {item.summary}
         </p>
-
-        {/* Expand/collapse hint */}
-        <div className="mb-3 flex items-center justify-center">
-          <span className="text-xs text-slate-400">
-            {expanded ? '▲ Click to collapse' : '▼ Click to read more'}
-          </span>
-        </div>
 
         {/* Deadline */}
         {item.deadline && (
@@ -131,8 +122,8 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
           </div>
         )}
 
-        {/* Source link when expanded */}
-        {expanded && item.sourceUrl && (
+        {/* Source link button */}
+        {item.sourceUrl && (
           <a
             href={item.sourceUrl}
             target="_blank"
@@ -149,7 +140,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
       </div>
 
       {/* Quick actions — always visible at bottom */}
-      <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
+      <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4" onClick={(e) => e.stopPropagation()}>
         <QuickActions
           civicItemId={item.id}
           civicItemSlug={item.slug}
