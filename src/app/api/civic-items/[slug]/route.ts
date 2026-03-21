@@ -91,6 +91,9 @@ export async function GET(
               },
             },
           })
+          console.log(`✅ VIEW engagement created for user ${user.id} on item ${civicItem.id}`)
+        } else {
+          console.log(`ℹ️ VIEW engagement already exists for user ${user.id} on item ${civicItem.id}`)
         }
       } catch (error) {
         // Don't fail the request if engagement tracking fails

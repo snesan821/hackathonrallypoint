@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ThreadType } from '@prisma/client'
 import { CommentThread } from './CommentThread'
 import { CommentComposer } from './CommentComposer'
@@ -34,6 +34,11 @@ export function CommunityDiscussion({
   const [showComposer, setShowComposer] = useState(false)
   const [replyingTo, setReplyingTo] = useState<any | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  // Update comments when initialComments prop changes
+  useEffect(() => {
+    setComments(initialComments)
+  }, [initialComments])
 
   const handleReply = (commentId: string) => {
     const comment = comments.find((c) => c.id === commentId)

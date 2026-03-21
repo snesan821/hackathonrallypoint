@@ -17,22 +17,27 @@ export default function ImpactPage() {
   const [impact, setImpact] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchImpact = async () => {
-      try {
-        const res = await fetch('/api/user/impact')
-        const data = await res.json()
+  const fetchImpact = async () => {
+    setIsLoading(true)
+    try {
+      console.log('📊 Fetching impact stats...')
+      const res = await fetch('/api/user/impact', { cache: 'no-store' })
+      const data = await res.json()
 
-        if (data.success) {
-          setImpact(data.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch impact:', error)
-      } finally {
-        setIsLoading(false)
+      if (data.success) {
+        console.log('✅ Impact stats loaded:', data.data.totals)
+        setImpact(data.data)
+      } else {
+        console.error('❌ Failed to fetch impact:', data.error)
       }
+    } catch (error) {
+      console.error('❌ Failed to fetch impact:', error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchImpact()
   }, [])
 
@@ -54,11 +59,20 @@ export default function ImpactPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">Your Impact</h1>
-        <p className="text-slate-600">
-          Track your civic engagement and see how you're making a difference
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="mb-2 text-3xl font-bold text-slate-900">Your Impact</h1>
+          <p className="text-slate-600">
+            Track your civic engagement and see how you're making a difference
+          </p>
+        </div>
+        <button
+          onClick={fetchImpact}
+          disabled={isLoading}
+          className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh Stats'}
+        </button>
       </div>
 
       {/* Stats Grid */}
