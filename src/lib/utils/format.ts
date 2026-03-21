@@ -275,7 +275,7 @@ export function isValidZipCode(zip: string): boolean {
  * Generate share URL for a civic item
  */
 export function generateShareUrl(slug: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return `${baseUrl}/issues/${slug}`
 }
 
