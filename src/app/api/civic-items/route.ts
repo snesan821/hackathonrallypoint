@@ -195,6 +195,7 @@ export async function GET(req: Request) {
       jurisdictionTags: item.jurisdictionTags,
       jurisdictionLevel: item.jurisdictionLevel,
       summary: item.summary,
+      sourceUrl: item.sourceUrl,
       deadline: item.deadline,
       currentSupport: item.currentSupport,
       targetSupport: item.targetSupport,
