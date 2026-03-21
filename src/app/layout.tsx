@@ -1,19 +1,19 @@
 import type { Metadata } from 'next'
-import { Instrument_Serif, DM_Sans } from 'next/font/google'
+import { Newsreader, Manrope } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import '@/styles/globals.css'
 import { Toaster } from '@/components/ui/Toaster'
 import { defaultMetadata } from '@/lib/seo/metadata'
 
-const instrumentSerif = Instrument_Serif({
+const newsreader = Newsreader({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
   style: ['normal', 'italic'],
-  variable: '--font-serif',
+  variable: '--font-headline',
   display: 'swap',
 })
 
-const dmSans = DM_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${instrumentSerif.variable} ${dmSans.variable}`}>
+      <html lang="en" className={`${newsreader.variable} ${manrope.variable}`}>
         <body className="min-h-screen">
           {children}
           <Toaster />

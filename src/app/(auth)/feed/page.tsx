@@ -17,14 +17,12 @@ export default function FeedPage() {
   const [hasMore, setHasMore] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
 
-  // Filters from URL
   const category = searchParams.get('category') as Category | null
   const type = searchParams.get('type') as CivicItemType | null
   const sort = searchParams.get('sort') || 'deadline'
 
   const fetchItems = async (pageNum: number = 1) => {
     setIsLoading(true)
-
     const params = new URLSearchParams()
     if (category) params.set('category', category)
     if (type) params.set('type', type)
@@ -35,7 +33,6 @@ export default function FeedPage() {
     try {
       const res = await fetch(`/api/civic-items?${params}`)
       const data = await res.json()
-
       if (data.success) {
         if (pageNum === 1) {
           setItems(data.data)
@@ -66,18 +63,14 @@ export default function FeedPage() {
   const handleEngage = async (itemId: string, action: EngagementAction) => {
     const item = items.find((i) => i.id === itemId)
     if (!item) return
-
     try {
       const res = await fetch(`/api/civic-items/${item.slug}/engage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       })
-
       const data = await res.json()
-
       if (data.success) {
-        // Update item in state
         setItems((prev) =>
           prev.map((i) =>
             i.id === itemId
@@ -98,48 +91,41 @@ export default function FeedPage() {
 
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
-      params.set(key, value)
-    } else {
-      params.delete(key)
-    }
+    if (value) params.set(key, value)
+    else params.delete(key)
     router.push(`/feed?${params.toString()}`)
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="site-wrap py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">Your Feed</h1>
-        <p className="text-slate-600">
+        <h1 className="mb-2 text-3xl font-bold text-on-surface font-headline">Your Feed</h1>
+        <p className="text-on-surface-variant">
           Discover civic issues relevant to your community and interests
         </p>
       </div>
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        {/* Category filter */}
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-600" />
+          <Filter className="h-4 w-4 text-on-surface-variant" />
           <select
             value={category || ''}
             onChange={(e) => updateFilter('category', e.target.value || null)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="field max-w-[200px]"
           >
             <option value="">All Categories</option>
             {CIVIC_CATEGORIES.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </select>
         </div>
 
-        {/* Type filter */}
         <select
           value={type || ''}
           onChange={(e) => updateFilter('type', e.target.value || null)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          className="field max-w-[200px]"
         >
           <option value="">All Types</option>
           <option value="PETITION">Petition</option>
@@ -151,13 +137,12 @@ export default function FeedPage() {
           <option value="SCHOOL_BOARD">School Board</option>
         </select>
 
-        {/* Sort */}
         <div className="ml-auto flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-slate-600" />
+          <TrendingUp className="h-4 w-4 text-on-surface-variant" />
           <select
             value={sort}
             onChange={(e) => updateFilter('sort', e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="field max-w-[180px]"
           >
             <option value="deadline">Deadline</option>
             <option value="newest">Newest</option>
@@ -167,15 +152,13 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* Results count */}
       {!isLoading && (
-        <div className="mb-4 text-sm text-slate-600">
+        <div className="mb-4 text-sm text-on-surface-variant">
           {totalCount} {totalCount === 1 ? 'issue' : 'issues'} found
           {category && ` in ${CIVIC_CATEGORIES.find((c) => c.value === category)?.label}`}
         </div>
       )}
 
-      {/* Items grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <CivicItemCard
@@ -184,41 +167,32 @@ export default function FeedPage() {
             onEngage={(action) => handleEngage(item.id, action)}
           />
         ))}
-
-        {/* Loading skeletons */}
-        {isLoading &&
-          items.length === 0 &&
+        {isLoading && items.length === 0 &&
           Array.from({ length: 6 }).map((_, i) => <CivicItemCardSkeleton key={i} />)}
       </div>
 
-      {/* Empty state */}
       {!isLoading && items.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
-            <Filter className="h-8 w-8 text-slate-400" />
+        <div className="rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-container-high">
+            <Filter className="h-8 w-8 text-on-surface-variant" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-slate-900">No issues found</h3>
-          <p className="text-slate-600">
+          <h3 className="mb-2 text-lg font-semibold text-on-surface">No issues found</h3>
+          <p className="text-on-surface-variant">
             Try adjusting your filters or check back later for new issues
           </p>
         </div>
       )}
 
-      {/* Load more */}
       {!isLoading && hasMore && items.length > 0 && (
         <div className="mt-8 text-center">
-          <button
-            onClick={handleLoadMore}
-            className="rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-          >
+          <button onClick={handleLoadMore} className="btn btn-primary">
             Load More Issues
           </button>
         </div>
       )}
 
-      {/* Loading more indicator */}
       {isLoading && items.length > 0 && (
-        <div className="mt-8 text-center text-sm text-slate-600">Loading more...</div>
+        <div className="mt-8 text-center text-sm text-on-surface-variant">Loading more...</div>
       )}
     </div>
   )

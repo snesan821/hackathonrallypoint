@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CivicItemCard, CivicItemCardSkeleton } from '@/components/civic/CivicItemCard'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
-import { Search, Filter } from 'lucide-react'
+import { Filter } from 'lucide-react'
 import type { Category, EngagementAction } from '@prisma/client'
 
 export default function DiscoverPage() {
@@ -50,19 +50,17 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="site-wrap py-8">
       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">Discover Issues</h1>
-        <p className="text-slate-600">Explore civic issues in your community</p>
+        <h1 className="mb-2 text-3xl font-bold text-on-surface font-headline">Discover Issues</h1>
+        <p className="text-on-surface-variant">Explore civic issues in your community</p>
       </div>
 
       {/* Category pills */}
       <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => updateFilter('category', null)}
-          className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-            !category ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-          }`}
+          className={!category ? 'pill pill-active' : 'pill'}
         >
           All
         </button>
@@ -70,11 +68,7 @@ export default function DiscoverPage() {
           <button
             key={cat.value}
             onClick={() => updateFilter('category', cat.value)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              category === cat.value
-                ? 'bg-orange-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
+            className={category === cat.value ? 'pill pill-active' : 'pill'}
           >
             {cat.icon} {cat.label}
           </button>
@@ -82,7 +76,7 @@ export default function DiscoverPage() {
       </div>
 
       {!isLoading && (
-        <p className="mb-4 text-sm text-slate-600">
+        <p className="mb-4 text-sm text-on-surface-variant">
           {totalCount} {totalCount === 1 ? 'issue' : 'issues'} found
         </p>
       )}
@@ -96,10 +90,10 @@ export default function DiscoverPage() {
       </div>
 
       {!isLoading && items.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <Filter className="mx-auto mb-4 h-12 w-12 text-slate-400" />
-          <h3 className="mb-2 text-lg font-semibold text-slate-900">No issues found</h3>
-          <p className="text-slate-600">Check back later for new civic issues in your area</p>
+        <div className="rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center">
+          <Filter className="mx-auto mb-4 h-12 w-12 text-on-surface-variant" />
+          <h3 className="mb-2 text-lg font-semibold text-on-surface">No issues found</h3>
+          <p className="text-on-surface-variant">Check back later for new civic issues in your area</p>
         </div>
       )}
     </div>
