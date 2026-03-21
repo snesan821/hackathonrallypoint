@@ -82,7 +82,7 @@ export function AppShell({ user, children }: AppShellProps) {
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-grow flex-col overflow-y-auto border-r border-slate-200 bg-white">
           {/* Logo */}
-          <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-6">
+          <Link href="/" className="flex h-16 items-center gap-2 border-b border-slate-200 px-6">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
               <svg
                 className="h-5 w-5 text-white"
@@ -105,7 +105,7 @@ export function AppShell({ user, children }: AppShellProps) {
               </svg>
             </div>
             <span className="text-xl font-bold text-slate-900">RallyPoint</span>
-          </div>
+          </Link>
 
           {/* User info */}
           {user && (
@@ -214,7 +214,7 @@ export function AppShell({ user, children }: AppShellProps) {
         <div className="flex h-full flex-col">
           {/* Mobile header */}
           <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
                 <svg
                   className="h-5 w-5 text-white"
@@ -237,7 +237,7 @@ export function AppShell({ user, children }: AppShellProps) {
                 </svg>
               </div>
               <span className="text-xl font-bold text-slate-900">RallyPoint</span>
-            </div>
+            </Link>
             <button
               onClick={() => setSidebarOpen(false)}
               className="text-slate-500 hover:text-slate-700"
@@ -284,7 +284,7 @@ export function AppShell({ user, children }: AppShellProps) {
             <Menu className="h-6 w-6" />
           </button>
 
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
               <svg
                 className="h-5 w-5 text-white"
@@ -301,7 +301,7 @@ export function AppShell({ user, children }: AppShellProps) {
               </svg>
             </div>
             <span className="text-lg font-bold text-slate-900">RallyPoint</span>
-          </div>
+          </Link>
 
           <div className="w-6" /> {/* Spacer for centering */}
         </header>
