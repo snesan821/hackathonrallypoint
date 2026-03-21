@@ -156,9 +156,11 @@ async function main() {
       title: 'Tempe Rent Stabilization Ordinance',
       slug: 'tempe-rent-stabilization-ordinance',
       category: 'HOUSING',
+      categories: ['HOUSING'],
       type: 'ORDINANCE',
       status: 'ACTIVE',
       jurisdiction: 'Tempe',
+      jurisdictionTags: ['Tempe', 'Maricopa County', 'Arizona'],
       jurisdictionLevel: 'CITY',
       districtIds: JSON.parse('["tempe-council-1", "tempe-council-2", "tempe-council-3", "tempe-council-4", "tempe-council-5", "tempe-council-6"]'),
       summary: 'Proposed ordinance to cap annual rent increases at 3% plus inflation for multifamily properties in Tempe. Includes exemptions for new construction and properties under 4 units.',
@@ -181,9 +183,11 @@ async function main() {
       title: 'ASU Campus Transit Expansion Petition',
       slug: 'asu-campus-transit-expansion',
       category: 'TRANSIT',
+      categories: ['TRANSIT', 'EDUCATION'],
       type: 'PETITION',
       status: 'ACTIVE',
       jurisdiction: 'ASU Tempe Campus',
+      jurisdictionTags: ['ASU Tempe Campus', 'Tempe', 'Arizona'],
       jurisdictionLevel: 'CAMPUS',
       districtIds: JSON.parse('["tempe-council-5", "az-ld-26"]'),
       summary: 'Student-led petition to expand free shuttle routes to cover off-campus student housing areas south of University Drive.',
@@ -205,9 +209,11 @@ async function main() {
       title: 'Maricopa County Water Conservation Initiative',
       slug: 'maricopa-water-conservation-initiative',
       category: 'ENVIRONMENT',
+      categories: ['ENVIRONMENT', 'CITY_SERVICES'],
       type: 'BALLOT_INITIATIVE',
       status: 'ACTIVE',
       jurisdiction: 'Maricopa County',
+      jurisdictionTags: ['Maricopa County', 'Arizona'],
       jurisdictionLevel: 'COUNTY',
       districtIds: JSON.parse('["maricopa-county"]'),
       summary: 'Ballot measure to fund water conservation infrastructure and desert landscaping incentives through a 0.1% sales tax increase.',
@@ -231,9 +237,11 @@ async function main() {
       title: 'Tempe Town Lake Mixed-Use Development Public Hearing',
       slug: 'town-lake-mixed-use-development-hearing',
       category: 'ZONING',
+      categories: ['ZONING', 'HOUSING'],
       type: 'PUBLIC_HEARING',
       status: 'ACTIVE',
       jurisdiction: 'Tempe',
+      jurisdictionTags: ['Tempe', 'Maricopa County', 'Arizona'],
       jurisdictionLevel: 'CITY',
       districtIds: JSON.parse('["tempe-council-1", "tempe-council-6"]'),
       summary: 'Public hearing on proposed 12-story mixed-use development at Town Lake waterfront. Includes 200 residential units, retail, and public plaza.',
@@ -256,9 +264,11 @@ async function main() {
       title: 'Arizona Public University Tuition Cap Bill (HB 2401)',
       slug: 'az-university-tuition-cap-hb2401',
       category: 'EDUCATION',
+      categories: ['EDUCATION', 'BUDGET'],
       type: 'STATE_BILL',
       status: 'ACTIVE',
       jurisdiction: 'Arizona',
+      jurisdictionTags: ['Arizona'],
       jurisdictionLevel: 'STATE',
       districtIds: JSON.parse('["az-ld-26"]'),
       summary: 'State legislation to cap tuition increases at Arizona public universities at 2% annually and expand need-based financial aid.',
@@ -281,9 +291,11 @@ async function main() {
       title: 'Tempe Union School District Mental Health Resources Vote',
       slug: 'tuhsd-mental-health-resources',
       category: 'HEALTHCARE',
+      categories: ['HEALTHCARE', 'EDUCATION'],
       type: 'SCHOOL_BOARD',
       status: 'ACTIVE',
       jurisdiction: 'Tempe Union High School District',
+      jurisdictionTags: ['Tempe Union High School District', 'Tempe', 'Arizona'],
       jurisdictionLevel: 'DISTRICT',
       districtIds: JSON.parse('["tuhsd"]'),
       summary: 'School board vote to hire 10 additional counselors and 5 social workers to address student mental health needs.',
@@ -306,9 +318,11 @@ async function main() {
       title: 'Tempe Protected Bike Lane Network Expansion',
       slug: 'tempe-protected-bike-lane-expansion',
       category: 'TRANSIT',
+      categories: ['TRANSIT', 'ENVIRONMENT'],
       type: 'CITY_POLICY',
       status: 'ACTIVE',
       jurisdiction: 'Tempe',
+      jurisdictionTags: ['Tempe', 'Maricopa County', 'Arizona'],
       jurisdictionLevel: 'CITY',
       districtIds: JSON.parse('["tempe-council-2", "tempe-council-3", "tempe-council-5"]'),
       summary: 'City policy proposal to add 15 miles of protected bike lanes connecting downtown, ASU campus, and residential neighborhoods.',
@@ -331,9 +345,11 @@ async function main() {
       title: 'Petition for Affordable Student Housing Near Campus',
       slug: 'affordable-student-housing-petition',
       category: 'HOUSING',
+      categories: ['HOUSING', 'EDUCATION'],
       type: 'PETITION',
       status: 'ACTIVE',
       jurisdiction: 'Tempe',
+      jurisdictionTags: ['Tempe', 'Maricopa County', 'Arizona', 'ASU'],
       jurisdictionLevel: 'CITY',
       districtIds: JSON.parse('["tempe-council-5"]'),
       summary: 'Community petition urging the city to fast-track approval for a 150-unit affordable housing project on Apache Boulevard.',
@@ -368,6 +384,8 @@ async function main() {
       argumentsAgainst: JSON.parse('["May discourage new apartment construction in Tempe", "Landlords might reduce property maintenance if unable to raise rents for repairs", "Could create rental market distortions and reduce housing quality", "Exemptions for small landlords create unequal treatment", "May not address root cause of housing shortage - need more supply"]'),
       importantDates: JSON.parse('[{"date":"2026-03-15","description":"City Council public comment period opens"},{"date":"2026-04-01","description":"Public hearing at Tempe City Hall"},{"date":"2026-04-15","description":"City Council final vote"}]'),
       nextActions: JSON.parse('["Submit public comment online or attend the April 1 hearing", "Contact your City Council representative about your position", "Sign the online petition to show support or opposition", "Share factual information about the ordinance with neighbors", "Attend community forums to learn more about housing policy"]'),
+      categories: ['HOUSING'],
+      affectedJurisdictions: ['Tempe', 'Maricopa County', 'Arizona'],
     },
   })
 
@@ -383,6 +401,8 @@ async function main() {
       argumentsAgainst: JSON.parse('["May increase ASU Transportation operating costs significantly", "Could slow down routes for students living closer to campus", "Some apartment complexes might benefit more than others", "ASU might argue off-campus transit is a city responsibility", "May require additional buses and drivers to maintain frequency"]'),
       importantDates: JSON.parse('[{"date":"2026-03-30","description":"Petition delivery deadline to ASU Transportation"},{"date":"2026-04-15","description":"Expected response from ASU Transportation"}]'),
       nextActions: JSON.parse('["Sign the online petition if you support the expansion", "Share the petition with students in off-campus housing", "Attend the ASU Undergraduate Student Government meeting to voice support", "Email ASU Transportation directly to share your transportation challenges", "Join student transit advocacy group meetings"]'),
+      categories: ['TRANSIT', 'EDUCATION'],
+      affectedJurisdictions: ['ASU Tempe Campus', 'Tempe', 'Arizona'],
     },
   })
 
@@ -398,6 +418,8 @@ async function main() {
       argumentsAgainst: JSON.parse('["Adds to cost burden during times of economic uncertainty", "Some residents may never use the rebate programs but still pay the tax", "Could be seen as government overreach into private landscaping choices", "Benefits homeowners more than renters who can\'t make landscaping decisions", "Some argue water conservation should come from large agriculture users, not residents"]'),
       importantDates: JSON.parse('[{"date":"2026-08-01","description":"Last day to register to vote for November election"},{"date":"2026-10-28","description":"Early voting begins"},{"date":"2026-11-03","description":"Election Day"}]'),
       nextActions: JSON.parse('["Register to vote or verify registration at recorder.maricopa.gov", "Research water usage statistics and drought projections for Arizona", "Attend public information sessions about the measure", "Calculate how the 0.1% tax would affect your personal budget", "Vote in the November 2026 election"]'),
+      categories: ['ENVIRONMENT', 'CITY_SERVICES'],
+      affectedJurisdictions: ['Maricopa County', 'Arizona'],
     },
   })
 
@@ -410,28 +432,28 @@ async function main() {
   await prisma.engagementEvent.createMany({
     data: [
       // Student engagements
-      { userId: student.id, civicItemId: rentStabilization.id, action: 'VIEW', createdAt: new Date('2026-03-01') },
-      { userId: student.id, civicItemId: rentStabilization.id, action: 'SAVE', createdAt: new Date('2026-03-01') },
-      { userId: student.id, civicItemId: rentStabilization.id, action: 'SUPPORT', createdAt: new Date('2026-03-02') },
-      { userId: student.id, civicItemId: asuTransit.id, action: 'VIEW', createdAt: new Date('2026-03-05') },
-      { userId: student.id, civicItemId: asuTransit.id, action: 'SUPPORT', createdAt: new Date('2026-03-05') },
-      { userId: student.id, civicItemId: asuTransit.id, action: 'SHARE', createdAt: new Date('2026-03-06') },
-      { userId: student.id, civicItemId: affordableHousing.id, action: 'VIEW', createdAt: new Date('2026-03-08') },
-      { userId: student.id, civicItemId: affordableHousing.id, action: 'SUPPORT', createdAt: new Date('2026-03-08') },
+      { userId: student.id, civicItemId: rentStabilization.id, action: 'VIEW', timestamp: new Date('2026-03-01') },
+      { userId: student.id, civicItemId: rentStabilization.id, action: 'SAVE', timestamp: new Date('2026-03-01') },
+      { userId: student.id, civicItemId: rentStabilization.id, action: 'SUPPORT', timestamp: new Date('2026-03-02') },
+      { userId: student.id, civicItemId: asuTransit.id, action: 'VIEW', timestamp: new Date('2026-03-05') },
+      { userId: student.id, civicItemId: asuTransit.id, action: 'SUPPORT', timestamp: new Date('2026-03-05') },
+      { userId: student.id, civicItemId: asuTransit.id, action: 'SHARE', timestamp: new Date('2026-03-06') },
+      { userId: student.id, civicItemId: affordableHousing.id, action: 'VIEW', timestamp: new Date('2026-03-08') },
+      { userId: student.id, civicItemId: affordableHousing.id, action: 'SUPPORT', timestamp: new Date('2026-03-08') },
 
       // Organizer engagements
-      { userId: organizer.id, civicItemId: waterConservation.id, action: 'VIEW', createdAt: new Date('2026-03-03') },
-      { userId: organizer.id, civicItemId: waterConservation.id, action: 'SAVE', createdAt: new Date('2026-03-03') },
-      { userId: organizer.id, civicItemId: bikeLanes.id, action: 'VIEW', createdAt: new Date('2026-03-04') },
-      { userId: organizer.id, civicItemId: bikeLanes.id, action: 'SUPPORT', createdAt: new Date('2026-03-04') },
-      { userId: organizer.id, civicItemId: townLakeDevelopment.id, action: 'VIEW', createdAt: new Date('2026-03-07') },
+      { userId: organizer.id, civicItemId: waterConservation.id, action: 'VIEW', timestamp: new Date('2026-03-03') },
+      { userId: organizer.id, civicItemId: waterConservation.id, action: 'SAVE', timestamp: new Date('2026-03-03') },
+      { userId: organizer.id, civicItemId: bikeLanes.id, action: 'VIEW', timestamp: new Date('2026-03-04') },
+      { userId: organizer.id, civicItemId: bikeLanes.id, action: 'SUPPORT', timestamp: new Date('2026-03-04') },
+      { userId: organizer.id, civicItemId: townLakeDevelopment.id, action: 'VIEW', timestamp: new Date('2026-03-07') },
 
       // Admin engagements
-      { userId: admin.id, civicItemId: rentStabilization.id, action: 'VIEW', createdAt: new Date('2026-03-02') },
-      { userId: admin.id, civicItemId: mentalHealthResources.id, action: 'VIEW', createdAt: new Date('2026-03-05') },
-      { userId: admin.id, civicItemId: mentalHealthResources.id, action: 'SUPPORT', createdAt: new Date('2026-03-05') },
-      { userId: admin.id, civicItemId: tuitionCap.id, action: 'VIEW', createdAt: new Date('2026-03-09') },
-      { userId: admin.id, civicItemId: tuitionCap.id, action: 'SAVE', createdAt: new Date('2026-03-09') },
+      { userId: admin.id, civicItemId: rentStabilization.id, action: 'VIEW', timestamp: new Date('2026-03-02') },
+      { userId: admin.id, civicItemId: mentalHealthResources.id, action: 'VIEW', timestamp: new Date('2026-03-05') },
+      { userId: admin.id, civicItemId: mentalHealthResources.id, action: 'SUPPORT', timestamp: new Date('2026-03-05') },
+      { userId: admin.id, civicItemId: tuitionCap.id, action: 'VIEW', timestamp: new Date('2026-03-09') },
+      { userId: admin.id, civicItemId: tuitionCap.id, action: 'SAVE', timestamp: new Date('2026-03-09') },
     ],
   })
 
@@ -443,7 +465,7 @@ async function main() {
 
   const comment1 = await prisma.comment.create({
     data: {
-      userId: student.id,
+      authorId: student.id,
       civicItemId: rentStabilization.id,
       threadType: 'SUPPORT',
       body: 'My rent went up $300/month this year and I almost had to drop out of school. This ordinance is desperately needed!',
@@ -456,7 +478,7 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      userId: organizer.id,
+      authorId: organizer.id,
       civicItemId: rentStabilization.id,
       parentId: comment1.id,
       threadType: 'SUPPORT',
@@ -470,7 +492,7 @@ async function main() {
 
   const comment3 = await prisma.comment.create({
     data: {
-      userId: admin.id,
+      authorId: admin.id,
       civicItemId: rentStabilization.id,
       threadType: 'QUESTION',
       body: 'How does this interact with existing lease agreements? Would it apply to renewals only?',
@@ -483,7 +505,7 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      userId: student.id,
+      authorId: student.id,
       civicItemId: asuTransit.id,
       threadType: 'SUPPORT',
       body: 'This would make a huge difference! I walk 20 minutes to catch the shuttle every day.',
@@ -496,7 +518,7 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      userId: organizer.id,
+      authorId: organizer.id,
       civicItemId: bikeLanes.id,
       threadType: 'EVIDENCE',
       body: 'Studies show protected bike lanes reduce cyclist injuries by 90% compared to painted lanes. Source: https://www.sciencedirect.com/science/article/pii/S2214140518301488',
@@ -509,7 +531,7 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      userId: admin.id,
+      authorId: admin.id,
       civicItemId: waterConservation.id,
       threadType: 'CONCERN',
       body: 'I support conservation but am concerned about the tax burden. Can we explore funding from existing budgets first?',
