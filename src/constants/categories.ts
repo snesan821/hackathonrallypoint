@@ -300,13 +300,6 @@ export const ACTION_LABELS: Record<EngagementAction, ActionMeta> = {
     icon: 'Download',
     level: 6,
   },
-  SKIP: {
-    action: 'SKIP',
-    label: 'Skip',
-    description: 'Skip this issue',
-    icon: 'SkipForward',
-    level: 0,
-  },
 }
 
 // Helper to get action metadata

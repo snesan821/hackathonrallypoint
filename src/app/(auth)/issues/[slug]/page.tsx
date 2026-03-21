@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { CategoryBadgeList } from '@/components/civic/CategoryBadge'
@@ -259,11 +258,9 @@ export default function IssueDetailPage() {
                   <div className="mb-3 flex items-center gap-3">
                     <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">
                       {update.author.avatarUrl ? (
-                        <Image
+                        <img
                           src={update.author.avatarUrl}
                           alt={update.author.displayName}
-                          width={32}
-                          height={32}
                           className="h-full w-full object-cover"
                         />
                       ) : (
