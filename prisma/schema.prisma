@@ -255,7 +255,7 @@ model CivicItem {
 /// SourceDocument - uploaded or linked documents for civic items
 model SourceDocument {
   id                String            @id @default(uuid()) @db.Uuid
-  civicItemId       String            @db.Uuid
+  civicItemId       String            @unique @db.Uuid
   title             String
   sourceUrl         String?           @map("originalUrl")
   fileUrl           String?

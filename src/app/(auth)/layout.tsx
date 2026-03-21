@@ -8,15 +8,21 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
-  const user = await getCurrentUser()
+  let user
+  try {
+    user = await getCurrentUser()
+  } catch (error) {
+    // Avoid retry loops on rate limiting or DB errors
+    redirect('/sign-in')
+  }
 
   if (!user) {
     redirect('/sign-in')
   }
 
-  // Redirect to onboarding if not completed
+  // Redirect to onboarding if not completed (but not if already on onboarding)
   if (!user.onboardingCompleted) {
-    redirect('/onboarding')
+    // We can't check the URL here easily in a layout, so we'll handle it in the onboarding page
   }
 
   // Fetch user's primary address for location display

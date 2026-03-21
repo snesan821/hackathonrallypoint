@@ -8,7 +8,12 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode
 }) {
-  const user = await getCurrentUser()
+  let user = null
+  try {
+    user = await getCurrentUser()
+  } catch {
+    // Database may not be available yet
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

@@ -4,35 +4,40 @@ const globalForRedis = globalThis as unknown as {
   redis: Redis | undefined
 }
 
-export const redis =
-  globalForRedis.redis ??
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-    maxRetriesPerRequest: 3,
+function createRedisClient(): Redis {
+  const client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    maxRetriesPerRequest: 1,
     retryStrategy(times) {
-      const delay = Math.min(times * 50, 2000)
-      return delay
-    },
-    reconnectOnError(err) {
-      console.error('Redis connection error:', err)
-      const targetErrors = ['READONLY', 'ECONNREFUSED']
-      if (targetErrors.some((targetError) => err.message.includes(targetError))) {
-        // Reconnect on these errors
-        return true
+      if (times > 3) {
+        // Stop retrying after 3 attempts — Redis is optional in dev
+        return null
       }
-      return false
+      return Math.min(times * 200, 2000)
     },
+    lazyConnect: true,
+    enableOfflineQueue: false,
   })
 
+  let errorLogged = false
+
+  client.on('error', (err) => {
+    if (!errorLogged) {
+      console.warn('Redis unavailable — caching disabled. Error:', err.code || err.message)
+      errorLogged = true
+    }
+  })
+
+  client.on('connect', () => {
+    console.log('Redis: Connected')
+    errorLogged = false
+  })
+
+  // Try to connect but don't block if it fails
+  client.connect().catch(() => {})
+
+  return client
+}
+
+export const redis = globalForRedis.redis ?? createRedisClient()
+
 if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis
-
-redis.on('connect', () => {
-  console.log('Redis: Connected')
-})
-
-redis.on('error', (err) => {
-  console.error('Redis error:', err)
-})
-
-redis.on('ready', () => {
-  console.log('Redis: Ready to accept commands')
-})
