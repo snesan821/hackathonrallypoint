@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { requireAuth } from '@/lib/auth/server'
 import { errorResponse, successResponse } from '@/lib/api/middleware'
+import { redis } from '@/lib/cache/redis'
 import { z } from 'zod'
 import { EngagementAction } from '@prisma/client'
 
@@ -19,6 +20,30 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth()
+
+    // Rate limit: 30 engagements per 60 seconds per user
+    try {
+      const rlKey = `ratelimit:engage:${user.id}`
+      const now = Date.now()
+      const windowMs = 60 * 1000
+      await redis.zremrangebyscore(rlKey, 0, now - windowMs)
+      const count = await redis.zcard(rlKey)
+      if (count >= 30) {
+        const oldest = await redis.zrange(rlKey, 0, 0, 'WITHSCORES')
+        const retryAfter = oldest[1]
+          ? Math.ceil((Number(oldest[1]) + windowMs - now) / 1000)
+          : 60
+        return NextResponse.json(
+          { success: false, error: 'Rate limit exceeded', retryAfter },
+          { status: 429, headers: { 'Retry-After': retryAfter.toString(), 'X-RateLimit-Limit': '30', 'X-RateLimit-Remaining': '0' } }
+        )
+      }
+      await redis.zadd(rlKey, now, `${now}-${Math.random()}`)
+      await redis.expire(rlKey, 60)
+    } catch {
+      // Redis unavailable — allow request through (fail open)
+    }
+
     const { slug } = await params
     const rawBody = await req.json()
     const validation = engageSchema.safeParse(rawBody)

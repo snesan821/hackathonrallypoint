@@ -225,7 +225,7 @@ export async function POST(
       action: 'COMMENT_CREATED',
       entityType: 'Comment',
       entityId: comment.id,
-      metadata: { civicItemId: civicItem.id, threadType, moderationStatus: moderationResult.status },
+      metadata: { civicItemId: civicItem.id, threadType, moderationStatus: moderationResult.status, toxicityScore: moderationResult.score, toxicityFlags: moderationResult.flags },
       ip,
     })
 
