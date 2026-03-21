@@ -74,6 +74,7 @@ enum EngagementAction {
   SHARE
   SUPPORT
   UNSUPPORT
+  SKIP
   COMMENT
   RSVP
   VOLUNTEER
