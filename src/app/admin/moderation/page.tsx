@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Shield, Check, X, Eye, EyeOff, Trash2 } from 'lucide-react'
 
@@ -150,11 +149,9 @@ export default function ModerationPage() {
                 <div className="mb-2 flex items-center gap-3">
                   <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">
                     {item.comment.author.avatarUrl ? (
-                      <Image
+                      <img
                         src={item.comment.author.avatarUrl}
                         alt={item.comment.author.displayName}
-                        width={32}
-                        height={32}
                         className="h-full w-full object-cover"
                       />
                     ) : (

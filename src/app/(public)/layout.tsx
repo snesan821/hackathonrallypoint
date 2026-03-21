@@ -1,18 +1,19 @@
 import Link from 'next/link'
 import { Footer } from '@/components/layout/Footer'
 import { UserButton } from '@clerk/nextjs'
-import { getCurrentUser } from '@/lib/auth/server'
+import { auth } from '@clerk/nextjs/server'
 
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  let user = null
+  let userId: string | null = null
   try {
-    user = await getCurrentUser()
+    const authResult = await auth()
+    userId = authResult.userId
   } catch {
-    // Database may not be available yet
+    // Clerk may not be available yet during environment setup
   }
 
   return (
@@ -67,7 +68,7 @@ export default async function PublicLayout({
           </nav>
 
           <div className="flex items-center gap-3">
-            {user ? (
+            {userId ? (
               <>
                 <Link
                   href="/feed"

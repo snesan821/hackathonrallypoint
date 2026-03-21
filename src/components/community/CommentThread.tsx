@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { ThreadType, CommentStatus, UserRole } from '@prisma/client'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils/cn'
@@ -183,11 +182,9 @@ function CommentCard({
           {/* Avatar */}
           <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">
             {author.avatarUrl ? (
-              <Image
+              <img
                 src={author.avatarUrl}
                 alt={author.displayName}
-                width={32}
-                height={32}
                 className="h-full w-full object-cover"
               />
             ) : (
