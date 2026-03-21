@@ -172,10 +172,10 @@ export default function ImpactPage() {
 
 function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: number; color: string }) {
   const colorClasses: Record<string, string> = {
-    blue: 'bg-blue-100 text-blue-600',
+    blue: 'bg-surface-container-high text-on-surface-variant',
     orange: 'bg-primary/10 text-primary',
-    red: 'bg-red-100 text-red-600',
-    green: 'bg-green-100 text-green-600',
+    red: 'bg-[var(--co-error)]/10 text-[var(--co-error)]',
+    green: 'bg-[var(--co-success)]/10 text-[var(--co-success)]',
   }
 
   return (
