@@ -1,45 +1,54 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
-// Define protected routes
+// Routes that require authentication
 const isProtectedRoute = createRouteMatcher([
-  '/(auth)(.*)',
+  '/feed(.*)',
+  '/discover(.*)',
+  '/impact(.*)',
+  '/issues(.*)',
+  '/onboarding(.*)',
+  '/profile(.*)',
+  '/saved(.*)',
   '/admin(.*)',
 ])
 
-// Define public API routes
-const isPublicApiRoute = createRouteMatcher([
-  '/api/public(.*)',
+// Routes that should always be public
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/about(.*)',
+  '/community(.*)',
   '/api/webhooks(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  // Allow public API routes
-  if (isPublicApiRoute(req)) {
-    return
+  // Always allow public routes
+  if (isPublicRoute(req)) {
+    return NextResponse.next()
   }
 
-  // Protect auth and admin routes
+  // Protect authenticated routes
   if (isProtectedRoute(req)) {
     try {
       const { userId } = await auth()
       if (!userId) {
         const signInUrl = new URL('/sign-in', req.url)
-        signInUrl.searchParams.set('redirect_url', req.nextUrl.pathname)
-        return Response.redirect(signInUrl)
+        return NextResponse.redirect(signInUrl)
       }
-    } catch (e) {
-      // If auth fails (e.g. missing keys), redirect to sign-in
+    } catch {
       const signInUrl = new URL('/sign-in', req.url)
-      return Response.redirect(signInUrl)
+      return NextResponse.redirect(signInUrl)
     }
   }
+
+  return NextResponse.next()
 })
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 }
