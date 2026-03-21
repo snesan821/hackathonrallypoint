@@ -12,11 +12,13 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  webpack(config) {
+  webpack(config, { isServer }) {
     if (!hasValidClerkKey) {
-      // Swap out @clerk/nextjs with a no-op stub so it never validates keys
-      config.resolve.alias['@clerk/nextjs'] = path.resolve('./src/lib/clerk-stub.tsx')
-      config.resolve.alias['@clerk/nextjs/server'] = path.resolve('./src/lib/clerk-stub-server.ts')
+      const clerkStub = path.resolve(__dirname, 'src/lib/clerk-stub.tsx')
+      const clerkServerStub = path.resolve(__dirname, 'src/lib/clerk-stub-server.ts')
+      // Apply to both client and server compilations
+      config.resolve.alias['@clerk/nextjs'] = clerkStub
+      config.resolve.alias['@clerk/nextjs/server'] = clerkServerStub
     }
     return config
   },

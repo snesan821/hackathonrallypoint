@@ -1,4 +1,3 @@
-import { getClerkAuth, getClerkCurrentUser } from './clerk-server'
 import { prisma } from '@/lib/db/prisma'
 import { redirect } from 'next/navigation'
 
@@ -13,10 +12,14 @@ export async function getCurrentUser() {
     return prisma.user.findFirst({ orderBy: { createdAt: 'asc' } })
   }
 
-  const { userId } = await getClerkAuth()
+  // Dynamically import so the module string is only evaluated at runtime,
+  // not statically resolved by webpack during the RSC build pass.
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+  const clerkServer = await (new Function('return import("@clerk/nextjs/server")')()) as typeof import('@clerk/nextjs/server')
+  const { userId } = await clerkServer.auth()
   if (!userId) return null
 
-  const clerkUser = await getClerkCurrentUser()
+  const clerkUser = await clerkServer.currentUser()
   if (!clerkUser) return null
 
   return prisma.user.upsert({

@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { Footer } from '@/components/layout/Footer'
-import { getClerkAuth } from '@/lib/auth/clerk-server'
+
+const IS_LOCAL_DEV =
+  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_test_') &&
+  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_')
 
 export default async function PublicLayout({
   children,
@@ -8,11 +11,14 @@ export default async function PublicLayout({
   children: React.ReactNode
 }) {
   let userId: string | null = null
-  try {
-    const authResult = await getClerkAuth()
-    userId = authResult.userId
-  } catch {
-    // auth not available
+  if (!IS_LOCAL_DEV) {
+    try {
+      const clerkServer = await (new Function('return import("@clerk/nextjs/server")')()) as typeof import('@clerk/nextjs/server')
+      const authResult = await clerkServer.auth()
+      userId = authResult.userId
+    } catch {
+      // auth not available
+    }
   }
 
   return (
