@@ -42,7 +42,9 @@ export default async function AuthLayout({
     displayName: user.displayName,
     avatarUrl: user.avatarUrl,
     role: user.role,
-    primaryAddress,
+    primaryAddress: primaryAddress
+      ? { city: primaryAddress.city ?? '', state: primaryAddress.state ?? '' }
+      : null,
   }
 
   return <AppShell user={userWithAddress}>{children}</AppShell>

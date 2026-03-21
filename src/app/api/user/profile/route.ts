@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { withAuth, withValidation, errorResponse, successResponse } from '@/lib/api/middleware'
+import { getCurrentUser } from '@/lib/auth/server'
+import { errorResponse, successResponse } from '@/lib/api/middleware'
 import { z } from 'zod'
 import { Category } from '@prisma/client'
 
@@ -16,8 +17,13 @@ const updateProfileSchema = z.object({
  * GET /api/user/profile
  * Get current user's profile with interests, address, and engagement stats
  */
-const getHandler = async (req: Request, { user }: any) => {
+export async function GET(req: Request) {
   try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return errorResponse('Unauthorized', 401)
+    }
+
     // Fetch user with related data
     const userProfile = await prisma.user.findUnique({
       where: { id: user.id },
@@ -99,9 +105,33 @@ const getHandler = async (req: Request, { user }: any) => {
  * PATCH /api/user/profile
  * Update user's profile (displayName and interests)
  */
-const patchHandler = async (req: Request, { user, body }: any) => {
+export async function PATCH(req: Request) {
   try {
-    const { displayName, interests } = body
+    const user = await getCurrentUser()
+    if (!user) {
+      return errorResponse('Unauthorized', 401)
+    }
+
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return errorResponse('Invalid JSON in request body', 400)
+    }
+
+    const validation = updateProfileSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid request format',
+          errors: validation.error.issues,
+        },
+        { status: 400 }
+      )
+    }
+
+    const { displayName, interests } = validation.data
 
     // Update user
     const updates: any = {}
@@ -157,6 +187,3 @@ const patchHandler = async (req: Request, { user, body }: any) => {
     return errorResponse('Failed to update profile')
   }
 }
-
-export const GET = withAuth(getHandler)
-export const PATCH = withValidation(updateProfileSchema)(withAuth(patchHandler))

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { withAuth, getSearchParams, buildPaginatedResponse, errorResponse } from '@/lib/api/middleware'
+import { getCurrentUser } from '@/lib/auth/server'
+import { getSearchParams, buildPaginatedResponse, errorResponse } from '@/lib/api/middleware'
 
 /**
  * GET /api/user/saved
@@ -10,8 +11,13 @@ import { withAuth, getSearchParams, buildPaginatedResponse, errorResponse } from
  * - page: Page number
  * - pageSize: Items per page
  */
-const handler = async (req: Request, { user }: any) => {
+export async function GET(req: Request) {
   try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return errorResponse('Unauthorized', 401)
+    }
+
     const searchParams = getSearchParams(req)
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '20')))
@@ -97,5 +103,3 @@ const handler = async (req: Request, { user }: any) => {
     return errorResponse('Failed to fetch saved items')
   }
 }
-
-export const GET = withAuth(handler)

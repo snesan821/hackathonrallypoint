@@ -20,7 +20,12 @@ export default clerkMiddleware(async (auth, req) => {
 
   // Protect auth and admin routes
   if (isProtectedRoute(req)) {
-    await auth.protect()
+    const { userId } = await auth()
+    if (!userId) {
+      const signInUrl = new URL('/sign-in', req.url)
+      signInUrl.searchParams.set('redirect_url', req.url)
+      return Response.redirect(signInUrl)
+    }
   }
 })
 

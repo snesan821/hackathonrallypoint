@@ -22,7 +22,7 @@ function createRedisClient(): Redis {
 
   client.on('error', (err) => {
     if (!errorLogged) {
-      console.warn('Redis unavailable — caching disabled. Error:', err.code || err.message)
+      console.warn('Redis unavailable — caching disabled. Error:', (err as any).code || err.message)
       errorLogged = true
     }
   })

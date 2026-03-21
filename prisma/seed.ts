@@ -20,7 +20,7 @@ async function main() {
     prisma.moderationFlag.deleteMany(),
     prisma.comment.deleteMany(),
     prisma.engagementEvent.deleteMany(),
-    prisma.aiSummary.deleteMany(),
+    prisma.aISummary.deleteMany(),
     prisma.sourceDocument.deleteMany(),
     prisma.civicItem.deleteMany(),
     prisma.userInterest.deleteMany(),
@@ -372,7 +372,7 @@ async function main() {
   // AI SUMMARIES (for 3 items)
   // ===========================================================================
 
-  await prisma.aiSummary.create({
+  await prisma.aISummary.create({
     data: {
       civicItemId: rentStabilization.id,
       modelVersion: 'claude-3-5-sonnet-20241022',
@@ -389,7 +389,7 @@ async function main() {
     },
   })
 
-  await prisma.aiSummary.create({
+  await prisma.aISummary.create({
     data: {
       civicItemId: asuTransit.id,
       modelVersion: 'claude-3-5-sonnet-20241022',
@@ -406,7 +406,7 @@ async function main() {
     },
   })
 
-  await prisma.aiSummary.create({
+  await prisma.aISummary.create({
     data: {
       civicItemId: waterConservation.id,
       modelVersion: 'claude-3-5-sonnet-20241022',

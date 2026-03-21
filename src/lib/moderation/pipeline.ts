@@ -95,11 +95,11 @@ export async function moderateComment(
 
   if (score < 0.3) {
     // Clean comment - auto approve
-    status = 'ACTIVE'
+    status = 'VISIBLE'
     approved = true
   } else if (score >= 0.3 && score < 0.7) {
     // Mildly problematic but acceptable - approve with logging
-    status = 'ACTIVE'
+    status = 'VISIBLE'
     approved = true
     // Log for potential review
     console.log('[Moderation] Borderline comment approved', {

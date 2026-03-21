@@ -91,7 +91,7 @@ export default function DiscoverPage() {
         {isLoading && items.length === 0 &&
           Array.from({ length: 6 }).map((_, i) => <CivicItemCardSkeleton key={i} />)}
         {items.map((item) => (
-          <CivicItemCard key={item.id} item={item} onEngage={() => {}} />
+          <CivicItemCard key={item.id} item={item} />
         ))}
       </div>
 
