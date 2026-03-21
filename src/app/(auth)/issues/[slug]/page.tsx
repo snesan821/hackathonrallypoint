@@ -9,7 +9,7 @@ import { SupportBar } from '@/components/civic/SupportBar'
 import { QuickActions } from '@/components/civic/QuickActions'
 import { ActionLadder } from '@/components/civic/ActionLadder'
 import { AISummarySection } from '@/components/civic/AISummarySection'
-import { CommunityDiscussion } from '@/components/civic/CommunityDiscussion'
+import { CommunityDiscussion } from '@/components/community/CommunityDiscussion'
 import { ArrowLeft, ExternalLink, CheckCircle2, Users } from 'lucide-react'
 import { EngagementAction, ThreadType } from '@prisma/client'
 
