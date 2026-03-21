@@ -181,7 +181,7 @@ export function ActionLadder({
     }
 
     // For engagement actions, call the onEngage handler
-    if (onEngage && step.action !== 'LEARN_MORE' && step.action !== 'OFFICIAL_ACTION') {
+    if (onEngage && step.action !== ('LEARN_MORE' as string) && step.action !== ('OFFICIAL_ACTION' as string)) {
       setLoadingAction(step.action)
       try {
         await onEngage(step.action as EngagementAction)

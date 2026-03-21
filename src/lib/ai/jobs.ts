@@ -59,6 +59,7 @@ export async function processSummarizationJob(sourceDocumentId: string) {
       data: {
         civicItemId: sourceDocument.civicItemId,
         sourceDocumentId: sourceDocument.id,
+        modelVersion: 'claude-3-5-sonnet-20241022',
         plainSummary: aiOutput.plainSummary,
         whoAffected: aiOutput.whoAffected,
         whatChanges: aiOutput.whatChanges,

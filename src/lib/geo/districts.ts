@@ -33,7 +33,7 @@ export function lookupDistricts(
           ? {
               districtId: id,
               districtName: district.name,
-              level: district.level,
+              level: district.level as string,
             }
           : null
       })

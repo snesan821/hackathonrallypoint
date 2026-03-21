@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         {
           success: false,
           error: 'Invalid address format',
-          errors: validation.error.errors,
+          errors: validation.error.issues,
         },
         { status: 400 }
       )

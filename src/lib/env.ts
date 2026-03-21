@@ -47,13 +47,13 @@ const envSchema = z.object({
     .transform(Number)
     .pipe(z.number().positive())
     .optional()
-    .default('10'),
+    .default(10),
   RATE_LIMIT_ENGAGEMENTS_PER_MINUTE: z
     .string()
     .transform(Number)
     .pipe(z.number().positive())
     .optional()
-    .default('30'),
+    .default(30),
 
   // Geocoding API (optional, for production upgrade)
   GOOGLE_MAPS_API_KEY: z.string().optional(),
@@ -67,15 +67,15 @@ const envSchema = z.object({
   ENABLE_AI_SUMMARIES: z
     .string()
     .transform((val) => val === 'true')
-    .default('true'),
+    .default(true),
   ENABLE_MODERATION: z
     .string()
     .transform((val) => val === 'true')
-    .default('true'),
+    .default(true),
   ENABLE_FRAUD_DETECTION: z
     .string()
     .transform((val) => val === 'true')
-    .default('true'),
+    .default(true),
 
   // Development
   SKIP_ENV_VALIDATION: z
@@ -108,7 +108,7 @@ function parseEnv(): Env {
       console.error('❌ Environment validation failed:')
       console.error('')
 
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         const path = err.path.join('.')
         console.error(`  ${path}: ${err.message}`)
       })
@@ -192,8 +192,8 @@ export function getFeatureFlags() {
  */
 export function getRateLimitConfig() {
   return {
-    commentsPerHour: parseInt(env.RATE_LIMIT_COMMENTS_PER_HOUR || '10'),
-    engagementsPerMinute: parseInt(env.RATE_LIMIT_ENGAGEMENTS_PER_MINUTE || '30'),
+    commentsPerHour: env.RATE_LIMIT_COMMENTS_PER_HOUR || 10,
+    engagementsPerMinute: env.RATE_LIMIT_ENGAGEMENTS_PER_MINUTE || 30,
   }
 }
 

@@ -1,31 +1,29 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { withAuth, withValidation, withRateLimit, compose, errorResponse, successResponse } from '@/lib/api/middleware'
+import { requireAuth } from '@/lib/auth/server'
+import { errorResponse, successResponse } from '@/lib/api/middleware'
 import { z } from 'zod'
 import { EngagementAction } from '@prisma/client'
 
-/**
- * Validation schema for engagement request
- */
 const engageSchema = z.object({
   action: z.nativeEnum(EngagementAction),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 })
 
 /**
  * POST /api/civic-items/[slug]/engage
- * Record user engagement action on a civic item
- *
- * Requires authentication
- * Rate limited to 30 actions per minute
  */
-const handler = async (
+export async function POST(
   req: Request,
-  { params, user, body }: any
-) => {
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
-    const { slug } = params
-    const { action, metadata } = body
+    const user = await requireAuth()
+    const { slug } = await params
+    const rawBody = await req.json()
+    const validation = engageSchema.safeParse(rawBody)
+    if (!validation.success) return errorResponse('Invalid request format', 400)
+    const { action, metadata } = validation.data
 
     // Find civic item by slug
     const civicItem = await prisma.civicItem.findUnique({
@@ -190,14 +188,3 @@ const handler = async (
     return errorResponse('Failed to record engagement')
   }
 }
-
-// Apply middleware: auth → validation → rate limiting
-export const POST = compose(
-  withRateLimit(
-    (req, user) => `engage:${user?.id}`,
-    30, // max requests
-    60  // per 60 seconds
-  ),
-  withValidation(engageSchema),
-  withAuth
-)(handler)

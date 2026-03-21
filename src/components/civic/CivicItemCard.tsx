@@ -63,7 +63,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
           </span>
         </div>
 
-        {item.status === 'VERIFIED' && (
+        {item.status === 'ACTIVE' && (
           <span className="ml-auto flex items-center gap-1 text-xs font-medium text-green-600">
             <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
               <path

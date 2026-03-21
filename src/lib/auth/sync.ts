@@ -1,34 +1,55 @@
-import type { User as ClerkUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/db/prisma'
+
+/**
+ * Minimal shape of a Clerk user (works with both User and webhook UserJSON)
+ */
+interface ClerkUserData {
+  id: string
+  emailAddresses?: { emailAddress: string }[]
+  email_addresses?: { email_address: string }[]
+  firstName?: string | null
+  first_name?: string | null
+  lastName?: string | null
+  last_name?: string | null
+  username?: string | null
+  imageUrl?: string
+  image_url?: string
+}
 
 /**
  * Sync Clerk user data to our database
  * Called on user creation and updates
  */
-export async function syncClerkUser(clerkUser: ClerkUser) {
-  const email = clerkUser.emailAddresses[0]?.emailAddress
+export async function syncClerkUser(clerkUser: ClerkUserData) {
+  const email =
+    clerkUser.emailAddresses?.[0]?.emailAddress ||
+    (clerkUser.email_addresses as any)?.[0]?.email_address
 
   if (!email) {
     throw new Error('User must have an email address')
   }
 
+  const firstName = clerkUser.firstName ?? clerkUser.first_name
+  const lastName = clerkUser.lastName ?? clerkUser.last_name
   const displayName =
-    clerkUser.firstName && clerkUser.lastName
-      ? `${clerkUser.firstName} ${clerkUser.lastName}`
-      : clerkUser.username || clerkUser.firstName || 'User'
+    firstName && lastName
+      ? `${firstName} ${lastName}`
+      : clerkUser.username || firstName || 'User'
+
+  const avatarUrl = clerkUser.imageUrl ?? clerkUser.image_url
 
   const user = await prisma.user.upsert({
     where: { clerkId: clerkUser.id },
     update: {
       email,
       displayName,
-      avatarUrl: clerkUser.imageUrl,
+      avatarUrl: avatarUrl,
     },
     create: {
       clerkId: clerkUser.id,
       email,
       displayName,
-      avatarUrl: clerkUser.imageUrl,
+      avatarUrl: avatarUrl,
       role: 'USER',
       onboardingCompleted: false,
     },

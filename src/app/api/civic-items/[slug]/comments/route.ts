@@ -4,6 +4,7 @@ import { autoModerateComment } from '@/lib/moderation/pipeline'
 import { checkEngagementFraud } from '@/lib/moderation/fraud'
 import { createAuditEntry, extractIP } from '@/lib/moderation/audit'
 import { withAuth, withValidation, getSearchParams, buildPaginatedResponse, errorResponse, successResponse } from '@/lib/api/middleware'
+import { requireAuth } from '@/lib/auth/server'
 import { z } from 'zod'
 import { ThreadType } from '@prisma/client'
 import { MODERATION_MESSAGES } from '@/constants/civility'
@@ -30,10 +31,10 @@ const createCommentSchema = z.object({
  */
 export async function GET(
   req: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params
+    const { slug } = await params
     const searchParams = getSearchParams(req)
 
     // Find civic item
@@ -147,15 +148,20 @@ export async function GET(
  * Requires authentication
  * Runs toxicity check - auto-flags if score > 0.7
  */
-const postHandler = async (
+export async function POST(
   req: Request,
-  { params, user, body }: any
-) => {
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
-    const { slug } = params
-    const { body: commentBody, threadType, parentId } = body
+    const user = await requireAuth()
+    const { slug } = await params
+    const rawBody = await req.json()
+    const validation = createCommentSchema.safeParse(rawBody)
+    if (!validation.success) {
+      return errorResponse('Invalid request format', 400)
+    }
+    const { body: commentBody, threadType, parentId } = validation.data
 
-    // Find civic item
     const civicItem = await prisma.civicItem.findUnique({
       where: { slug },
       select: { id: true },
@@ -165,41 +171,23 @@ const postHandler = async (
       return errorResponse('Civic item not found', 404)
     }
 
-    // If parentId provided, verify it exists and belongs to this civic item
     if (parentId) {
       const parentComment = await prisma.comment.findUnique({
         where: { id: parentId },
         select: { civicItemId: true, parentId: true },
       })
-
-      if (!parentComment) {
-        return errorResponse('Parent comment not found', 404)
-      }
-
-      if (parentComment.civicItemId !== civicItem.id) {
-        return errorResponse('Parent comment belongs to different civic item', 400)
-      }
-
-      // Don't allow replies to replies (max 2 levels)
-      if (parentComment.parentId) {
-        return errorResponse('Cannot reply to a reply. Maximum 2 levels of nesting.', 400)
-      }
+      if (!parentComment) return errorResponse('Parent comment not found', 404)
+      if (parentComment.civicItemId !== civicItem.id) return errorResponse('Parent comment belongs to different civic item', 400)
+      if (parentComment.parentId) return errorResponse('Cannot reply to a reply. Maximum 2 levels of nesting.', 400)
     }
 
-    // Step 1: Check for fraud/suspicious behavior
     const fraudDetected = await checkEngagementFraud(user.id, 'COMMENT', civicItem.id)
     if (fraudDetected) {
-      return errorResponse(
-        'Your account has been flagged for suspicious activity. Please contact support.',
-        403
-      )
+      return errorResponse('Your account has been flagged for suspicious activity.', 403)
     }
 
-    // Step 2: Run through moderation pipeline
     const moderationResult = await autoModerateComment(commentBody, user.id)
-
     if (!moderationResult.approved) {
-      // Comment was rejected or needs manual review
       return NextResponse.json({
         success: false,
         error: moderationResult.suggestion || MODERATION_MESSAGES.commentFlagged,
@@ -207,83 +195,45 @@ const postHandler = async (
       })
     }
 
-    // Step 3: Create comment with moderation status
     const comment = await prisma.comment.create({
       data: {
         civicItemId: civicItem.id,
         authorId: user.id,
         body: commentBody,
-        sanitizedBody: commentBody.trim(), // Already sanitized in pipeline
+        sanitizedBody: commentBody.trim(),
         threadType,
         parentId: parentId || null,
         status: moderationResult.status,
       },
       include: {
-        author: {
-          select: {
-            id: true,
-            displayName: true,
-            avatarUrl: true,
-            role: true,
-          },
-        },
+        author: { select: { id: true, displayName: true, avatarUrl: true, role: true } },
       },
     })
 
-    // Step 4: If auto-flagged or hidden, the pipeline already created the flag
-    // We just need to notify the user
-
-    // Step 5: Create COMMENT engagement event
     await prisma.engagementEvent.create({
       data: {
         userId: user.id,
         civicItemId: civicItem.id,
         action: 'COMMENT',
-        metadata: {
-          commentId: comment.id,
-          threadType,
-        },
+        metadata: { commentId: comment.id, threadType },
       },
     })
 
-    // Step 6: Create comprehensive audit log
     const ip = extractIP(req)
     await createAuditEntry({
       userId: user.id,
       action: 'COMMENT_CREATED',
       entityType: 'Comment',
       entityId: comment.id,
-      metadata: {
-        civicItemId: civicItem.id,
-        threadType,
-        moderationStatus: moderationResult.status,
-        toxicityScore: moderationResult.score,
-        toxicityFlags: moderationResult.flags,
-      },
+      metadata: { civicItemId: civicItem.id, threadType, moderationStatus: moderationResult.status },
       ip,
     })
 
-    // Return different response based on moderation status
     if (moderationResult.status === 'FLAGGED') {
-      return NextResponse.json({
-        success: true,
-        data: {
-          id: comment.id,
-          status: 'flagged',
-          message: MODERATION_MESSAGES.commentFlagged,
-        },
-      })
+      return NextResponse.json({ success: true, data: { id: comment.id, status: 'flagged', message: MODERATION_MESSAGES.commentFlagged } })
     }
-
     if (moderationResult.status === 'HIDDEN') {
-      return NextResponse.json({
-        success: true,
-        data: {
-          id: comment.id,
-          status: 'hidden',
-          message: MODERATION_MESSAGES.commentHidden,
-        },
-      })
+      return NextResponse.json({ success: true, data: { id: comment.id, status: 'hidden', message: MODERATION_MESSAGES.commentHidden } })
     }
 
     return successResponse({
@@ -301,6 +251,3 @@ const postHandler = async (
     return errorResponse('Failed to post comment')
   }
 }
-
-// Apply middleware: auth → validation
-export const POST = withValidation(createCommentSchema)(withAuth(postHandler))

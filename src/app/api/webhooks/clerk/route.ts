@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     switch (eventType) {
       case 'user.created':
       case 'user.updated':
-        await syncClerkUser(evt.data)
+        await syncClerkUser(evt.data as any)
         console.log(`✅ User ${eventType}:`, evt.data.id)
         break
 

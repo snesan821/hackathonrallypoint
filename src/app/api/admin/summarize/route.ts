@@ -39,7 +39,7 @@ export async function POST(req: Request) {
           {
             success: false,
             error: 'Invalid request format',
-            errors: validation.error.errors,
+            errors: validation.error.issues,
           },
           { status: 400 }
         )
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
           {
             success: false,
             error: 'Invalid request format',
-            errors: validation.error.errors,
+            errors: validation.error.issues,
           },
           { status: 400 }
         )

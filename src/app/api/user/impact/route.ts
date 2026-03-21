@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { withAuth, errorResponse, successResponse } from '@/lib/api/middleware'
+import { getCurrentUser } from '@/lib/auth/server'
+import { errorResponse, successResponse } from '@/lib/api/middleware'
 import { EngagementAction } from '@prisma/client'
 
 /**
  * GET /api/user/impact
  * Get user's personal impact dashboard data
  */
-const handler = async (req: Request, { user }: any) => {
+export async function GET(req: Request) {
   try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return errorResponse('Unauthorized', 401)
+    }
+
     // Get total engagement stats by action
     const engagementsByAction = await prisma.engagementEvent.groupBy({
       by: ['action'],
@@ -118,5 +124,3 @@ const handler = async (req: Request, { user }: any) => {
     return errorResponse('Failed to fetch impact data')
   }
 }
-
-export const GET = withAuth(handler)

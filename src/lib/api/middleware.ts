@@ -24,7 +24,7 @@ export type AuthenticatedHandler<T = any> = (
 export function withAuth<T = any>(
   handler: AuthenticatedHandler<T>
 ): ApiHandler<T> {
-  return async (req: Request, context?: { params?: any }) => {
+  return async (req: Request, context?: { params?: any }): Promise<NextResponse<any>> => {
     try {
       const user = await requireAuth()
       return handler(req, { ...context, user })
@@ -48,7 +48,7 @@ export function withRole<T = any>(
   roles: UserRole[],
   handler: AuthenticatedHandler<T>
 ): ApiHandler<T> {
-  return async (req: Request, context?: { params?: any }) => {
+  return async (req: Request, context?: { params?: any }): Promise<NextResponse<any>> => {
     try {
       const user = await requireRole(roles)
       return handler(req, { ...context, user })
@@ -78,7 +78,7 @@ export function withRateLimit<T = any>(
   windowSeconds: number
 ) {
   return (handler: ApiHandler<T>): ApiHandler<T> => {
-    return async (req: Request, context?: { params?: any; user?: User }) => {
+    return async (req: Request, context?: { params?: any; user?: User }): Promise<NextResponse<any>> => {
       try {
         // Generate rate limit key
         const key = `ratelimit:${keyFn(req, context?.user)}`
@@ -163,7 +163,7 @@ export function withValidation<TInput = any, TOutput = any>(
             {
               success: false,
               error: 'Invalid request format',
-              errors: validation.error.errors,
+              errors: validation.error.issues,
             },
             { status: 400 }
           ) as any
