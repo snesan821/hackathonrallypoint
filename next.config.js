@@ -37,27 +37,7 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(self)',
           },
-          // Content Security Policy (relaxed in dev, strict in production)
-          ...(process.env.NODE_ENV === 'production'
-            ? [
-                {
-                  key: 'Content-Security-Policy',
-                  value: [
-                    "default-src 'self'",
-                    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.clerk.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
-                    "style-src 'self' 'unsafe-inline'",
-                    "img-src 'self' data: https: blob:",
-                    "font-src 'self' data:",
-                    "connect-src 'self' https://*.clerk.com https://clerk.com wss://*.clerk.com https://*.clerk.dev https://api.anthropic.com",
-                    "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.com https://*.clerk.dev",
-                    "frame-ancestors 'self'",
-                    "form-action 'self'",
-                    "base-uri 'self'",
-                    "upgrade-insecure-requests",
-                  ].join('; '),
-                },
-              ]
-            : []),
+          // CSP removed for now — was blocking Clerk's clerk.accounts.dev domain
           // HSTS (HTTP Strict Transport Security)
           // Only enable in production with HTTPS
           ...(process.env.NODE_ENV === 'production'
