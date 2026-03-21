@@ -15,4 +15,4 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 // Connection pool best practices:
 // - Singleton pattern prevents multiple instances in dev hot reload
 // - Connection pooling is handled by Prisma automatically
-// - Use DIRECT_URL for migrations, DATABASE_URL for app queries with connection pooling
+// - Use DATABASE_URL for app queries; configure a separate migration URL only if you actually need one
