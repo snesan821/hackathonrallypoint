@@ -210,12 +210,24 @@ export async function POST(
       },
     })
 
-    await prisma.engagementEvent.create({
-      data: {
+    // Create or update COMMENT engagement (upsert to handle unique constraint)
+    await prisma.engagementEvent.upsert({
+      where: {
+        userId_civicItemId_action: {
+          userId: user.id,
+          civicItemId: civicItem.id,
+          action: 'COMMENT',
+        },
+      },
+      create: {
         userId: user.id,
         civicItemId: civicItem.id,
         action: 'COMMENT',
-        metadata: { commentId: comment.id, threadType },
+        metadata: { commentId: comment.id, threadType, commentCount: 1 },
+      },
+      update: {
+        metadata: { commentId: comment.id, threadType, lastCommentAt: new Date() },
+        timestamp: new Date(), // Update timestamp to reflect latest comment
       },
     })
 
