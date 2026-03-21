@@ -26,8 +26,6 @@ const envSchema = z.object({
   CLERK_SECRET_KEY: z.string().min(1, 'CLERK_SECRET_KEY is required'),
   CLERK_WEBHOOK_SECRET: z.string().min(1, 'CLERK_WEBHOOK_SECRET is required for webhook security'),
 
-  // Anthropic (Claude AI)
-  ANTHROPIC_API_KEY: z.string().min(1, 'ANTHROPIC_API_KEY is required for AI features'),
 
   // Application URLs
   NEXT_PUBLIC_SITE_URL: z
