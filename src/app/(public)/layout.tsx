@@ -65,6 +65,12 @@ export default async function PublicLayout({
             >
               Community
             </Link>
+            <Link
+              href="/contact"
+              className="text-sm font-medium text-slate-700 hover:text-slate-900"
+            >
+              Contact
+            </Link>
           </nav>
 
           <div className="flex items-center gap-3">
