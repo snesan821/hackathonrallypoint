@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { CivicItemCard, CivicItemCardSkeleton } from '@/components/civic/CivicItemCard'
 import { EngagementAction } from '@prisma/client'
-import { Bookmark, X } from 'lucide-react'
+import { Bookmark } from 'lucide-react'
 
 export default function SavedPage() {
   const [items, setItems] = useState<any[]>([])
@@ -14,17 +14,12 @@ export default function SavedPage() {
 
   const fetchSaved = async (pageNum: number = 1) => {
     setIsLoading(true)
-
     try {
       const res = await fetch(`/api/user/saved?page=${pageNum}&pageSize=12`)
       const data = await res.json()
-
       if (data.success) {
-        if (pageNum === 1) {
-          setItems(data.data)
-        } else {
-          setItems((prev) => [...prev, ...data.data])
-        }
+        if (pageNum === 1) setItems(data.data)
+        else setItems((prev) => [...prev, ...data.data])
         setTotalCount(data.pagination.totalCount)
         setHasMore(data.pagination.hasMore)
       }
@@ -35,9 +30,7 @@ export default function SavedPage() {
     }
   }
 
-  useEffect(() => {
-    fetchSaved(1)
-  }, [])
+  useEffect(() => { fetchSaved(1) }, [])
 
   const handleLoadMore = () => {
     const nextPage = page + 1
@@ -48,31 +41,22 @@ export default function SavedPage() {
   const handleEngage = async (itemId: string, action: EngagementAction) => {
     const item = items.find((i) => i.id === itemId)
     if (!item) return
-
     try {
       const res = await fetch(`/api/civic-items/${item.slug}/engage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       })
-
       const data = await res.json()
-
       if (data.success) {
-        // If unsaving, remove from list
         if (action === 'SAVE' && item.userActions?.includes('SAVE')) {
           setItems((prev) => prev.filter((i) => i.id !== itemId))
           setTotalCount((prev) => prev - 1)
         } else {
-          // Update item in state
           setItems((prev) =>
             prev.map((i) =>
               i.id === itemId
-                ? {
-                    ...i,
-                    currentSupport: data.data.currentSupport || i.currentSupport,
-                    userActions: data.data.userEngagement?.actions || [],
-                  }
+                ? { ...i, currentSupport: data.data.currentSupport || i.currentSupport, userActions: data.data.userEngagement?.actions || [] }
                 : i
             )
           )
@@ -85,84 +69,55 @@ export default function SavedPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
+    <div className="site-wrap py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="mb-2 flex items-center gap-2 text-3xl font-bold text-slate-900">
-            <Bookmark className="h-8 w-8 text-orange-600" />
+          <h1 className="mb-2 flex items-center gap-2 text-3xl font-bold text-on-surface font-headline">
+            <Bookmark className="h-8 w-8 text-primary" />
             Saved Issues
           </h1>
-          <p className="text-slate-600">
-            Issues you've bookmarked for later review
-          </p>
+          <p className="text-on-surface-variant">Issues you've bookmarked for later review</p>
         </div>
         {totalCount > 0 && (
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-on-surface-variant">
             {totalCount} {totalCount === 1 ? 'item' : 'items'} saved
           </div>
         )}
       </div>
 
-      {/* Items grid */}
       {!isLoading && items.length > 0 && (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <div key={item.id} className="relative">
-              <CivicItemCard
-                item={item}
-                onEngage={(action) => handleEngage(item.id, action)}
-              />
-            </div>
+            <CivicItemCard key={item.id} item={item} onEngage={(action) => handleEngage(item.id, action)} />
           ))}
         </div>
       )}
 
-      {/* Loading skeletons */}
       {isLoading && items.length === 0 && (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CivicItemCardSkeleton key={i} />
-          ))}
+          {Array.from({ length: 6 }).map((_, i) => <CivicItemCardSkeleton key={i} />)}
         </div>
       )}
 
-      {/* Empty state */}
       {!isLoading && items.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
-            <Bookmark className="h-8 w-8 text-slate-400" />
+        <div className="rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-container-high">
+            <Bookmark className="h-8 w-8 text-on-surface-variant" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-slate-900">
-            No saved issues yet
-          </h3>
-          <p className="mb-6 text-slate-600">
-            Bookmark issues to easily find them later
-          </p>
-          <a
-            href="/feed"
-            className="inline-block rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-          >
-            Explore Issues
-          </a>
+          <h3 className="mb-2 text-lg font-semibold text-on-surface">No saved issues yet</h3>
+          <p className="mb-6 text-on-surface-variant">Bookmark issues to easily find them later</p>
+          <a href="/feed" className="btn btn-primary inline-flex">Explore Issues</a>
         </div>
       )}
 
-      {/* Load more */}
       {!isLoading && hasMore && items.length > 0 && (
         <div className="mt-8 text-center">
-          <button
-            onClick={handleLoadMore}
-            className="rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-          >
-            Load More
-          </button>
+          <button onClick={handleLoadMore} className="btn btn-primary">Load More</button>
         </div>
       )}
 
-      {/* Loading more indicator */}
       {isLoading && items.length > 0 && (
-        <div className="mt-8 text-center text-sm text-slate-600">Loading more...</div>
+        <div className="mt-8 text-center text-sm text-on-surface-variant">Loading more...</div>
       )}
     </div>
   )

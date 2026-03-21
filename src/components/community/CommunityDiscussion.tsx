@@ -19,14 +19,8 @@ interface CommunityDiscussionProps {
 }
 
 export function CommunityDiscussion({
-  civicItemSlug,
-  initialComments,
-  totalCount,
-  onLoadMore,
-  onPostComment,
-  onUpvote,
-  onFlag,
-  className,
+  civicItemSlug, initialComments, totalCount, onLoadMore,
+  onPostComment, onUpvote, onFlag, className,
 }: CommunityDiscussionProps) {
   const [comments, setComments] = useState(initialComments)
   const [selectedThreadType, setSelectedThreadType] = useState<ThreadType | 'ALL'>('ALL')
@@ -38,48 +32,27 @@ export function CommunityDiscussion({
   const handleReply = (commentId: string) => {
     const comment = comments.find((c) => c.id === commentId)
     if (comment) {
-      setReplyingTo({
-        id: comment.id,
-        author: comment.author.displayName,
-        body: comment.body,
-      })
+      setReplyingTo({ id: comment.id, author: comment.author.displayName, body: comment.body })
       setShowComposer(true)
     }
   }
 
-  const handlePostComment = async (
-    body: string,
-    threadType: ThreadType,
-    parentId?: string
-  ) => {
+  const handlePostComment = async (body: string, threadType: ThreadType, parentId?: string) => {
     await onPostComment(body, threadType, parentId)
     setShowComposer(false)
     setReplyingTo(null)
-    // Refresh comments list (in a real app, you'd update the state optimistically)
   }
 
   const handleLoadMore = async () => {
     if (onLoadMore && !isLoadingMore) {
       setIsLoadingMore(true)
-      try {
-        await onLoadMore()
-      } finally {
-        setIsLoadingMore(false)
-      }
+      try { await onLoadMore() } finally { setIsLoadingMore(false) }
     }
   }
 
-  // Filter comments by thread type
-  const filteredComments =
-    selectedThreadType === 'ALL'
-      ? comments
-      : comments.filter((c) => c.threadType === selectedThreadType)
-
-  // Sort comments
+  const filteredComments = selectedThreadType === 'ALL' ? comments : comments.filter((c) => c.threadType === selectedThreadType)
   const sortedComments = [...filteredComments].sort((a, b) => {
-    if (sortBy === 'helpful') {
-      return b.upvotes - a.upvotes
-    }
+    if (sortBy === 'helpful') return b.upvotes - a.upvotes
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
@@ -93,42 +66,27 @@ export function CommunityDiscussion({
 
   return (
     <div id="comments" className={cn('space-y-6', className)}>
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5 text-slate-700" />
-          <h3 className="text-xl font-bold text-slate-900">
-            Discussion ({totalCount})
-          </h3>
+          <MessageCircle className="h-5 w-5 text-on-surface-variant" />
+          <h3 className="text-xl font-bold text-on-surface font-headline">Discussion ({totalCount})</h3>
         </div>
-
-        <button
-          onClick={() => setShowComposer(!showComposer)}
-          className="inline-flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
-        >
-          <Plus className="h-4 w-4" />
-          Add Comment
+        <button onClick={() => setShowComposer(!showComposer)} className="btn btn-primary">
+          <Plus className="h-4 w-4" /> Add Comment
         </button>
       </div>
 
-      {/* Composer */}
       {showComposer && (
         <CommentComposer
-          civicItemSlug={civicItemSlug}
-          parentComment={replyingTo}
+          civicItemSlug={civicItemSlug} parentComment={replyingTo}
           onSubmit={handlePostComment}
-          onCancel={() => {
-            setShowComposer(false)
-            setReplyingTo(null)
-          }}
+          onCancel={() => { setShowComposer(false); setReplyingTo(null) }}
         />
       )}
 
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Thread type filter */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-700">Filter:</span>
+          <span className="text-sm font-medium text-on-surface-variant">Filter:</span>
           <div className="flex gap-1">
             {threadTypeFilters.map((filter) => (
               <button
@@ -137,8 +95,8 @@ export function CommunityDiscussion({
                 className={cn(
                   'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
                   selectedThreadType === filter.value
-                    ? 'bg-orange-100 text-orange-700'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
                 )}
               >
                 {filter.label}
@@ -146,54 +104,31 @@ export function CommunityDiscussion({
             ))}
           </div>
         </div>
-
-        {/* Sort */}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-700">Sort:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'newest' | 'helpful')}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-          >
+          <span className="text-sm font-medium text-on-surface-variant">Sort:</span>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'newest' | 'helpful')} className="field max-w-[160px]">
             <option value="newest">Newest</option>
             <option value="helpful">Most Helpful</option>
           </select>
         </div>
       </div>
 
-      {/* Comments list */}
       {sortedComments.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <MessageCircle className="mx-auto mb-3 h-12 w-12 text-slate-400" />
-          <p className="text-lg font-medium text-slate-600">No comments yet</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Be the first to share your thoughts on this issue
-          </p>
-          <button
-            onClick={() => setShowComposer(true)}
-            className="mt-4 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
-          >
-            Start the Discussion
-          </button>
+        <div className="rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center">
+          <MessageCircle className="mx-auto mb-3 h-12 w-12 text-on-surface-variant" />
+          <p className="text-lg font-medium text-on-surface-variant">No comments yet</p>
+          <p className="mt-1 text-sm text-on-surface-variant">Be the first to share your thoughts on this issue</p>
+          <button onClick={() => setShowComposer(true)} className="btn btn-primary mt-4">Start the Discussion</button>
         </div>
       ) : (
         <div className="space-y-4">
           {sortedComments.map((comment) => (
-            <CommentThread
-              key={comment.id}
-              comment={comment}
-              onReply={handleReply}
-              onUpvote={onUpvote}
-              onFlag={onFlag}
-            />
+            <CommentThread key={comment.id} comment={comment} onReply={handleReply} onUpvote={onUpvote} onFlag={onFlag} />
           ))}
-
-          {/* Load more button */}
           {comments.length < totalCount && onLoadMore && (
             <button
-              onClick={handleLoadMore}
-              disabled={isLoadingMore}
-              className="w-full rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              onClick={handleLoadMore} disabled={isLoadingMore}
+              className="btn btn-secondary w-full justify-center disabled:opacity-50"
             >
               {isLoadingMore ? 'Loading...' : `Load More Comments (${totalCount - comments.length} remaining)`}
             </button>

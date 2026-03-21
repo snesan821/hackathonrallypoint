@@ -20,9 +20,8 @@ export function SupportBar({
   animated = true,
 }: SupportBarProps) {
   if (!targetSupport) {
-    // No target support - just show count
     return (
-      <div className={cn('text-sm text-slate-600', className)}>
+      <div className={cn('text-sm text-on-surface-variant', className)}>
         <span className="font-semibold">{currentSupport.toLocaleString()}</span> supporters
       </div>
     )
@@ -30,26 +29,19 @@ export function SupportBar({
 
   const percentage = Math.min(100, (currentSupport / targetSupport) * 100)
   const isComplete = currentSupport >= targetSupport
-
-  // Calculate milestone markers at 25%, 50%, 75%, 100%
   const milestones = [25, 50, 75, 100]
 
   return (
     <div className={cn('space-y-2', className)}>
-      {/* Progress bar */}
-      <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-200">
+      <div className="progress-track relative">
         <div
           className={cn(
-            'h-full rounded-full transition-all duration-500 ease-out',
-            isComplete
-              ? 'bg-gradient-to-r from-green-500 to-green-600'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600',
+            'progress-fill',
+            isComplete && 'bg-[var(--co-success)]',
             animated && 'animate-in slide-in-from-left'
           )}
           style={{ width: `${percentage}%` }}
         />
-
-        {/* Milestone markers */}
         {milestones.map((milestone) => {
           const isPassed = percentage >= milestone
           return (
@@ -66,25 +58,19 @@ export function SupportBar({
         })}
       </div>
 
-      {/* Text display */}
       {showText && (
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            {isComplete && (
-              <div className="flex items-center gap-1 text-green-600">
+            {isComplete ? (
+              <div className="flex items-center gap-1 text-[var(--co-success)]">
                 <Check className="h-4 w-4" />
                 <span className="font-medium">Goal reached!</span>
               </div>
-            )}
-            {!isComplete && (
-              <span className="text-slate-700">
-                {formatSupport(currentSupport, targetSupport)}
-              </span>
+            ) : (
+              <span className="text-on-surface-variant">{formatSupport(currentSupport, targetSupport)}</span>
             )}
           </div>
-          <span className="text-slate-500">
-            {percentage.toFixed(0)}%
-          </span>
+          <span className="text-on-surface-variant">{percentage.toFixed(0)}%</span>
         </div>
       )}
     </div>

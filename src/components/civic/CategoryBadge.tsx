@@ -76,7 +76,7 @@ export function CategoryBadgeList({
         />
       ))}
       {remainingCount > 0 && (
-        <span className="text-xs text-slate-500">+{remainingCount} more</span>
+        <span className="text-xs text-on-surface-variant">+{remainingCount} more</span>
       )}
     </div>
   )
