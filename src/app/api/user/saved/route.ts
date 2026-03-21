@@ -1,0 +1,101 @@
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/db/prisma'
+import { withAuth, getSearchParams, buildPaginatedResponse, errorResponse } from '@/lib/api/middleware'
+
+/**
+ * GET /api/user/saved
+ * Get user's saved civic items
+ *
+ * Query params:
+ * - page: Page number
+ * - pageSize: Items per page
+ */
+const handler = async (req: Request, { user }: any) => {
+  try {
+    const searchParams = getSearchParams(req)
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '20')))
+
+    // Get all SAVE engagement events for this user
+    const savedEngagements = await prisma.engagementEvent.findMany({
+      where: {
+        userId: user.id,
+        action: 'SAVE',
+      },
+      select: {
+        civicItemId: true,
+        timestamp: true,
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+    })
+
+    const savedItemIds = savedEngagements.map((e) => e.civicItemId)
+
+    // Get total count
+    const totalCount = savedItemIds.length
+
+    // Paginate
+    const paginatedIds = savedItemIds.slice((page - 1) * pageSize, page * pageSize)
+
+    // Fetch civic items
+    const items = await prisma.civicItem.findMany({
+      where: {
+        id: { in: paginatedIds },
+      },
+      include: {
+        _count: {
+          select: {
+            comments: true,
+            engagements: true,
+          },
+        },
+      },
+    })
+
+    // Sort items by save timestamp
+    const savedTimestampMap = new Map(
+      savedEngagements.map((e) => [e.civicItemId, e.timestamp])
+    )
+
+    items.sort((a, b) => {
+      const aTime = savedTimestampMap.get(a.id)?.getTime() || 0
+      const bTime = savedTimestampMap.get(b.id)?.getTime() || 0
+      return bTime - aTime
+    })
+
+    // Transform to card format
+    const cardData = items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      categories: item.categories,
+      type: item.type,
+      status: item.status,
+      jurisdictionTags: item.jurisdictionTags,
+      jurisdictionLevel: item.jurisdictionLevel,
+      summary: item.summary,
+      deadline: item.deadline,
+      currentSupport: item.currentSupport,
+      targetSupport: item.targetSupport,
+      allowsOnlineSignature: item.allowsOnlineSignature,
+      tags: item.tags,
+      districtIds: item.districtIds,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      commentCount: item._count.comments,
+      engagementCount: item._count.engagements,
+      savedAt: savedTimestampMap.get(item.id),
+    }))
+
+    const response = buildPaginatedResponse(cardData, { page, pageSize, totalCount })
+
+    return NextResponse.json(response)
+  } catch (error: any) {
+    console.error('GET /api/user/saved error:', error)
+    return errorResponse('Failed to fetch saved items')
+  }
+}
+
+export const GET = withAuth(handler)

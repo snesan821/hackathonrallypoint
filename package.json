@@ -1,0 +1,19 @@
+{
+  "name": "rallypoint",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.20.0",
+    "sonner": "^2.0.7"
+  },
+  "packageManager": "pnpm@10.32.1"
+}
