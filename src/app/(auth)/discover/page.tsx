@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CivicItemCard, CivicItemCardSkeleton } from '@/components/civic/CivicItemCard'
 import { SwipeStack } from '@/components/discover/SwipeStack'
@@ -12,6 +12,23 @@ import { LocationPrompt } from '@/components/civic/LocationPrompt'
 import type { Category } from '@prisma/client'
 
 type ViewMode = 'swipe' | 'browse'
+
+/** Background gradient per category — used for dynamic page background */
+const CATEGORY_BG: Record<string, string> = {
+  HOUSING: 'from-amber-50 to-orange-50',
+  EDUCATION: 'from-violet-50 to-purple-50',
+  TRANSIT: 'from-emerald-50 to-green-50',
+  PUBLIC_SAFETY: 'from-rose-50 to-red-50',
+  HEALTHCARE: 'from-pink-50 to-rose-50',
+  JOBS: 'from-orange-50 to-amber-50',
+  ENVIRONMENT: 'from-lime-50 to-emerald-50',
+  CIVIL_RIGHTS: 'from-indigo-50 to-violet-50',
+  CITY_SERVICES: 'from-cyan-50 to-sky-50',
+  BUDGET: 'from-yellow-50 to-amber-50',
+  ZONING: 'from-orange-50 to-yellow-50',
+  OTHER: 'from-slate-50 to-gray-50',
+}
+const DEFAULT_BG = 'from-slate-100 to-gray-50'
 
 export default function DiscoverPage() {
   const searchParams = useSearchParams()
@@ -25,6 +42,11 @@ export default function DiscoverPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
   const [locationFilter, setLocationFilter] = useState<{ city?: string; county?: string; state?: string } | null>(null)
+  const [activeBg, setActiveBg] = useState(DEFAULT_BG)
+
+  const handleCategoryChange = useCallback((cat: string | null) => {
+    setActiveBg(cat ? CATEGORY_BG[cat] || DEFAULT_BG : DEFAULT_BG)
+  }, [])
 
   const fetchItems = async () => {
     setIsLoading(true)
@@ -54,6 +76,13 @@ export default function DiscoverPage() {
     if (viewMode === 'browse') fetchItems()
   }, [category, search, viewMode, locationFilter])
 
+  // Update background color when browse category filter changes
+  useEffect(() => {
+    if (viewMode === 'browse') {
+      setActiveBg(category ? CATEGORY_BG[category] || DEFAULT_BG : DEFAULT_BG)
+    }
+  }, [category, viewMode])
+
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString())
     if (value) params.set(key, value)
@@ -62,6 +91,7 @@ export default function DiscoverPage() {
   }
 
   return (
+    <div className={cn('min-h-screen bg-gradient-to-br transition-colors duration-700', activeBg)}>
     <div className="site-wrap py-8">
       {/* Page header */}
       <div className="mb-6">
@@ -110,7 +140,7 @@ export default function DiscoverPage() {
       {/* SWIPE MODE */}
       {viewMode === 'swipe' && (
         <div className="mx-auto max-w-lg">
-          <SwipeStack />
+          <SwipeStack onCategoryChange={handleCategoryChange} />
         </div>
       )}
 
@@ -167,6 +197,7 @@ export default function DiscoverPage() {
           )}
         </>
       )}
+    </div>
     </div>
   )
 }
