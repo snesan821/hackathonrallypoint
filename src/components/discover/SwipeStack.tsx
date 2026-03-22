@@ -9,10 +9,6 @@ import { cn } from '@/lib/utils/cn'
 import type { Category } from '@prisma/client'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
 
-// --------------------------------------------------------------------------
-// Category filter strip
-// --------------------------------------------------------------------------
-
 type CategoryFilter = Category | 'ALL'
 
 const FILTER_OPTIONS: { value: CategoryFilter; label: string }[] = [
@@ -22,10 +18,6 @@ const FILTER_OPTIONS: { value: CategoryFilter; label: string }[] = [
 
 const REFETCH_THRESHOLD = 3
 
-// --------------------------------------------------------------------------
-// SwipeStack
-// --------------------------------------------------------------------------
-
 export function SwipeStack() {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('ALL')
   const [queue, setQueue] = useState<SwipeItem[]>([])
@@ -33,10 +25,21 @@ export function SwipeStack() {
   const [cursor, setCursor] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEmpty, setIsEmpty] = useState(false)
+
+  // Refs
   const isFetchingRef = useRef(false)
   const topCardHandleRef = useRef<SwipeCardHandle | null>(null)
+  // Keep a synchronous mirror of queue so handlers can read current top without stale closure
+  const queueRef = useRef<SwipeItem[]>([])
+  // Client-side skip tracking — cleared on "Start Over" so items reappear
+  const skippedIdsRef = useRef<Set<string>>(new Set())
 
-  // ── Fetch ────────────────────────────────────────────────────────────────
+  // Keep queueRef in sync
+  useEffect(() => {
+    queueRef.current = queue
+  }, [queue])
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
 
   const fetchBatch = useCallback(
     async (nextCursor: string | null, category: CategoryFilter) => {
@@ -50,12 +53,14 @@ export function SwipeStack() {
         const data = await res.json()
         if (data.success) {
           const incoming: SwipeItem[] = data.data
+          // Filter out client-side skipped items before adding to queue
+          const fresh = incoming.filter((i) => !skippedIdsRef.current.has(i.id))
           setQueue((prev) => {
             const ids = new Set(prev.map((i) => i.id))
-            return [...prev, ...incoming.filter((i) => !ids.has(i.id))]
+            return [...prev, ...fresh.filter((i) => !ids.has(i.id))]
           })
           setCursor(data.nextCursor ?? null)
-          if (incoming.length === 0) setIsEmpty(true)
+          if (fresh.length === 0 && incoming.length === 0) setIsEmpty(true)
         }
       } catch (err) {
         console.error('SwipeStack fetch error:', err)
@@ -67,7 +72,7 @@ export function SwipeStack() {
     []
   )
 
-  // Reset + fetch on category change
+  // Reset on category change
   useEffect(() => {
     topCardHandleRef.current = null
     setQueue([])
@@ -75,10 +80,11 @@ export function SwipeStack() {
     setIsEmpty(false)
     setIsLoading(true)
     isFetchingRef.current = false
+    // Don't clear skippedIds on category change — only on explicit "Start Over"
     fetchBatch(null, activeCategory)
   }, [activeCategory, fetchBatch])
 
-  // Auto-fetch more when queue gets low
+  // Auto-fetch more when queue is getting low
   useEffect(() => {
     if (!isLoading && queue.length <= REFETCH_THRESHOLD && cursor) {
       fetchBatch(cursor, activeCategory)
@@ -86,7 +92,7 @@ export function SwipeStack() {
     if (!isLoading && queue.length === 0 && !cursor) setIsEmpty(true)
   }, [queue.length, cursor, isLoading, activeCategory, fetchBatch])
 
-  // ── Swipe actions ────────────────────────────────────────────────────────
+  // ── API calls ──────────────────────────────────────────────────────────────
 
   const recordSkip = useCallback(async (item: SwipeItem) => {
     try {
@@ -108,28 +114,31 @@ export function SwipeStack() {
     } catch { /* fire-and-forget */ }
   }, [])
 
+  // ── Swipe handlers (using queueRef to avoid stale closures) ───────────────
+
   const handleSwipeLeft = useCallback(() => {
     topCardHandleRef.current = null
-    setQueue((prev) => {
-      const [top, ...rest] = prev
-      if (top) recordSkip(top)
-      return rest
-    })
+    const top = queueRef.current[0]
+    if (top) {
+      skippedIdsRef.current.add(top.id)
+      recordSkip(top)
+    }
+    setQueue((prev) => prev.slice(1))
   }, [recordSkip])
 
   const handleSwipeRight = useCallback(() => {
     topCardHandleRef.current = null
-    setQueue((prev) => {
-      const [top, ...rest] = prev
-      if (top) {
-        recordSave(top)
-        setMatches((m) => (m.find((x) => x.id === top.id) ? m : [top, ...m]))
-      }
-      return rest
-    })
+    const top = queueRef.current[0]
+    if (top) {
+      recordSave(top)
+      // Update matches separately — never call setState inside another setState updater
+      setMatches((m) => (m.find((x) => x.id === top.id) ? m : [top, ...m]))
+    }
+    setQueue((prev) => prev.slice(1))
   }, [recordSave])
 
-  // Button-triggered swipes — animate the card then pop
+  // ── Button triggers ────────────────────────────────────────────────────────
+
   const triggerSkip = useCallback(() => {
     topCardHandleRef.current?.triggerLeft()
   }, [])
@@ -138,8 +147,11 @@ export function SwipeStack() {
     topCardHandleRef.current?.triggerRight()
   }, [])
 
+  // ── Start Over (clears client-side skip history so items reappear) ─────────
+
   const handleReset = useCallback(() => {
     topCardHandleRef.current = null
+    skippedIdsRef.current = new Set() // clear skip history
     setQueue([])
     setMatches([])
     setCursor(null)
@@ -175,7 +187,7 @@ export function SwipeStack() {
       {/* Card stack */}
       <div className="flex flex-col items-center gap-5">
         <div className="relative w-full" style={{ height: 520 }}>
-          {/* Loading state */}
+
           {isLoading && visibleCards.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white shadow-card">
               <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
@@ -183,17 +195,16 @@ export function SwipeStack() {
             </div>
           )}
 
-          {/* Empty state */}
           {!isLoading && isEmpty && visibleCards.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
               <Inbox className="h-10 w-10 text-slate-400" />
               <div>
                 <p className="font-semibold text-slate-700">All caught up</p>
                 <p className="mt-1 text-sm text-slate-500">
-                  No more{' '}
+                  No more
                   {activeCategory !== 'ALL'
-                    ? activeCategory.replace(/_/g, ' ').toLowerCase() + ' '
-                    : ''}
+                    ? ` ${activeCategory.replace(/_/g, ' ').toLowerCase()}`
+                    : ''}{' '}
                   issues in your queue.
                 </p>
               </div>
@@ -215,7 +226,6 @@ export function SwipeStack() {
             </div>
           )}
 
-          {/* Cards — rendered back-to-front so top card is on top */}
           {visibleCards
             .slice()
             .reverse()
@@ -240,7 +250,7 @@ export function SwipeStack() {
             })}
         </div>
 
-        {/* Swipe buttons */}
+        {/* Skip / Save buttons */}
         {!isLoading && visibleCards.length > 0 && (
           <div className="flex items-center justify-center gap-10">
             <button
@@ -262,11 +272,10 @@ export function SwipeStack() {
           </div>
         )}
 
-        {/* Hint + remaining count */}
         {!isLoading && queue.length > 0 && (
           <p className="text-center text-xs text-slate-400">
-            Drag or tap buttons &middot;{' '}
-            {queue.length} {queue.length === 1 ? 'issue' : 'issues'} left
+            Drag or tap buttons &middot; {queue.length}{' '}
+            {queue.length === 1 ? 'issue' : 'issues'} left
           </p>
         )}
       </div>

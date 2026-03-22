@@ -19,11 +19,13 @@ export async function GET(req: Request) {
     const cursor = searchParams.get('cursor') || undefined
     const categoryParam = searchParams.get('category') || undefined
 
-    // IDs of items already acted on (exclude SUPPORT, SKIP, and SAVE from swipe queue)
+    // IDs of items the user has already SAVED or SUPPORTED (permanent — no need to revisit).
+    // SKIP is intentionally excluded from this filter so "Start Over" works:
+    // skipped items are tracked client-side only and cleared on reset.
     const seenEngagements = await prisma.engagementEvent.findMany({
       where: {
         userId: user.id,
-        action: { in: ['SUPPORT', 'SKIP', 'SAVE'] },
+        action: { in: ['SUPPORT', 'SAVE'] },
       },
       select: { civicItemId: true },
     })
