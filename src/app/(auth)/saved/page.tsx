@@ -41,6 +41,7 @@ export default function FollowingPage() {
   const handleEngage = async (itemId: string, action: EngagementAction) => {
     const item = items.find((i) => i.id === itemId)
     if (!item) return
+    
     try {
       const res = await fetch(`/api/civic-items/${item.slug}/engage`, {
         method: 'POST',
@@ -48,15 +49,22 @@ export default function FollowingPage() {
         body: JSON.stringify({ action }),
       })
       const data = await res.json()
+      
       if (data.success) {
-        if (action === 'SAVE' && item.userActions?.includes('SAVE')) {
+        // If user unfollowed (UNSAVE), remove from list immediately
+        if (action === 'UNSAVE' || (action === 'SAVE' && item.userActions?.includes('SAVE'))) {
           setItems((prev) => prev.filter((i) => i.id !== itemId))
-          setTotalCount((prev) => prev - 1)
+          setTotalCount((prev) => Math.max(0, prev - 1))
         } else {
+          // Update item state for other actions
           setItems((prev) =>
             prev.map((i) =>
               i.id === itemId
-                ? { ...i, currentSupport: data.data.currentSupport || i.currentSupport, userActions: data.data.userEngagement?.actions || [] }
+                ? {
+                    ...i,
+                    currentSupport: data.data.currentSupport !== undefined ? data.data.currentSupport : i.currentSupport,
+                    userActions: data.data.userEngagement?.actions || i.userActions || [],
+                  }
                 : i
             )
           )
