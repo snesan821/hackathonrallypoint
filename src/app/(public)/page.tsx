@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   Scale,
   Eye,
-  ArrowRight,
 } from 'lucide-react'
 
 const trustFeatures = [
@@ -65,43 +64,6 @@ export default function LandingPage() {
           </div>
           <div className="relative order-1 lg:order-2">
             <HeroStabilizer />
-            {/* Floating card */}
-            <div className="absolute -bottom-10 -left-6 lg:-left-20 w-full max-w-sm bg-surface-container-lowest p-6 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant/10">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-primary text-[10px] font-bold tracking-[0.2em] uppercase">
-                    Trending Issue
-                  </span>
-                  <span className="text-on-surface-variant text-[10px] font-medium">
-                    2.4k active
-                  </span>
-                </div>
-                <h3 className="text-on-surface text-2xl font-bold leading-tight font-headline">
-                  Rent Stabilization Ordinance
-                </h3>
-                <p className="text-on-surface-variant text-sm leading-normal">
-                  Discussion on proposed amendments to local housing stability and tenant
-                  protections.
-                </p>
-                <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden mt-2">
-                  <div className="h-full bg-primary w-3/4" />
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex -space-x-2">
-                    <div className="size-6 rounded-full border-2 border-surface bg-surface-container-high" />
-                    <div className="size-6 rounded-full border-2 border-surface bg-surface-container-highest" />
-                    <div className="size-6 rounded-full border-2 border-surface bg-outline" />
-                  </div>
-                  <Link
-                    href="/discover"
-                    className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary-container transition-colors"
-                  >
-                    View Discussion
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
