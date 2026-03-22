@@ -121,7 +121,7 @@ export function SwipeStack() {
   const visibleCards = queue.slice(0, 3)
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 pb-6">
       <div className="flex flex-col items-center">
         <div className="relative w-full max-w-sm overflow-visible" style={{ height: 480 }}>
           {isLoading && visibleCards.length === 0 && (
@@ -138,7 +138,7 @@ export function SwipeStack() {
                 <p className="font-semibold text-on-surface">You&rsquo;re all caught up</p>
                 <p className="mt-1 text-sm text-on-surface-variant">No more issues in your queue right now.</p>
               </div>
-              <button type="button" onClick={handleReset} className="inline-flex items-center gap-2 rounded-lg border border-outline-variant/15 bg-surface-container-lowest px-4 py-2 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low transition-colors">
+              <button type="button" onClick={handleReset} className="inline-flex items-center gap-2 rounded-lg border border-outline-variant/15 bg-surface-container-lowest px-4 py-2 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent] active:scale-95">
                 <RefreshCw className="h-4 w-4" />
                 Start over
               </button>
@@ -168,7 +168,7 @@ export function SwipeStack() {
             <button
               type="button"
               aria-label="Skip"
-              className="flex h-14 w-14 items-center justify-center text-on-surface-variant transition-all hover:scale-110 hover:text-on-surface active:scale-95"
+              className="flex h-14 w-14 items-center justify-center text-on-surface-variant transition-all duration-300 ease-in-out hover:scale-110 hover:text-on-surface active:scale-95 select-none [-webkit-tap-highlight-color:transparent]"
               onClick={() => topCardRef.current?.triggerSwipeLeft()}
             >
               <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ export function SwipeStack() {
             <button
               type="button"
               aria-label="Follow"
-              className="flex h-14 w-14 items-center justify-center text-[var(--co-success)] transition-all hover:scale-110 active:scale-95"
+              className="flex h-14 w-14 items-center justify-center text-[var(--co-success)] transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 select-none [-webkit-tap-highlight-color:transparent]"
               onClick={() => topCardRef.current?.triggerSwipeRight()}
             >
               <Plus className="h-9 w-9" strokeWidth={2.5} />
@@ -229,11 +229,11 @@ export function SwipeStack() {
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <Link href={`/issues/${item.slug}`} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-on-primary hover:bg-primary-container transition-colors whitespace-nowrap">
+                    <Link href={`/issues/${item.slug}`} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-on-primary hover:bg-primary-container transition-all duration-300 ease-in-out whitespace-nowrap select-none [-webkit-tap-highlight-color:transparent] active:scale-95">
                       Read article
                     </Link>
                     {contactUrl && (
-                      <a href={contactUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-outline-variant/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-colors whitespace-nowrap">
+                      <a href={contactUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-outline-variant/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all duration-300 ease-in-out whitespace-nowrap select-none [-webkit-tap-highlight-color:transparent] active:scale-95">
                         <ExternalLink className="h-3 w-3" />
                         Source
                       </a>
@@ -245,7 +245,7 @@ export function SwipeStack() {
           </div>
 
           <div className="mt-4 text-center">
-            <Link href="/saved" className="text-sm font-medium text-primary hover:text-primary-container">
+            <Link href="/saved" className="text-sm font-medium text-primary hover:text-primary-container transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent]">
               View all followed issues &rarr;
             </Link>
           </div>
