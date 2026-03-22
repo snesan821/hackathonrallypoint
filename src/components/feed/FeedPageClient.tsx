@@ -178,7 +178,7 @@ export function FeedPageClient({
           <select
             value={category || ''}
             onChange={(e) => updateFilter('category', e.target.value || null)}
-            className="field max-w-[200px]"
+            className="field max-w-[200px] select-none [-webkit-tap-highlight-color:transparent]"
           >
             <option value="">All Categories</option>
             {CIVIC_CATEGORIES.map((entry) => (
@@ -192,7 +192,7 @@ export function FeedPageClient({
         <select
           value={type || ''}
           onChange={(e) => updateFilter('type', e.target.value || null)}
-          className="field max-w-[200px]"
+          className="field max-w-[200px] select-none [-webkit-tap-highlight-color:transparent]"
         >
           <option value="">All Types</option>
           <option value="PETITION">Petition</option>
@@ -209,7 +209,7 @@ export function FeedPageClient({
           <select
             value={sort}
             onChange={(e) => updateFilter('sort', e.target.value)}
-            className="field max-w-[180px]"
+            className="field max-w-[180px] select-none [-webkit-tap-highlight-color:transparent]"
           >
             <option value="deadline">Deadline</option>
             <option value="newest">Newest</option>
@@ -253,7 +253,7 @@ export function FeedPageClient({
           <button
             onClick={handleLoadMore}
             disabled={isLoadingMore}
-            className="btn btn-primary disabled:opacity-50"
+            className="btn btn-primary disabled:opacity-50 select-none [-webkit-tap-highlight-color:transparent] transition-all duration-300 ease-in-out active:scale-95"
           >
             {isLoadingMore ? 'Loading more...' : 'Load More Issues'}
           </button>

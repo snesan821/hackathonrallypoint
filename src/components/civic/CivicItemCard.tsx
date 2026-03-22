@@ -59,8 +59,9 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
   return (
     <article
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card transition-all cursor-pointer',
-        'hover:shadow-card-hover hover:scale-[1.02] hover:-translate-y-1',
+        'group relative overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card transition-all duration-300 ease-in-out cursor-pointer select-none [-webkit-tap-highlight-color:transparent]',
+        'hover:shadow-card-hover hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]',
+        'w-full',
         className
       )}
       onClick={handleCardClick}
@@ -122,7 +123,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-              className="mt-1 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-container transition-colors"
+              className="mt-1 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-container transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent]"
             >
               {expanded ? (
                 <><ChevronUp className="h-3.5 w-3.5" />Show less</>
@@ -153,7 +154,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
             href={item.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mb-4 inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
+            className="mb-4 inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent] active:scale-95"
             onClick={(e) => e.stopPropagation()}
           >
             View official source / Sign petition
