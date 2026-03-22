@@ -28,8 +28,8 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${newsreader.variable} ${manrope.variable}`}>
-        <body className="min-h-screen">
+      <html lang="en" className={`${newsreader.variable} ${manrope.variable}`} suppressHydrationWarning>
+        <body className="min-h-screen" suppressHydrationWarning>
           {children}
           <Toaster />
         </body>

@@ -95,8 +95,14 @@ export function SwipeStack() {
     setQueue((prev) => {
       const [top, ...rest] = prev
       if (top) {
-        recordFollow(top)
-        setMatches((m) => [top, ...m])
+        recordSave(top)
+        setMatches((m) => {
+          // Prevent duplicates in matches array
+          if (m.some(item => item.id === top.id)) {
+            return m
+          }
+          return [top, ...m]
+        })
       }
       return rest
     })
