@@ -16,8 +16,9 @@ import {
   Menu,
   X,
 } from 'lucide-react'
-import { UserRole } from '@prisma/client'
 import { FloatingContactButton } from './FloatingContactButton'
+
+type UserRole = 'USER' | 'ORGANIZER' | 'MODERATOR' | 'ADMIN'
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>
