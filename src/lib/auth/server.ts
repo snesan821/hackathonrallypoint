@@ -9,6 +9,7 @@ export type UserRole = 'USER' | 'ORGANIZER' | 'MODERATOR' | 'ADMIN'
 /**
  * Gets the current user from Clerk and syncs/fetches from our database
  * Returns null if not authenticated
+ * Optimized: read-first, only syncs if user not found in DB
  */
 export async function getCurrentUser() {
   const { userId } = await auth()

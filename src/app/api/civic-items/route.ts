@@ -17,6 +17,8 @@ import { getCivicItemsPage } from '@/lib/civic/items'
  * - jurisdictionLevel: JurisdictionLevel enum filter
  * - search: Text search in title/summary
  * - sort: deadline | newest | trending | support
+ * - city: Filter by city (from browser geolocation)
+ * - state: Filter by state (from browser geolocation)
  * - page: Page number (default: 1)
  * - pageSize: Items per page (default: 20, max: 50)
  */
@@ -31,6 +33,9 @@ export async function GET(req: Request) {
     const jurisdiction = searchParams.get('jurisdiction')
     const jurisdictionLevel = searchParams.get('jurisdictionLevel') as JurisdictionLevel | null
     const search = searchParams.get('search')
+    const city = searchParams.get('city')
+    const county = searchParams.get('county')
+    const state = searchParams.get('state')
     const sort = searchParams.get('sort') || 'deadline'
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '20')))
@@ -39,7 +44,7 @@ export async function GET(req: Request) {
     const user = await getCurrentUser()
 
     // Build cache key
-    const cacheKey = `feed:${category || 'all'}:${type || 'all'}:${status || 'all'}:${jurisdiction || 'all'}:${jurisdictionLevel || 'all'}:${search || 'none'}:${sort}:${page}:${pageSize}:${user?.id || 'anon'}`
+    const cacheKey = `feed:${category || 'all'}:${type || 'all'}:${status || 'all'}:${jurisdiction || 'all'}:${jurisdictionLevel || 'all'}:${search || 'none'}:${city || 'all'}:${county || 'all'}:${state || 'all'}:${sort}:${page}:${pageSize}:${user?.id || 'anon'}`
 
     // Check cache (5 minute TTL)
     try {

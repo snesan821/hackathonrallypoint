@@ -8,6 +8,7 @@ import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { Filter, LayoutGrid, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { renderIcon } from '@/lib/utils/icons'
+import { LocationPrompt } from '@/components/civic/LocationPrompt'
 import type { Category } from '@prisma/client'
 
 type ViewMode = 'swipe' | 'browse'
@@ -48,6 +49,9 @@ export default function DiscoverPage() {
     const params = new URLSearchParams()
     if (category) params.set('category', category)
     if (search) params.set('search', search)
+    if (locationFilter?.city) params.set('city', locationFilter.city)
+    if (locationFilter?.county) params.set('county', locationFilter.county)
+    if (locationFilter?.state) params.set('state', locationFilter.state)
     params.set('pageSize', '20')
     try {
       const res = await fetch(`/api/civic-items?${params}`)
