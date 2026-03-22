@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CategoryBadge } from '@/components/civic/CategoryBadge'
 import { DeadlineChip } from '@/components/civic/DeadlineChip'
@@ -25,6 +25,27 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
   const [activeTab, setActiveTab] = useState<'details' | 'discussion' | 'updates'>(
     'details'
   )
+  const [hasTrackedView, setHasTrackedView] = useState(false)
+
+  // Track VIEW engagement when component mounts (only once)
+  useEffect(() => {
+    const trackView = async () => {
+      if (hasTrackedView) return
+      setHasTrackedView(true)
+      
+      try {
+        await fetch(`/api/civic-items/${slug}/engage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'VIEW' }),
+        })
+      } catch (error) {
+        console.error('Failed to track view:', error)
+      }
+    }
+    
+    trackView()
+  }, [slug, hasTrackedView])
 
   const fetchComments = async () => {
     setIsLoadingComments(true)
@@ -61,10 +82,11 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
       const data = await res.json()
 
       if (data.success) {
+        // Update item state with new engagement data
         setItem((prev) => ({
           ...prev,
-          currentSupport: data.data.currentSupport || prev.currentSupport,
-          userEngagement: data.data.userEngagement,
+          currentSupport: data.data.currentSupport !== undefined ? data.data.currentSupport : prev.currentSupport,
+          userEngagement: data.data.userEngagement || prev.userEngagement,
         }))
       }
     } catch (error) {

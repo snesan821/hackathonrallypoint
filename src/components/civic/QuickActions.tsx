@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Plus, Share2, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { EngagementAction } from '@prisma/client'
@@ -22,9 +22,21 @@ export function QuickActions({
   onEngage,
   className,
 }: QuickActionsProps) {
-  const [optimisticActions, setOptimisticActions] = useState<Set<EngagementAction>>(new Set(userActions))
+  // Create a stable Set from userActions using useMemo to prevent infinite loops
+  const userActionsSet = useMemo(() => new Set(userActions), [userActions.join(',')])
+  
+  const [optimisticActions, setOptimisticActions] = useState<Set<EngagementAction>>(userActionsSet)
   const [optimisticSupport, setOptimisticSupport] = useState(currentSupport)
   const [isLoading, setIsLoading] = useState<EngagementAction | null>(null)
+
+  // Sync optimistic state with props when they change (from parent updates)
+  useEffect(() => {
+    setOptimisticActions(userActionsSet)
+  }, [userActionsSet])
+
+  useEffect(() => {
+    setOptimisticSupport(currentSupport)
+  }, [currentSupport])
 
   const hasSupported = optimisticActions.has('SUPPORT')
   const hasFollowed = optimisticActions.has('SAVE')
@@ -32,18 +44,61 @@ export function QuickActions({
   const handleAction = async (action: EngagementAction) => {
     if (!onEngage || isLoading) return
     setIsLoading(action)
+    
     const newActions = new Set(optimisticActions)
+    
     if (action === 'SUPPORT') {
-      if (hasSupported) { newActions.delete('SUPPORT'); setOptimisticSupport((prev) => prev - 1) }
-      else { newActions.add('SUPPORT'); setOptimisticSupport((prev) => prev + 1) }
+      if (hasSupported) {
+        // User is unsupporting - use UNSUPPORT action
+        newActions.delete('SUPPORT')
+        setOptimisticSupport((prev) => prev - 1)
+        try {
+          await onEngage('UNSUPPORT' as EngagementAction)
+        } catch (error) {
+          // Rollback on error
+          newActions.add('SUPPORT')
+          setOptimisticSupport((prev) => prev + 1)
+          console.error('Unsupport action failed:', error)
+        }
+      } else {
+        // User is supporting
+        newActions.add('SUPPORT')
+        setOptimisticSupport((prev) => prev + 1)
+        try {
+          await onEngage('SUPPORT')
+        } catch (error) {
+          // Rollback on error
+          newActions.delete('SUPPORT')
+          setOptimisticSupport((prev) => prev - 1)
+          console.error('Support action failed:', error)
+        }
+      }
     } else if (action === 'SAVE') {
-      if (hasFollowed) newActions.delete('SAVE')
-      else newActions.add('SAVE')
+      if (hasFollowed) {
+        // User is unfollowing - use UNSAVE action
+        newActions.delete('SAVE')
+        try {
+          await onEngage('UNSAVE' as EngagementAction)
+        } catch (error) {
+          // Rollback on error
+          newActions.add('SAVE')
+          console.error('Unfollow action failed:', error)
+        }
+      } else {
+        // User is following
+        newActions.add('SAVE')
+        try {
+          await onEngage('SAVE')
+        } catch (error) {
+          // Rollback on error
+          newActions.delete('SAVE')
+          console.error('Follow action failed:', error)
+        }
+      }
     }
+    
     setOptimisticActions(newActions)
-    try { await onEngage(action) }
-    catch (error) { setOptimisticActions(new Set(userActions)); setOptimisticSupport(currentSupport); console.error('Engagement action failed:', error) }
-    finally { setIsLoading(null) }
+    setIsLoading(null)
   }
 
   const handleShare = async () => {
@@ -129,14 +184,14 @@ export function QuickActions({
 
       <button
         onClick={() => handleAction(hasSupported ? 'UNSUPPORT' : 'SUPPORT')}
-        disabled={isLoading === 'SUPPORT'}
+        disabled={isLoading === 'SUPPORT' || isLoading === 'UNSUPPORT'}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
+          'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent]',
           'hover:scale-105 active:scale-95',
           hasSupported
             ? 'bg-primary text-on-primary hover:bg-primary-container'
             : 'bg-primary/10 text-primary hover:bg-primary/15',
-          isLoading === 'SUPPORT' && 'opacity-50 cursor-not-allowed'
+          (isLoading === 'SUPPORT' || isLoading === 'UNSUPPORT') && 'opacity-50 cursor-not-allowed'
         )}
         title={hasSupported ? 'Unsupport' : 'Show support'}
       >
