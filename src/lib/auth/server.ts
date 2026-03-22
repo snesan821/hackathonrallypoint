@@ -1,6 +1,8 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/db/prisma'
 import { redirect } from 'next/navigation'
+import { syncClerkUser } from '@/lib/auth/sync'
+import { cache } from 'react'
 
 export type UserRole = 'USER' | 'ORGANIZER' | 'MODERATOR' | 'ADMIN'
 
@@ -15,36 +17,26 @@ export async function getCurrentUser() {
     return null
   }
 
+  // Keep the hot path read-only. Clerk webhook sync populates the DB for normal requests.
+  const existingUser = await prisma.user.findUnique({
+    where: { clerkId: userId },
+  })
+
+  if (existingUser) {
+    return existingUser
+  }
+
   const clerkUser = await currentUser()
 
   if (!clerkUser) {
     return null
   }
 
-  // Upsert user in our database
-  const user = await prisma.user.upsert({
-    where: { clerkId: userId },
-    update: {
-      email: clerkUser.emailAddresses[0]?.emailAddress || '',
-      displayName: clerkUser.firstName && clerkUser.lastName
-        ? `${clerkUser.firstName} ${clerkUser.lastName}`
-        : clerkUser.username || 'User',
-      avatarUrl: clerkUser.imageUrl,
-    },
-    create: {
-      clerkId: userId,
-      email: clerkUser.emailAddresses[0]?.emailAddress || '',
-      displayName: clerkUser.firstName && clerkUser.lastName
-        ? `${clerkUser.firstName} ${clerkUser.lastName}`
-        : clerkUser.username || 'User',
-      avatarUrl: clerkUser.imageUrl,
-      role: 'USER',
-      onboardingCompleted: false,
-    },
-  })
-
-  return user
+  // Fall back to a one-time sync if the webhook has not populated the user yet.
+  return syncClerkUser(clerkUser)
 }
+
+export const getCurrentUserCached = cache(getCurrentUser)
 
 /**
  * Requires authentication - redirects to sign-in if not authenticated
