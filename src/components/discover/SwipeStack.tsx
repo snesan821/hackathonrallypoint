@@ -115,7 +115,7 @@ export function SwipeStack() {
     <div className="flex flex-col gap-10">
       {/* Swipe deck */}
       <div className="flex flex-col items-center">
-        <div className="relative w-full max-w-sm" style={{ height: 560 }}>
+        <div className="relative w-full max-w-sm" style={{ height: 480 }}>
           {isLoading && visibleCards.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white shadow-card">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
@@ -130,7 +130,7 @@ export function SwipeStack() {
                 <p className="font-semibold text-slate-700">You&rsquo;re all caught up</p>
                 <p className="mt-1 text-sm text-slate-500">No more issues in your queue right now.</p>
               </div>
-              <button type="button" onClick={handleReset} className="btn btn-secondary gap-2">
+              <button type="button" onClick={handleReset} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                 <RefreshCw className="h-4 w-4" />
                 Start over
               </button>
@@ -209,7 +209,7 @@ export function SwipeStack() {
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <Link
                       href={`/issues/${item.slug}`}
-                      className="btn btn-primary px-3 py-1.5 text-xs whitespace-nowrap"
+                      className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-700 transition-colors whitespace-nowrap"
                     >
                       Read article
                     </Link>
@@ -218,7 +218,7 @@ export function SwipeStack() {
                         href={contactUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-secondary flex items-center gap-1 px-3 py-1.5 text-xs whitespace-nowrap"
+                        className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
                       >
                         <ExternalLink className="h-3 w-3" />
                         Source
