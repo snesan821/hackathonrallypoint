@@ -62,6 +62,9 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!isTop) return
+      // Don't capture pointer on interactive elements (links, buttons)
+      const target = e.target as HTMLElement
+      if (target.closest('a, button')) return
       isDraggingRef.current = true
       startXRef.current = e.clientX
       currentXRef.current = e.clientX
@@ -169,7 +172,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
         <div className="flex-1 overflow-y-auto p-5 pb-0">
           {/* Category + meta badges */}
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            {item.categories[0] && <CategoryBadge category={item.categories[0]} size="sm" />}
+            {(item.categories[0] || item.category) && <CategoryBadge category={item.categories[0] || item.category} size="sm" showIcon />}
             <span className="rounded bg-surface-container-high px-2 py-0.5 text-xs font-medium text-on-surface-variant">
               {item.jurisdictionTags[0] || item.jurisdictionLevel}
             </span>
@@ -190,7 +193,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
           </h2>
 
           {/* Summary */}
-          <p className="mb-3 line-clamp-4 text-sm leading-relaxed text-on-surface-variant">
+          <p className="mb-3 text-sm leading-relaxed text-on-surface-variant">
             {displaySummary}
           </p>
 
@@ -221,7 +224,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
           </div>
 
           {/* Action links */}
-          <div className="flex items-center gap-2 border-t border-outline-variant/15 pt-3 pb-3">
+          <div className="flex items-center justify-center gap-2 border-t border-outline-variant/15 pt-3 pb-3">
             <Link
               href={`/issues/${item.slug}`}
               className="rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"

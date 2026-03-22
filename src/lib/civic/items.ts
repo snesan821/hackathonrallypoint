@@ -28,6 +28,7 @@ export interface CivicItemCardRecord {
   id: string
   title: string
   slug: string
+  category: Category
   categories: Category[]
   type: CivicItemType
   status: CivicItemStatus
@@ -240,6 +241,7 @@ export async function getCivicItemsPage(
       id: item.id,
       title: item.title,
       slug: item.slug,
+      category: item.category,
       categories: item.categories,
       type: item.type,
       status: item.status,
