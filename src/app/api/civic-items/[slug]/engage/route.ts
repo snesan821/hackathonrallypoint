@@ -65,6 +65,54 @@ export async function POST(
       return errorResponse('This item does not allow online signatures', 400)
     }
 
+    // Check for UNSAVE action (toggle off SAVE)
+    if (action === 'UNSAVE') {
+      // Find and delete the SAVE engagement
+      const saveEngagement = await prisma.engagementEvent.findFirst({
+        where: {
+          userId: user.id,
+          civicItemId: civicItem.id,
+          action: 'SAVE',
+        },
+      })
+
+      if (!saveEngagement) {
+        return errorResponse('No save engagement found to remove', 404)
+      }
+
+      // Delete engagement
+      await prisma.engagementEvent.delete({
+        where: { id: saveEngagement.id },
+      })
+
+      // Invalidate cache
+      try {
+        await redis.del(`civic_item:${slug}`)
+        await redis.del(`user:${user.id}:saved`)
+      } catch {
+        // Redis unavailable - continue
+      }
+
+      // Get updated engagement state
+      const remainingEngagements = await prisma.engagementEvent.findMany({
+        where: {
+          userId: user.id,
+          civicItemId: civicItem.id,
+        },
+        select: { action: true },
+      })
+
+      return successResponse({
+        message: 'Item unfollowed',
+        userEngagement: {
+          actions: remainingEngagements.map((e) => e.action),
+          hasSupported: remainingEngagements.some((e) => e.action === 'SUPPORT'),
+          hasSaved: false,
+        },
+        currentSupport: civicItem.currentSupport,
+      })
+    }
+
     // Check for UNSUPPORT action
     if (action === 'UNSUPPORT') {
       // Find and delete the SUPPORT engagement
@@ -90,6 +138,14 @@ export async function POST(
           data: { currentSupport: { decrement: 1 } },
         }),
       ])
+
+      // Invalidate cache
+      try {
+        await redis.del(`civic_item:${slug}`)
+        await redis.del(`user:${user.id}:impact`)
+      } catch {
+        // Redis unavailable - continue
+      }
 
       // Get updated engagement state
       const remainingEngagements = await prisma.engagementEvent.findMany({
@@ -127,6 +183,14 @@ export async function POST(
           where: { id: existingEngagement.id },
         })
 
+        // Invalidate cache
+        try {
+          await redis.del(`civic_item:${slug}`)
+          await redis.del(`user:${user.id}:saved`)
+        } catch {
+          // Redis unavailable - continue
+        }
+
         const remainingEngagements = await prisma.engagementEvent.findMany({
           where: {
             userId: user.id,
@@ -136,7 +200,7 @@ export async function POST(
         })
 
         return successResponse({
-          message: 'Item unsaved',
+          message: 'Item unfollowed',
           userEngagement: {
             actions: remainingEngagements.map((e) => e.action),
             hasSupported: remainingEngagements.some((e) => e.action === 'SUPPORT'),
@@ -197,6 +261,19 @@ export async function POST(
       },
       select: { action: true },
     })
+
+    // Invalidate relevant caches
+    try {
+      await redis.del(`civic_item:${slug}`)
+      if (action === 'SAVE') {
+        await redis.del(`user:${user.id}:saved`)
+      }
+      if (HIGH_VALUE_ACTIONS.includes(action)) {
+        await redis.del(`user:${user.id}:impact`)
+      }
+    } catch {
+      // Redis unavailable - continue
+    }
 
     return successResponse({
       message: `${action} recorded successfully`,

@@ -120,13 +120,14 @@ export function FeedPageClient({
       const data = await res.json()
 
       if (data.success) {
+        // Update item with new engagement state
         setItems((prev) =>
           prev.map((entry) =>
             entry.id === itemId
               ? {
                   ...entry,
-                  currentSupport: data.data.currentSupport || entry.currentSupport,
-                  userActions: data.data.userEngagement?.actions || [],
+                  currentSupport: data.data.currentSupport !== undefined ? data.data.currentSupport : entry.currentSupport,
+                  userActions: data.data.userEngagement?.actions || entry.userActions || [],
                 }
               : entry
           )

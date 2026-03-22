@@ -45,7 +45,7 @@ export async function GET(req: Request) {
 
     const paginatedIds = savedEngagements.map((engagement) => engagement.civicItemId)
 
-    // Fetch civic items
+    // Fetch civic items with user engagement data
     const items = await prisma.civicItem.findMany({
       where: {
         id: { in: paginatedIds },
@@ -59,6 +59,27 @@ export async function GET(req: Request) {
         },
       },
     })
+
+    // Get all user engagements for these items
+    const userEngagements = await prisma.engagementEvent.findMany({
+      where: {
+        userId: user.id,
+        civicItemId: { in: paginatedIds },
+      },
+      select: {
+        civicItemId: true,
+        action: true,
+      },
+    })
+
+    // Group engagements by civic item
+    const engagementsByItem = new Map<string, string[]>()
+    for (const engagement of userEngagements) {
+      if (!engagementsByItem.has(engagement.civicItemId)) {
+        engagementsByItem.set(engagement.civicItemId, [])
+      }
+      engagementsByItem.get(engagement.civicItemId)!.push(engagement.action)
+    }
 
     // Sort items by save timestamp
     const savedTimestampMap = new Map(
@@ -92,6 +113,7 @@ export async function GET(req: Request) {
       longitude: item.longitude,
       commentCount: item._count.comments,
       engagementCount: item._count.engagements,
+      userActions: engagementsByItem.get(item.id) || [],
       savedAt: savedTimestampMap.get(item.id),
     }))
 
