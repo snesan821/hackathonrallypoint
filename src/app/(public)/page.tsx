@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { renderIcon } from '@/lib/utils/icons'
+import { HeroStabilizer } from '@/components/landing/HeroStabilizer'
 import {
   ShieldCheck,
   Scale,
@@ -25,12 +26,6 @@ const trustFeatures = [
     icon: Eye,
   },
 ]
-
-const RallyPointLogo = () => (
-  <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" />
-  </svg>
-)
 
 export default function LandingPage() {
   return (
@@ -69,14 +64,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="relative order-1 lg:order-2">
-            <div className="w-full aspect-[4/3] rounded-3xl bg-gradient-to-br from-primary/10 via-surface-container to-surface-container-high shadow-2xl overflow-hidden flex items-center justify-center">
-              <div className="text-center p-8">
-                <div className="size-24 mx-auto text-primary/20 mb-4">
-                  <RallyPointLogo />
-                </div>
-                <p className="text-on-surface-variant text-sm">Community Engagement Platform</p>
-              </div>
-            </div>
+            <HeroStabilizer />
             {/* Floating card */}
             <div className="absolute -bottom-10 -left-6 lg:-left-20 w-full max-w-sm bg-surface-container-lowest p-6 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant/10">
               <div className="flex flex-col gap-3">
