@@ -41,11 +41,11 @@ export default async function AuthLayout({
     id: user.id,
     displayName: user.displayName,
     avatarUrl: user.avatarUrl,
-    role: user.role,
+    role: String(user.role),
     primaryAddress: primaryAddress
       ? { city: primaryAddress.city ?? '', state: primaryAddress.state ?? '' }
       : null,
   }
 
-  return <AppShell user={userWithAddress}>{children}</AppShell>
+  return <AppShell user={JSON.parse(JSON.stringify(userWithAddress))}>{children}</AppShell>
 }
