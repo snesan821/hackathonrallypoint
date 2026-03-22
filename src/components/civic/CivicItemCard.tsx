@@ -11,6 +11,22 @@ import { DeadlineChip } from './DeadlineChip'
 import { QuickActions } from './QuickActions'
 import { cn } from '@/lib/utils/cn'
 
+/** Per-category card accent: left border color */
+const CARD_BORDER: Record<string, string> = {
+  HOUSING: 'border-l-amber-400',
+  EDUCATION: 'border-l-violet-400',
+  TRANSIT: 'border-l-emerald-400',
+  PUBLIC_SAFETY: 'border-l-rose-400',
+  HEALTHCARE: 'border-l-pink-400',
+  JOBS: 'border-l-orange-400',
+  ENVIRONMENT: 'border-l-lime-400',
+  CIVIL_RIGHTS: 'border-l-indigo-400',
+  CITY_SERVICES: 'border-l-cyan-400',
+  BUDGET: 'border-l-yellow-400',
+  ZONING: 'border-l-orange-400',
+  OTHER: 'border-l-slate-300',
+}
+
 export interface CivicItemCardData {
   id: string
   title: string
@@ -59,7 +75,8 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
   return (
     <article
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card transition-all duration-300 ease-in-out cursor-pointer select-none [-webkit-tap-highlight-color:transparent]',
+        'group relative overflow-hidden rounded-2xl border border-outline-variant/15 border-l-[3px] bg-surface-container-lowest shadow-card transition-all duration-300 ease-in-out cursor-pointer select-none [-webkit-tap-highlight-color:transparent]',
+        CARD_BORDER[primaryCategory ?? ''] || CARD_BORDER.OTHER,
         'hover:shadow-card-hover hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]',
         'w-full',
         className
