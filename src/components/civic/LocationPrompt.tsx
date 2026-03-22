@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { MapPin, X, Loader2 } from 'lucide-react'
 import { useUserLocation } from '@/lib/hooks/use-user-location'
 
@@ -11,22 +12,21 @@ interface LocationPromptProps {
 
 export function LocationPrompt({ onLocationResolved, onLocationCleared }: LocationPromptProps) {
   const { location, status, error, requestLocation, clearLocation } = useUserLocation()
+  const notifiedRef = useRef<string | null>(null)
 
-  const handleRequest = async () => {
-    await requestLocation()
-  }
+  // Notify parent once when location is resolved (not on every render)
+  useEffect(() => {
+    if (status !== 'granted' || !location || !onLocationResolved) return
 
-  // Notify parent when location changes
-  const handleRequestAndNotify = async () => {
-    await requestLocation()
-  }
+    const key = `${location.city}|${location.county}|${location.state}`
+    if (notifiedRef.current === key) return
 
-  // Use effect-like pattern via the status
-  if (status === 'granted' && location && onLocationResolved) {
-    setTimeout(() => onLocationResolved({ city: location.city, county: location.county, state: location.state }), 0)
-  }
+    notifiedRef.current = key
+    onLocationResolved({ city: location.city, county: location.county, state: location.state })
+  }, [status, location, onLocationResolved])
 
   const handleClear = () => {
+    notifiedRef.current = null
     clearLocation()
     onLocationCleared?.()
   }
@@ -65,7 +65,7 @@ export function LocationPrompt({ onLocationResolved, onLocationCleared }: Locati
     return (
       <button
         type="button"
-        onClick={handleRequestAndNotify}
+        onClick={requestLocation}
         className="flex items-center gap-2 rounded-full border border-outline-variant/30 bg-surface-container-low px-3 py-1.5 text-sm text-on-surface-variant hover:bg-surface-container transition-colors"
       >
         <MapPin className="h-3.5 w-3.5" />
@@ -78,7 +78,7 @@ export function LocationPrompt({ onLocationResolved, onLocationCleared }: Locati
   return (
     <button
       type="button"
-      onClick={handleRequestAndNotify}
+      onClick={requestLocation}
       className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-sm text-primary hover:bg-primary/10 transition-colors"
     >
       <MapPin className="h-3.5 w-3.5" />
