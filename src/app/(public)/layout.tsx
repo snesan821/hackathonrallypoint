@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Footer } from '@/components/layout/Footer'
+import { auth } from '@clerk/nextjs/server'
 
 const IS_LOCAL_DEV =
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_test_') &&
@@ -13,8 +14,7 @@ export default async function PublicLayout({
   let userId: string | null = null
   if (!IS_LOCAL_DEV) {
     try {
-      const clerkServer = await (new Function('return import("@clerk/nextjs/server")')()) as typeof import('@clerk/nextjs/server')
-      const authResult = await clerkServer.auth()
+      const authResult = await auth()
       userId = authResult.userId
     } catch {
       // auth not available

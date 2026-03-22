@@ -13,13 +13,18 @@ const nextConfig = {
     },
   },
   webpack(config, { isServer }) {
+    const clerkStub = path.resolve(__dirname, 'src/lib/clerk-stub.tsx')
+    const clerkServerStub = path.resolve(__dirname, 'src/lib/clerk-stub-server.ts')
+    const middlewareImpl = hasValidClerkKey
+      ? path.resolve(__dirname, 'src/lib/middleware-clerk.ts')
+      : path.resolve(__dirname, 'src/lib/middleware-passthrough.ts')
+
     if (!hasValidClerkKey) {
-      const clerkStub = path.resolve(__dirname, 'src/lib/clerk-stub.tsx')
-      const clerkServerStub = path.resolve(__dirname, 'src/lib/clerk-stub-server.ts')
-      // Apply to both client and server compilations
       config.resolve.alias['@clerk/nextjs'] = clerkStub
       config.resolve.alias['@clerk/nextjs/server'] = clerkServerStub
     }
+    // Always alias the middleware impl so the correct one is bundled
+    config.resolve.alias['#middleware-impl'] = middlewareImpl
     return config
   },
   async headers() {
