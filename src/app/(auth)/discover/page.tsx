@@ -16,14 +16,15 @@ type ViewMode = 'swipe' | 'browse'
 export default function DiscoverPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [viewMode, setViewMode] = useState<ViewMode>('swipe')
+  const category = searchParams.get('category') as Category | null
+  const search = searchParams.get('q') || ''
+
+  // Default to browse mode when a category filter is present
+  const [viewMode, setViewMode] = useState<ViewMode>(category ? 'browse' : 'swipe')
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
   const [locationFilter, setLocationFilter] = useState<{ city?: string; county?: string; state?: string } | null>(null)
-
-  const category = searchParams.get('category') as Category | null
-  const search = searchParams.get('q') || ''
 
   const fetchItems = async () => {
     setIsLoading(true)
