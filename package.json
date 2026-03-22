@@ -16,7 +16,10 @@
     "prisma:push": "prisma db push",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:migrate": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "create-test-users": "tsx scripts/create-test-users.ts",
+    "reset-all-users": "tsx scripts/reset-user-data.ts",
+    "reset-user": "tsx scripts/reset-specific-user.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
