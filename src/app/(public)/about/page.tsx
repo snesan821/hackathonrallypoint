@@ -6,7 +6,7 @@ export default function AboutPage() {
       <h1 className="mb-6 text-4xl font-bold text-on-surface font-headline">How It Works</h1>
       <p className="mb-12 text-lg text-on-surface-variant">
         RallyPoint makes civic participation accessible for everyone — especially
-        first-time voters and civic newcomers in the Tempe, Phoenix, and Maricopa County area.
+        first-time voters and civic newcomers in your local community.
       </p>
 
       <div className="space-y-12">
