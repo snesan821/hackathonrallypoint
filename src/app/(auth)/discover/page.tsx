@@ -13,6 +13,21 @@ import type { Category } from '@prisma/client'
 
 type ViewMode = 'swipe' | 'browse'
 
+const CATEGORY_BG: Record<string, string> = {
+  HOUSING:       'from-blue-100 to-cyan-50',
+  EDUCATION:     'from-violet-100 to-purple-50',
+  TRANSIT:       'from-emerald-100 to-teal-50',
+  PUBLIC_SAFETY: 'from-red-100 to-rose-50',
+  HEALTHCARE:    'from-pink-100 to-rose-50',
+  JOBS:          'from-amber-100 to-yellow-50',
+  ENVIRONMENT:   'from-green-100 to-emerald-50',
+  CIVIL_RIGHTS:  'from-indigo-100 to-blue-50',
+  CITY_SERVICES: 'from-sky-100 to-cyan-50',
+  BUDGET:        'from-yellow-100 to-amber-50',
+  ZONING:        'from-orange-100 to-amber-50',
+  OTHER:         'from-slate-100 to-gray-50',
+}
+
 export default function DiscoverPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -20,10 +35,14 @@ export default function DiscoverPage() {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
-  const [locationFilter, setLocationFilter] = useState<{ city?: string; county?: string; state?: string } | null>(null)
+  const [activeBg, setActiveBg] = useState('from-slate-100 to-gray-50')
 
   const category = searchParams.get('category') as Category | null
   const search = searchParams.get('q') || ''
+
+  useEffect(() => {
+    setActiveBg(category && CATEGORY_BG[category] ? CATEGORY_BG[category] : 'from-slate-100 to-gray-50')
+  }, [category])
 
   const fetchItems = async () => {
     setIsLoading(true)
@@ -34,95 +53,72 @@ export default function DiscoverPage() {
     if (locationFilter?.county) params.set('county', locationFilter.county)
     if (locationFilter?.state) params.set('state', locationFilter.state)
     params.set('pageSize', '20')
-
     try {
       const res = await fetch(`/api/civic-items?${params}`)
       const data = await res.json()
-      if (data.success) {
-        setItems(data.data)
-        setTotalCount(data.pagination?.totalCount || 0)
-      }
-    } catch (error) {
-      console.error('Failed to fetch:', error)
-    } finally {
-      setIsLoading(false)
-    }
+      if (data.success) { setItems(data.data); setTotalCount(data.pagination?.totalCount || 0) }
+    } catch { /* silent */ } finally { setIsLoading(false) }
   }
 
-  useEffect(() => {
-    if (viewMode === 'browse') fetchItems()
-  }, [category, search, viewMode, locationFilter])
+  useEffect(() => { if (viewMode === 'browse') fetchItems() }, [category, search, viewMode])
 
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) params.set(key, value)
-    else params.delete(key)
+    if (value) params.set(key, value); else params.delete(key)
     router.push(`/discover?${params.toString()}`)
   }
 
   return (
-    <div className="site-wrap py-8">
-      {/* Page header */}
-      <div className="mb-6">
-        <h1 className="mb-2 text-3xl font-bold text-on-surface font-headline">Discover Issues</h1>
-        <p className="text-on-surface-variant">Local campaigns, initiatives, and propositions near you</p>
+    <div className={cn('min-h-screen bg-gradient-to-br transition-all duration-700', activeBg)}>
+      {/* ── Header bar ── */}
+      <div className="site-wrap pt-6 pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 font-headline">Discover Issues</h1>
+            <p className="text-xs text-gray-500">Tempe · Phoenix · Maricopa County</p>
+          </div>
+          {/* Toggle */}
+          <div className="flex items-center gap-0.5 rounded-xl border border-black/10 bg-white/80 backdrop-blur-sm p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setViewMode('swipe')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
+                viewMode === 'swipe' ? 'bg-gray-900 text-white shadow' : 'text-gray-500 hover:text-gray-800'
+              )}
+            >
+              <Layers className="h-3.5 w-3.5" /> Swipe
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('browse')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
+                viewMode === 'browse' ? 'bg-gray-900 text-white shadow' : 'text-gray-500 hover:text-gray-800'
+              )}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Browse
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Location prompt */}
-      <div className="mb-6">
-        <LocationPrompt
-          onLocationResolved={(loc) => setLocationFilter(loc)}
-          onLocationCleared={() => setLocationFilter(null)}
-        />
-      </div>
-
-      {/* View mode toggle */}
-      <div className="mb-8 flex items-center gap-1 rounded-xl border border-outline-variant/15 bg-surface-container-low p-1 w-fit">
-        <button
-          type="button"
-          onClick={() => setViewMode('swipe')}
-          className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
-            viewMode === 'swipe'
-              ? 'bg-surface-container-lowest text-on-surface shadow-sm'
-              : 'text-on-surface-variant hover:text-on-surface'
-          )}
-        >
-          <Layers className="h-4 w-4" />
-          Swipe
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode('browse')}
-          className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
-            viewMode === 'browse'
-              ? 'bg-surface-container-lowest text-on-surface shadow-sm'
-              : 'text-on-surface-variant hover:text-on-surface'
-          )}
-        >
-          <LayoutGrid className="h-4 w-4" />
-          Browse
-        </button>
-      </div>
-
-      {/* SWIPE MODE */}
+      {/* ── SWIPE MODE: full-height deck ── */}
       {viewMode === 'swipe' && (
-        <div className="mx-auto max-w-lg">
-          <SwipeStack />
+        <div className="site-wrap pb-6">
+          <SwipeStack
+            onCategoryChange={(cat) =>
+              setActiveBg(cat && CATEGORY_BG[cat] ? CATEGORY_BG[cat] : 'from-slate-100 to-gray-50')
+            }
+          />
         </div>
       )}
 
-      {/* BROWSE MODE */}
+      {/* ── BROWSE MODE ── */}
       {viewMode === 'browse' && (
-        <>
-          {/* Category pills */}
-          <div className="mb-6 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => updateFilter('category', null)}
-              className={cn('pill', !category ? 'pill-active' : '')}
-            >
+        <div className="site-wrap pb-8">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button type="button" onClick={() => updateFilter('category', null)} className={cn('pill', !category ? 'pill-active' : '')}>
               All
             </button>
             {CIVIC_CATEGORIES.map((cat) => (
@@ -130,41 +126,30 @@ export default function DiscoverPage() {
                 key={cat.value}
                 type="button"
                 onClick={() => updateFilter('category', cat.value)}
-                className={cn(
-                  'pill flex items-center gap-2',
-                  category === cat.value ? 'pill-active' : ''
-                )}
+                className={cn('pill flex items-center gap-1.5', category === cat.value ? 'pill-active' : '')}
               >
-                {renderIcon(cat.icon, 16, "h-4 w-4")} {cat.label}
+                {renderIcon(cat.icon, 14, 'h-3.5 w-3.5')} {cat.label}
               </button>
             ))}
           </div>
 
           {!isLoading && (
-            <p className="mb-4 text-sm text-on-surface-variant">
-              {totalCount} {totalCount === 1 ? 'issue' : 'issues'} found
-            </p>
+            <p className="mb-4 text-xs text-gray-500">{totalCount} {totalCount === 1 ? 'issue' : 'issues'} found</p>
           )}
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {isLoading &&
-              items.length === 0 &&
-              Array.from({ length: 6 }).map((_, i) => <CivicItemCardSkeleton key={i} />)}
-            {items.map((item) => (
-              <CivicItemCard key={item.id} item={item} />
-            ))}
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {isLoading && items.length === 0 && Array.from({ length: 6 }).map((_, i) => <CivicItemCardSkeleton key={i} />)}
+            {items.map((item) => <CivicItemCard key={item.id} item={item} />)}
           </div>
 
           {!isLoading && items.length === 0 && (
-            <div className="rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center">
-              <Filter className="mx-auto mb-4 h-12 w-12 text-on-surface-variant" />
-              <h3 className="mb-2 text-lg font-semibold text-on-surface">No issues found</h3>
-              <p className="text-on-surface-variant">
-                Check back later for new civic issues in your area
-              </p>
+            <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white/60 p-12 text-center">
+              <Filter className="mx-auto mb-3 h-10 w-10 text-gray-300" />
+              <p className="font-semibold text-gray-700">No issues found</p>
+              <p className="mt-1 text-sm text-gray-400">Check back later for new civic issues</p>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   )

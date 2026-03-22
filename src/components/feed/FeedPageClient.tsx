@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CivicItemCard, CivicItemCardSkeleton } from '@/components/civic/CivicItemCard'
-import { LocationPrompt } from '@/components/civic/LocationPrompt'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { Filter, TrendingUp } from 'lucide-react'
 import { Category, CivicItemType, EngagementAction } from '@prisma/client'
@@ -34,7 +33,6 @@ export function FeedPageClient({
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [totalCount, setTotalCount] = useState(initialTotalCount)
-  const [locationFilter, setLocationFilter] = useState<{ city?: string; county?: string; state?: string } | null>(null)
 
   useEffect(() => {
     setItems(initialItems)
@@ -43,38 +41,6 @@ export function FeedPageClient({
     setPage(1)
     setIsLoadingMore(false)
   }, [initialHasMore, initialItems, initialTotalCount, category, type, sort])
-
-  // Refetch when location filter changes
-  useEffect(() => {
-    if (!locationFilter) return
-
-    const fetchWithLocation = async () => {
-      const params = new URLSearchParams()
-      if (category) params.set('category', category)
-      if (type) params.set('type', type)
-      params.set('sort', sort)
-      params.set('page', '1')
-      params.set('pageSize', '12')
-      if (locationFilter.city) params.set('city', locationFilter.city)
-      if (locationFilter.county) params.set('county', locationFilter.county)
-      if (locationFilter.state) params.set('state', locationFilter.state)
-
-      try {
-        const res = await fetch(`/api/civic-items?${params}`)
-        const data = await res.json()
-        if (data.success) {
-          setItems(data.data)
-          setTotalCount(data.pagination?.totalCount || 0)
-          setHasMore(data.pagination?.hasMore || false)
-          setPage(1)
-        }
-      } catch (error) {
-        console.error('Failed to fetch with location:', error)
-      }
-    }
-
-    fetchWithLocation()
-  }, [locationFilter, category, type, sort])
 
   const handleLoadMore = async () => {
     const nextPage = page + 1
@@ -86,9 +52,6 @@ export function FeedPageClient({
     params.set('sort', sort)
     params.set('page', nextPage.toString())
     params.set('pageSize', '12')
-    if (locationFilter?.city) params.set('city', locationFilter.city)
-    if (locationFilter?.county) params.set('county', locationFilter.county)
-    if (locationFilter?.state) params.set('state', locationFilter.state)
 
     try {
       const res = await fetch(`/api/civic-items?${params}`)
@@ -157,19 +120,6 @@ export function FeedPageClient({
         <p className="text-on-surface-variant">
           Discover civic issues relevant to your community and interests
         </p>
-      </div>
-
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <LocationPrompt
-          onLocationResolved={(loc) => setLocationFilter(loc)}
-          onLocationCleared={() => {
-            setLocationFilter(null)
-            setItems(initialItems)
-            setTotalCount(initialTotalCount)
-            setHasMore(initialHasMore)
-            setPage(1)
-          }}
-        />
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">

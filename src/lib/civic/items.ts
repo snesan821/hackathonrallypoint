@@ -16,9 +16,6 @@ export interface CivicItemsQuery {
   jurisdiction?: string | null
   jurisdictionLevel?: JurisdictionLevel | null
   search?: string | null
-  city?: string | null
-  county?: string | null
-  state?: string | null
   sort?: CivicItemsSort
   page?: number
   pageSize?: number
@@ -28,7 +25,6 @@ export interface CivicItemCardRecord {
   id: string
   title: string
   slug: string
-  category: Category
   categories: Category[]
   type: CivicItemType
   status: CivicItemStatus
@@ -76,9 +72,6 @@ export async function getCivicItemsPage(
     jurisdiction = null,
     jurisdictionLevel = null,
     search = null,
-    city = null,
-    county = null,
-    state = null,
     sort = 'deadline',
   } = query
 
@@ -114,9 +107,6 @@ export async function getCivicItemsPage(
       { tags: { hasSome: [search.toLowerCase()] } },
     ]
   }
-
-  // Location-based: don't filter out, we'll score and sort after fetching
-  // so city-level items appear first, then county, then state, then the rest
 
   let orderBy: Array<Record<string, unknown>> = []
 
@@ -215,33 +205,11 @@ export async function getCivicItemsPage(
     }
   }
 
-  // ── Location proximity sorting ──
-  // City match > county match > state match > no match
-  if ((city || county || state) && items.length > 0) {
-    const lowerCity = city?.toLowerCase()
-    const lowerCounty = county?.toLowerCase()
-    const lowerState = state?.toLowerCase()
-
-    const scored = items.map((item) => {
-      const tags = item.jurisdictionTags.map((t) => t.toLowerCase())
-      let geoScore = 0
-
-      if (lowerCity && tags.includes(lowerCity)) geoScore = 30
-      else if (lowerCounty && tags.includes(lowerCounty)) geoScore = 20
-      else if (lowerState && tags.includes(lowerState)) geoScore = 10
-
-      return { ...item, geoScore }
-    })
-
-    items = scored.sort((a, b) => b.geoScore - a.geoScore)
-  }
-
   return {
     items: items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
-      category: item.category,
       categories: item.categories,
       type: item.type,
       status: item.status,

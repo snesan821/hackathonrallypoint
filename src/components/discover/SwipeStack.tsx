@@ -8,7 +8,11 @@ import { ExternalLink, BookmarkCheck, RefreshCw, Inbox } from 'lucide-react'
 
 const REFETCH_THRESHOLD = 3 // fetch next batch when this many cards remain
 
-export function SwipeStack() {
+interface SwipeStackProps {
+  onCategoryChange?: (category: string | null) => void
+}
+
+export function SwipeStack({ onCategoryChange }: SwipeStackProps) {
   const [queue, setQueue] = useState<SwipeItem[]>([])
   const [matches, setMatches] = useState<SwipeItem[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
@@ -16,6 +20,7 @@ export function SwipeStack() {
   const [isEmpty, setIsEmpty] = useState(false)
   const isFetchingRef = useRef(false)
   const topCardRef = useRef<SwipeCardHandle>(null)
+  const savedIdsRef = useRef<Set<string>>(new Set())
 
   const fetchBatch = useCallback(async (nextCursor?: string | null) => {
     if (isFetchingRef.current) return
@@ -69,20 +74,13 @@ export function SwipeStack() {
   }, [])
 
   const recordSave = useCallback(async (item: SwipeItem) => {
-    // Record both SUPPORT (swipe tracking) and SAVE (shows on saved page)
+    // Only record SAVE — this is what shows on the saved page
     try {
-      await Promise.all([
-        fetch('/api/swipe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ civicItemId: item.id, action: 'SUPPORT' }),
-        }),
-        fetch(`/api/civic-items/${item.slug}/engage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'SAVE' }),
-        }),
-      ])
+      await fetch(`/api/civic-items/${item.slug}/engage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'SAVE' }),
+      })
     } catch {
       // Fire-and-forget
     }
@@ -99,7 +97,8 @@ export function SwipeStack() {
   const handleSwipeRight = useCallback(() => {
     setQueue((prev) => {
       const [top, ...rest] = prev
-      if (top) {
+      if (top && !savedIdsRef.current.has(top.id)) {
+        savedIdsRef.current.add(top.id)
         recordSave(top)
         setMatches((m) => [top, ...m])
       }
@@ -114,17 +113,28 @@ export function SwipeStack() {
     setIsEmpty(false)
     setIsLoading(true)
     isFetchingRef.current = false
+    savedIdsRef.current = new Set()
     fetchBatch(null)
   }, [fetchBatch])
 
   // Visible cards: top 3
   const visibleCards = queue.slice(0, 3)
 
+  // Notify parent of top card's category for dynamic background
+  useEffect(() => {
+    if (visibleCards.length > 0) {
+      const topCat = visibleCards[0].categories[0] || visibleCards[0].category
+      onCategoryChange?.(topCat ?? null)
+    } else {
+      onCategoryChange?.(null)
+    }
+  }, [visibleCards[0]?.id])
+
   return (
-    <div className="flex flex-col gap-10">
-      {/* Swipe deck */}
+    <div className="flex flex-col gap-6">
+      {/* Swipe deck — fills available vertical space */}
       <div className="flex flex-col items-center">
-        <div className="relative w-full max-w-sm overflow-visible" style={{ height: 480 }}>
+        <div className="relative w-full max-w-sm overflow-visible" style={{ height: 'min(580px, calc(100dvh - 260px))' }}>
           {isLoading && visibleCards.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-outline-variant border-t-primary" />
@@ -165,43 +175,36 @@ export function SwipeStack() {
             })}
         </div>
 
-        {/* Swipe buttons — below the deck, not inside the card */}
+        {/* Swipe buttons */}
         {!isLoading && visibleCards.length > 0 && (
-          <div className="mt-5 flex items-center justify-center gap-10">
+          <div className="mt-4 flex items-center justify-center gap-8">
             <button
               type="button"
               aria-label="Skip"
-              className="flex h-14 w-14 items-center justify-center text-on-surface-variant transition-all hover:scale-110 hover:text-on-surface active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm text-gray-400 transition-all hover:scale-110 hover:border-gray-300 hover:text-gray-600 active:scale-95"
               onClick={() => topCardRef.current?.triggerSwipeLeft()}
             >
-              <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             <button
               type="button"
               aria-label="Save"
-              className="flex h-14 w-14 items-center justify-center text-[var(--co-success)] transition-all hover:scale-110 active:scale-95"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-900 shadow-lg text-white transition-all hover:scale-110 hover:bg-gray-700 active:scale-95"
               onClick={() => topCardRef.current?.triggerSwipeRight()}
             >
-              <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
           </div>
         )}
 
-        {/* Swipe hint */}
+        {/* Hint + count */}
         {!isLoading && visibleCards.length > 0 && (
-          <p className="mt-4 text-center text-xs text-on-surface-variant">
-            Swipe right to save &middot; swipe left to skip
-          </p>
-        )}
-
-        {/* Remaining count */}
-        {!isLoading && queue.length > 0 && (
-          <p className="mt-1 text-center text-xs text-on-surface-variant">
-            {queue.length} {queue.length === 1 ? 'issue' : 'issues'} remaining
+          <p className="mt-2 text-center text-[11px] text-gray-400">
+            Swipe right to save · swipe left to skip · {queue.length} remaining
           </p>
         )}
       </div>
