@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { CategoryBadgeList } from '@/components/civic/CategoryBadge'
+import { CategoryBadge } from '@/components/civic/CategoryBadge'
 import { DeadlineChip } from '@/components/civic/DeadlineChip'
 import { SupportBar } from '@/components/civic/SupportBar'
 import { QuickActions } from '@/components/civic/QuickActions'
 import { ActionLadder } from '@/components/civic/ActionLadder'
-import { AISummarySection } from '@/components/civic/AISummarySection'
 import { CommunityDiscussion } from '@/components/community/CommunityDiscussion'
 import { ArrowLeft, ExternalLink, CheckCircle2, Users } from 'lucide-react'
 import { EngagementAction, ThreadType } from '@prisma/client'
@@ -23,8 +22,8 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
   const [comments, setComments] = useState<any[]>([])
   const [commentCount, setCommentCount] = useState(initialItem.commentCount || 0)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
-  const [activeTab, setActiveTab] = useState<'summary' | 'details' | 'discussion' | 'updates'>(
-    'summary'
+  const [activeTab, setActiveTab] = useState<'details' | 'discussion' | 'updates'>(
+    'details'
   )
 
   const fetchComments = async () => {
@@ -44,7 +43,7 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
     }
   }
 
-  const handleTabChange = async (nextTab: 'summary' | 'details' | 'discussion' | 'updates') => {
+  const handleTabChange = async (nextTab: 'details' | 'discussion' | 'updates') => {
     setActiveTab(nextTab)
     if (nextTab === 'discussion' && comments.length === 0 && !isLoadingComments) {
       await fetchComments()
@@ -108,7 +107,9 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
 
           <div className="mb-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              <CategoryBadgeList categories={item.categories as any} showIcon />
+              {(item.categories[0] || item.category) && (
+                <CategoryBadge category={item.categories[0] || item.category!} size="sm" showIcon />
+              )}
               <div className="flex items-center gap-2 text-sm">
                 <span className="rounded bg-surface-container-high px-2 py-1 font-medium text-on-surface-variant">
                   {item.jurisdictionTags[0]}
@@ -161,7 +162,6 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
           <div className="mb-6 border-b border-outline-variant/15">
             <div className="flex gap-6">
               {[
-                { id: 'summary', label: 'Summary' },
                 { id: 'details', label: 'Full Details' },
                 { id: 'discussion', label: `Discussion (${commentCount})` },
                 { id: 'updates', label: `Updates (${item.organizerUpdates?.length || 0})` },
@@ -180,15 +180,6 @@ export function IssueDetailPageClient({ initialItem }: IssueDetailPageClientProp
               ))}
             </div>
           </div>
-
-          {activeTab === 'summary' && item.aiSummary && (
-            <AISummarySection summary={item.aiSummary as any} />
-          )}
-          {activeTab === 'summary' && !item.aiSummary && (
-            <div className="rounded-xl border border-outline-variant/15 bg-surface-container-lowest p-6">
-              <p className="text-on-surface-variant">AI summary not yet available for this issue.</p>
-            </div>
-          )}
 
           {activeTab === 'details' && (
             <div className="space-y-6">
