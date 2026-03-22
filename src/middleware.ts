@@ -1,14 +1,5 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-
-// Local dev passthrough — no Clerk dependency
-export default function middleware(_req: NextRequest) {
-  return NextResponse.next()
-}
-
-export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
-}
+// This file is intentionally minimal.
+// next.config.js swaps the actual implementation via webpack alias:
+//   hasValidClerkKey=true  → src/lib/middleware-clerk.ts   (real Clerk)
+//   hasValidClerkKey=false → src/lib/middleware-passthrough.ts (no-op)
+export { default, config } from '#middleware-impl'
