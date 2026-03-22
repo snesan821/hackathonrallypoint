@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth/server'
+import { getCurrentUserCached } from '@/lib/auth/server'
 import { prisma } from '@/lib/db/prisma'
 import { AppShell } from '@/components/layout/AppShell'
 
@@ -10,7 +10,7 @@ export default async function AuthLayout({
 }) {
   let user
   try {
-    user = await getCurrentUser()
+    user = await getCurrentUserCached()
   } catch (error) {
     // Avoid retry loops on rate limiting or DB errors
     redirect('/sign-in')
