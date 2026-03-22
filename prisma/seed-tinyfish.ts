@@ -9,9 +9,9 @@
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const TINYFISH_API_KEY = 'sk-tinyfish-IeEHr8KeVNEGkGMDkA5jdYTssPszjH8n'
+const TINYFISH_API_KEY = 'sk-tinyfish-iWUhyV0zZpTcsLZHulh7DEJGPxF7h1kC'
 const TINYFISH_URL = 'https://agent.tinyfish.ai/v1/automation/run-sse'
-const TIMEOUT = 120_000 // 2 min per scrape
+const TIMEOUT = 420_000 // 7 min per scrape
 
 interface CivicSeed {
   title: string
@@ -36,7 +36,16 @@ interface CivicSeed {
 async function scrape(url: string, goal: string): Promise<any[]> {
   console.log(`\n🐟 Scraping: ${url.slice(0, 70)}`)
   const ac = new AbortController()
-  const t = setTimeout(() => ac.abort(), TIMEOUT)
+  const mainTimeout = setTimeout(() => ac.abort(), TIMEOUT)
+  let idleTimer: ReturnType<typeof setTimeout> | null = null
+
+  function resetIdle() {
+    if (idleTimer) clearTimeout(idleTimer)
+    idleTimer = setTimeout(() => {
+      console.log('\n   ⏸️  No data for 20s — closing stream')
+      ac.abort()
+    }, 20_000)
+  }
 
   try {
     const res = await fetch(TINYFISH_URL, {
@@ -45,46 +54,177 @@ async function scrape(url: string, goal: string): Promise<any[]> {
       body: JSON.stringify({ url, goal }),
       signal: ac.signal,
     })
-    if (!res.ok) { clearTimeout(t); console.log(`   ❌ HTTP ${res.status}`); return [] }
+    if (!res.ok) {
+      clearTimeout(mainTimeout)
+      console.log(`   ❌ HTTP ${res.status}`)
+      return []
+    }
 
     const reader = res.body?.getReader()
-    if (!reader) { clearTimeout(t); return [] }
+    if (!reader) { clearTimeout(mainTimeout); return [] }
 
     const dec = new TextDecoder()
-    let buf = '', result: any = null
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      buf += dec.decode(value, { stream: true })
-      const lines = buf.split('\n'); buf = lines.pop() ?? ''
-      for (const l of lines) {
-        if (l.startsWith('data: ')) {
-          try {
-            const e = JSON.parse(l.slice(6))
-            if (e.type === 'PROGRESS') process.stdout.write('.')
-            if (e.type === 'COMPLETE') result = e
-          } catch {}
+    let buf = ''
+    let lastEvent: any = null
+    const allEvents: any[] = []
+
+    resetIdle()
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        resetIdle()
+        buf += dec.decode(value, { stream: true })
+        const lines = buf.split('\n')
+        buf = lines.pop() ?? ''
+        for (const l of lines) {
+          if (l.startsWith('data: ')) {
+            try {
+              const e = JSON.parse(l.slice(6))
+              allEvents.push(e)
+              if (e.type === 'PROGRESS') process.stdout.write('.')
+              if (['COMPLETE','RESULT','DONE','complete','result','done'].includes(e.type)) {
+                lastEvent = e
+              }
+            } catch {}
+          }
         }
       }
+    } catch (readErr: any) {
+      if (readErr.name !== 'AbortError') throw readErr
     }
-    clearTimeout(t)
-    if (!result) { console.log(' ⚠️ no result'); return [] }
-    console.log(' ✅')
-    const raw = result.output || result.result || result.data || result
-    if (Array.isArray(raw)) return raw
-    if (typeof raw === 'string') {
-      const m = raw.match(/\[[\s\S]*\]/)
-      if (m) try { return JSON.parse(m[0]) } catch {}
+
+    clearTimeout(mainTimeout)
+    if (idleTimer) clearTimeout(idleTimer)
+
+    const uniqueTypes = [...new Set(allEvents.map(e => e.type).filter(Boolean))]
+    console.log(`\n   📡 Received ${allEvents.length} events, types: [${uniqueTypes.join(', ')}]`)
+
+    if (!lastEvent && allEvents.length > 0) {
+      lastEvent = allEvents[allEvents.length - 1]
     }
-    if (typeof raw === 'object' && raw) {
-      for (const v of Object.values(raw)) { if (Array.isArray(v)) return v as any[] }
+    if (!lastEvent) { console.log('   ⚠️ no events received'); return [] }
+
+    console.log(`   🔍 Last event type: ${lastEvent.type}, keys: [${Object.keys(lastEvent).join(', ')}]`)
+    console.log(`   📋 Preview: ${JSON.stringify(lastEvent).slice(0, 400)}`)
+
+    const extracted = extractArray(lastEvent)
+    if (extracted.length > 0) {
+      console.log(`   ✅ Extracted ${extracted.length} items`)
+      return extracted
     }
+
+    for (let i = allEvents.length - 1; i >= 0; i--) {
+      const arr = extractArray(allEvents[i])
+      if (arr.length > 0) {
+        console.log(`   ✅ Extracted ${arr.length} items from event #${i}`)
+        return arr
+      }
+    }
+
+    console.log('   ⚠️ Could not extract array from any event')
     return []
   } catch (e: any) {
-    clearTimeout(t)
-    console.log(`   ⏱️ ${e.name === 'AbortError' ? 'Timed out (2min)' : e.message}`)
+    clearTimeout(mainTimeout)
+    if (idleTimer) clearTimeout(idleTimer)
+    console.log(`   ⏱️ ${e.name === 'AbortError' ? 'Timed out' : e.message}`)
     return []
   }
+}
+
+/** Recursively search an object for an array of items with a 'title' key */
+function extractArray(obj: any): any[] {
+  if (!obj) return []
+
+  // Direct array
+  if (Array.isArray(obj)) {
+    if (obj.length > 0 && typeof obj[0] === 'object' && obj[0]?.title) return obj
+    // Could be array of arrays
+    for (const item of obj) {
+      const sub = extractArray(item)
+      if (sub.length > 0) return sub
+    }
+    return obj.length > 0 ? obj : []
+  }
+
+  // String that contains JSON array
+  if (typeof obj === 'string') {
+    // Try parsing the whole string
+    try { const parsed = JSON.parse(obj); return extractArray(parsed) } catch {}
+    // Try extracting a JSON array from within the string
+    const m = obj.match(/\[[\s\S]*\]/)
+    if (m) try { return extractArray(JSON.parse(m[0])) } catch {}
+    return []
+  }
+
+  // Object — check common keys, then recurse all values
+  if (typeof obj === 'object') {
+    const priorityKeys = ['output', 'result', 'results', 'data', 'items', 'records', 'content', 'response', 'payload']
+    for (const key of priorityKeys) {
+      if (obj[key]) {
+        const arr = extractArray(obj[key])
+        if (arr.length > 0) return arr
+      }
+    }
+    // Try all other keys
+    for (const [key, val] of Object.entries(obj)) {
+      if (!priorityKeys.includes(key)) {
+        const arr = extractArray(val)
+        if (arr.length > 0) return arr
+      }
+    }
+  }
+
+  return []
+}
+
+// ============================================================================
+// Content inference helpers
+// ============================================================================
+
+function inferCategory(text: string): string {
+  const t = text.toLowerCase()
+  if (/housing|rent|apartment|tenant|landlord|affordable/.test(t)) return 'HOUSING'
+  if (/school|education|tuition|student|university|campus/.test(t)) return 'EDUCATION'
+  if (/transit|bus|rail|shuttle|bike|transportation|streetcar|sewer|road|infrastructure/.test(t)) return 'TRANSIT'
+  if (/police|fire|safety|crime|emergency/.test(t)) return 'PUBLIC_SAFETY'
+  if (/health|mental|hospital|medical|counselor/.test(t)) return 'HEALTHCARE'
+  if (/job|employment|workforce|economic/.test(t)) return 'JOBS'
+  if (/environment|water|climate|solar|energy|conservation|drought/.test(t)) return 'ENVIRONMENT'
+  if (/civil|rights|vote|election|ballot/.test(t)) return 'CIVIL_RIGHTS'
+  if (/zoning|development|land use|planning|building|easement/.test(t)) return 'ZONING'
+  if (/budget|tax|fund|grant|payment|contract|fiscal/.test(t)) return 'BUDGET'
+  if (/city|municipal|commission|council|park|recreation/.test(t)) return 'CITY_SERVICES'
+  return 'OTHER'
+}
+
+function inferType(text: string): string {
+  const t = text.toLowerCase()
+  if (/petition/.test(t)) return 'PETITION'
+  if (/ballot|proposition|prop\s?\d/.test(t)) return 'BALLOT_INITIATIVE'
+  if (/ordinance/.test(t)) return 'ORDINANCE'
+  if (/public hearing|hearing/.test(t)) return 'PUBLIC_HEARING'
+  if (/council|vote|approve|adopt|resolution/.test(t)) return 'COUNCIL_VOTE'
+  if (/school board/.test(t)) return 'SCHOOL_BOARD'
+  if (/\b[hs]b\s?\d|state bill|legislature/.test(t)) return 'STATE_BILL'
+  if (/policy|contract|award|renew/.test(t)) return 'CITY_POLICY'
+  return 'OTHER'
+}
+
+function inferTags(text: string): string[] {
+  const tags: string[] = []
+  const t = text.toLowerCase()
+  if (/housing|rent/.test(t)) tags.push('housing')
+  if (/transit|transportation/.test(t)) tags.push('transit')
+  if (/water|conservation/.test(t)) tags.push('water')
+  if (/education|school|tuition/.test(t)) tags.push('education')
+  if (/safety|police|crime/.test(t)) tags.push('safety')
+  if (/environment|climate/.test(t)) tags.push('environment')
+  if (/budget|fund|grant|contract/.test(t)) tags.push('budget')
+  if (/infrastructure|sewer|road/.test(t)) tags.push('infrastructure')
+  if (/zoning|development/.test(t)) tags.push('zoning')
+  return [...new Set(tags)]
 }
 
 // ============================================================================
@@ -341,14 +481,16 @@ async function main() {
     if (item.title) {
       scrapedItems.push({
         title: item.title,
-        summary: item.summary || item.description || 'Tempe City Council item',
-        sourceUrl: item.url || null,
-        deadline: item.date || null,
-        category: 'CITY_SERVICES', type: 'COUNCIL_VOTE',
+        summary: item.summary || item.description || item.details || 'Tempe City Council item',
+        sourceUrl: item.url || item.link || item.sourceUrl || null,
+        deadline: item.date || item.deadline || null,
+        category: inferCategory(item.title + ' ' + (item.summary || '')),
+        type: inferType(item.title + ' ' + (item.summary || '')),
         jurisdiction: 'Tempe', jurisdictionLevel: 'CITY',
         jurisdictionTags: ['Tempe', 'Maricopa County', 'Arizona'],
         districtIds: ['tempe-council-1','tempe-council-2','tempe-council-3','tempe-council-4','tempe-council-5','tempe-council-6'],
-        lat: 33.4255, lng: -111.9400, tags: ['tempe', 'city-council'],
+        lat: 33.4255, lng: -111.9400,
+        tags: ['tempe', 'city-council', ...inferTags(item.title + ' ' + (item.summary || ''))],
       })
     }
   }
@@ -362,13 +504,15 @@ async function main() {
     if (item.title) {
       scrapedItems.push({
         title: item.title,
-        summary: item.summary || item.description || 'Arizona state bill',
-        sourceUrl: item.url || null,
-        category: 'EDUCATION', type: 'STATE_BILL',
+        summary: item.summary || item.description || item.details || 'Arizona state bill',
+        sourceUrl: item.url || item.link || item.sourceUrl || null,
+        category: inferCategory(item.title + ' ' + (item.summary || '')),
+        type: 'STATE_BILL',
         jurisdiction: 'Arizona', jurisdictionLevel: 'STATE',
         jurisdictionTags: ['Arizona'],
         districtIds: ['az-ld-26'],
-        lat: 33.4484, lng: -112.0740, tags: ['arizona', 'state-bill'],
+        lat: 33.4484, lng: -112.0740,
+        tags: ['arizona', 'state-bill', ...inferTags(item.title + ' ' + (item.summary || ''))],
       })
     }
   }
