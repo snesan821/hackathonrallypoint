@@ -11,7 +11,7 @@ import { DeadlineChip } from './DeadlineChip'
 import { QuickActions } from './QuickActions'
 import { cn } from '@/lib/utils/cn'
 
-/** Per-category card accent: left border color */
+/** Per-category card accent: left border color + top gradient strip */
 const CARD_BORDER: Record<string, string> = {
   HOUSING: 'border-l-amber-400',
   EDUCATION: 'border-l-violet-400',
@@ -25,6 +25,21 @@ const CARD_BORDER: Record<string, string> = {
   BUDGET: 'border-l-yellow-400',
   ZONING: 'border-l-orange-400',
   OTHER: 'border-l-slate-300',
+}
+
+const CARD_TOP_GRADIENT: Record<string, string> = {
+  HOUSING: 'from-amber-400 to-orange-300',
+  EDUCATION: 'from-violet-400 to-purple-300',
+  TRANSIT: 'from-emerald-400 to-green-300',
+  PUBLIC_SAFETY: 'from-rose-400 to-red-300',
+  HEALTHCARE: 'from-pink-400 to-rose-300',
+  JOBS: 'from-orange-400 to-amber-300',
+  ENVIRONMENT: 'from-lime-400 to-emerald-300',
+  CIVIL_RIGHTS: 'from-indigo-400 to-violet-300',
+  CITY_SERVICES: 'from-cyan-400 to-sky-300',
+  BUDGET: 'from-yellow-400 to-amber-300',
+  ZONING: 'from-orange-400 to-yellow-300',
+  OTHER: 'from-slate-300 to-gray-200',
 }
 
 export interface CivicItemCardData {
@@ -84,6 +99,9 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
       onClick={handleCardClick}
       onMouseEnter={prefetchDetailPage}
     >
+      {/* Category color strip at top */}
+      <div className={cn('h-1.5 w-full rounded-t-2xl bg-gradient-to-r', CARD_TOP_GRADIENT[primaryCategory ?? ''] || CARD_TOP_GRADIENT.OTHER)} />
+
       <div className="p-5 pb-0">
         {/* Top metadata row */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -183,7 +201,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
       </div>
 
       {/* Quick actions — always visible at bottom */}
-      <div className="flex items-center justify-between border-t border-outline-variant/15 px-5 py-4" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center justify-center gap-2 flex-wrap border-t border-outline-variant/15 px-5 py-4" onClick={(e) => e.stopPropagation()}>
         <QuickActions
           civicItemId={item.id}
           civicItemSlug={item.slug}
