@@ -51,6 +51,23 @@ const SWIPE_THRESHOLD = 80
 const ROTATION_FACTOR = 0.07
 const EXIT_X = 640
 
+/** Per-category card accent: border-left color + subtle ring/shadow */
+const CARD_ACCENT: Record<string, { border: string; ring: string; glow: string }> = {
+  HOUSING:      { border: 'border-l-amber-400',   ring: 'ring-amber-200/50',   glow: 'shadow-[0_4px_24px_rgba(245,158,11,0.12)]' },
+  EDUCATION:    { border: 'border-l-violet-400',   ring: 'ring-violet-200/50',  glow: 'shadow-[0_4px_24px_rgba(139,92,246,0.12)]' },
+  TRANSIT:      { border: 'border-l-emerald-400',  ring: 'ring-emerald-200/50', glow: 'shadow-[0_4px_24px_rgba(16,185,129,0.12)]' },
+  PUBLIC_SAFETY:{ border: 'border-l-rose-400',     ring: 'ring-rose-200/50',    glow: 'shadow-[0_4px_24px_rgba(244,63,94,0.12)]' },
+  HEALTHCARE:   { border: 'border-l-pink-400',     ring: 'ring-pink-200/50',    glow: 'shadow-[0_4px_24px_rgba(236,72,153,0.12)]' },
+  JOBS:         { border: 'border-l-orange-400',   ring: 'ring-orange-200/50',  glow: 'shadow-[0_4px_24px_rgba(249,115,22,0.12)]' },
+  ENVIRONMENT:  { border: 'border-l-lime-400',     ring: 'ring-lime-200/50',    glow: 'shadow-[0_4px_24px_rgba(132,204,22,0.12)]' },
+  CIVIL_RIGHTS: { border: 'border-l-indigo-400',   ring: 'ring-indigo-200/50',  glow: 'shadow-[0_4px_24px_rgba(99,102,241,0.12)]' },
+  CITY_SERVICES:{ border: 'border-l-cyan-400',     ring: 'ring-cyan-200/50',    glow: 'shadow-[0_4px_24px_rgba(6,182,212,0.12)]' },
+  BUDGET:       { border: 'border-l-yellow-400',   ring: 'ring-yellow-200/50',  glow: 'shadow-[0_4px_24px_rgba(234,179,8,0.12)]' },
+  ZONING:       { border: 'border-l-orange-400',   ring: 'ring-orange-200/50',  glow: 'shadow-[0_4px_24px_rgba(249,115,22,0.12)]' },
+  OTHER:        { border: 'border-l-slate-300',    ring: 'ring-slate-200/50',   glow: 'shadow-card' },
+}
+const DEFAULT_ACCENT = CARD_ACCENT.OTHER
+
 export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function SwipeCard(
   { item, onSwipeLeft, onSwipeRight, onSupport, isTop, stackIndex },
   ref
@@ -141,13 +158,15 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
   const deadline = item.deadline ? new Date(item.deadline) : null
   const displaySummary = item.aiSummary?.plainSummary || item.summary
   const contactUrl = item.officialActionUrl || item.sourceUrl
+  const accent = CARD_ACCENT[item.categories[0] || item.category] || DEFAULT_ACCENT
 
   return (
     <div
       ref={cardRef}
       className={cn(
-        'absolute inset-0 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card select-none [-webkit-tap-highlight-color:transparent]',
-        isTop ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none'
+        'absolute inset-0 rounded-2xl border border-outline-variant/15 border-l-[3px] bg-surface-container-lowest select-none [-webkit-tap-highlight-color:transparent]',
+        accent.border,
+        isTop ? cn('ring-1', accent.ring, accent.glow, 'cursor-grab active:cursor-grabbing') : 'shadow-card pointer-events-none'
       )}
       style={{
         transform: isTop
