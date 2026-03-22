@@ -23,7 +23,7 @@ export function DeadlineChip({
   const urgencyStyles = {
     critical: 'bg-[var(--co-error)]/10 text-[var(--co-error)] border-[var(--co-error)]/20',
     high: 'bg-[var(--co-warning)]/10 text-[var(--co-warning)] border-[var(--co-warning)]/20',
-    medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    medium: 'bg-[var(--co-info)]/10 text-[var(--co-info)] border-[var(--co-info)]/20',
     low: 'bg-[var(--co-success)]/10 text-[var(--co-success)] border-[var(--co-success)]/20',
     ended: 'bg-surface-container-high text-on-surface-variant border-outline-variant',
   }
