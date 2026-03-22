@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useImperativeHandle, forwardRef } from '
 import Link from 'next/link'
 import { CategoryBadge } from '@/components/civic/CategoryBadge'
 import { cn } from '@/lib/utils/cn'
-import { ExternalLink, Calendar, Users, CheckCircle2 } from 'lucide-react'
+import { ExternalLink, Eye, Plus, Heart, Calendar, CheckCircle2 } from 'lucide-react'
 import type { Category, CivicItemType, JurisdictionLevel } from '@prisma/client'
 
 export interface SwipeItem {
@@ -23,6 +23,9 @@ export interface SwipeItem {
   isVerified: boolean
   sourceUrl?: string | null
   officialActionUrl?: string | null
+  viewCount?: number
+  saveCount?: number
+  supporterCount?: number
   aiSummary?: {
     plainSummary: string | null
     whoAffected: string | null
@@ -34,6 +37,7 @@ interface SwipeCardProps {
   item: SwipeItem
   onSwipeLeft: () => void
   onSwipeRight: () => void
+  onSupport: (item: SwipeItem) => void
   isTop: boolean
   stackIndex: number
 }
@@ -48,7 +52,7 @@ const ROTATION_FACTOR = 0.07
 const EXIT_X = 640
 
 export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function SwipeCard(
-  { item, onSwipeLeft, onSwipeRight, isTop, stackIndex },
+  { item, onSwipeLeft, onSwipeRight, onSupport, isTop, stackIndex },
   ref
 ) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -58,11 +62,12 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
+  const [hasSupported, setHasSupported] = useState(false)
+  const [optimisticSupporters, setOptimisticSupporters] = useState(item.supporterCount ?? 0)
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!isTop) return
-      // Don't capture pointer on interactive elements (links, buttons)
       const target = e.target as HTMLElement
       if (target.closest('a, button')) return
       isDraggingRef.current = true
@@ -117,6 +122,15 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
     triggerSwipeRight,
   }), [triggerSwipeLeft, triggerSwipeRight])
 
+  const handleSupportClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (hasSupported) return
+    setHasSupported(true)
+    setOptimisticSupporters((prev) => prev + 1)
+    onSupport(item)
+  }, [hasSupported, item, onSupport])
+
   const rotation = dragX * ROTATION_FACTOR
   const saveOpacity = Math.min(Math.max(dragX / SWIPE_THRESHOLD, 0), 1)
   const skipOpacity = Math.min(Math.max(-dragX / SWIPE_THRESHOLD, 0), 1)
@@ -147,13 +161,16 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      {/* Save indicator overlay */}
+      {/* Follow indicator overlay — green plus */}
       <div
         className="pointer-events-none absolute inset-0 z-10 flex items-start justify-start rounded-2xl p-6"
         style={{ opacity: saveOpacity }}
       >
         <div className="rounded-xl border-4 border-[var(--co-success)] px-4 py-2" style={{ transform: 'rotate(-14deg)' }}>
-          <span className="text-2xl font-bold uppercase tracking-widest text-[var(--co-success)]">Save</span>
+          <span className="flex items-center gap-2 text-2xl font-bold uppercase tracking-widest text-[var(--co-success)]">
+            <Plus className="h-7 w-7" strokeWidth={3} />
+            Follow
+          </span>
         </div>
       </div>
 
@@ -167,7 +184,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
         </div>
       </div>
 
-      {/* Card content — scrollable area above the fixed bottom buttons */}
+      {/* Card content */}
       <div className="flex h-full flex-col select-none">
         <div className="flex-1 overflow-y-auto p-5 pb-0">
           {/* Category + meta badges */}
@@ -207,20 +224,46 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
             </div>
           )}
 
-          {/* Meta row */}
-          <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
-            {item.currentSupport > 0 && (
-              <span className="flex items-center gap-1">
-                <Users className="h-3.5 w-3.5" />
-                {item.currentSupport.toLocaleString()} supporters
-              </span>
-            )}
-            {deadline && (
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-            )}
+          {/* Audience stats row */}
+          <div className="mb-3 flex flex-wrap items-center justify-center gap-4 text-xs text-on-surface-variant">
+            <span className="flex items-center gap-1">
+              <Eye className="h-3.5 w-3.5" />
+              {item.viewCount ?? 0} views
+            </span>
+            <span className="flex items-center gap-1">
+              <Plus className="h-3.5 w-3.5" />
+              {item.saveCount ?? 0} followers
+            </span>
+            <span className="flex items-center gap-1">
+              <Heart className="h-3.5 w-3.5" />
+              {optimisticSupporters} supporters
+            </span>
+          </div>
+
+          {deadline && (
+            <div className="mb-3 flex items-center gap-1 text-xs text-on-surface-variant">
+              <Calendar className="h-3.5 w-3.5" />
+              {deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+          )}
+
+          {/* Support button — matches grid UI QuickActions */}
+          <div className="mb-3 flex justify-center" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={handleSupportClick}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
+                'hover:scale-105 active:scale-95',
+                hasSupported
+                  ? 'bg-primary text-on-primary hover:bg-primary-container'
+                  : 'bg-primary/10 text-primary hover:bg-primary/15',
+              )}
+            >
+              <Heart className={cn('h-4 w-4', hasSupported && 'fill-current')} />
+              <span className="font-semibold">{optimisticSupporters}</span>
+              <span>{hasSupported ? 'Supported' : 'Support'}</span>
+            </button>
           </div>
 
           {/* Action links */}

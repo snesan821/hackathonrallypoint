@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { CategoryBadge } from '@/components/civic/CategoryBadge'
 import {
   Eye,
-  Bookmark,
+  Plus,
   Heart,
   MessageCircle,
   Flame,
@@ -94,7 +94,7 @@ export default async function ImpactPage() {
 
   const totals = {
     issuesViewed: actionCounts['VIEW'] || 0,
-    issuesSaved: actionCounts['SAVE'] || 0,
+    issuesFollowed: actionCounts['SAVE'] || 0,
     issuesSupported: actionCounts['SUPPORT'] || 0,
     commentsPosted: commentCount,
   }
@@ -111,7 +111,7 @@ export default async function ImpactPage() {
       {/* Stats Grid */}
       <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Eye} label="Issues Viewed" value={totals.issuesViewed} color="blue" />
-        <StatCard icon={Bookmark} label="Issues Saved" value={totals.issuesSaved} color="orange" />
+        <StatCard icon={Plus} label="Issues Followed" value={totals.issuesFollowed} color="orange" />
         <StatCard icon={Heart} label="Issues Supported" value={totals.issuesSupported} color="red" />
         <StatCard icon={MessageCircle} label="Comments Posted" value={totals.commentsPosted} color="green" />
       </div>
@@ -238,14 +238,14 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
 }
 
 function ActionIcon({ action }: { action: string }) {
-  const icons: Record<string, any> = { VIEW: Eye, SAVE: Bookmark, SUPPORT: Heart, COMMENT: MessageCircle }
+  const icons: Record<string, any> = { VIEW: Eye, SAVE: Plus, SUPPORT: Heart, COMMENT: MessageCircle }
   const Icon = icons[action]
   return Icon ? <Icon className="h-5 w-5" /> : <span>•</span>
 }
 
 function getActionLabel(action: string) {
   const labels: Record<string, string> = {
-    VIEW: 'Viewed', SAVE: 'Saved', SUPPORT: 'Supported', COMMENT: 'Commented on',
+    VIEW: 'Viewed', SAVE: 'Followed', SUPPORT: 'Supported', COMMENT: 'Commented on',
     SHARE: 'Shared', CONTACT_REP: 'Contacted representative about',
     RSVP: 'RSVPed to', VOLUNTEER: 'Volunteered for', SIGN: 'Signed',
   }

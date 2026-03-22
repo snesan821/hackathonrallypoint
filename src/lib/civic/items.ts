@@ -86,9 +86,15 @@ export async function getCivicItemsPage(
   const pageSize = Math.min(50, Math.max(1, query.pageSize ?? 20))
 
   const where: Record<string, unknown> = {}
+  const andConditions: Record<string, unknown>[] = []
 
   if (category) {
-    where.categories = { has: category }
+    andConditions.push({
+      OR: [
+        { categories: { has: category } },
+        { category: category },
+      ],
+    })
   }
 
   if (type) {
@@ -108,11 +114,17 @@ export async function getCivicItemsPage(
   }
 
   if (search) {
-    where.OR = [
-      { title: { contains: search, mode: 'insensitive' } },
-      { summary: { contains: search, mode: 'insensitive' } },
-      { tags: { hasSome: [search.toLowerCase()] } },
-    ]
+    andConditions.push({
+      OR: [
+        { title: { contains: search, mode: 'insensitive' } },
+        { summary: { contains: search, mode: 'insensitive' } },
+        { tags: { hasSome: [search.toLowerCase()] } },
+      ],
+    })
+  }
+
+  if (andConditions.length > 0) {
+    where.AND = andConditions
   }
 
   // Location-based: don't filter out, we'll score and sort after fetching

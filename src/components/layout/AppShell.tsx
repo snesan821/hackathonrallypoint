@@ -8,7 +8,7 @@ import {
   Home,
   Compass,
   TrendingUp,
-  Bookmark,
+  Plus,
   Users,
   User,
   LayoutDashboard,
@@ -55,7 +55,7 @@ export function AppShell({ user, children }: AppShellProps) {
     { icon: Home, label: 'Home', href: '/feed' },
     { icon: Compass, label: 'Discover', href: '/discover' },
     { icon: TrendingUp, label: 'My Impact', href: '/impact' },
-    { icon: Bookmark, label: 'Saved', href: '/saved' },
+    { icon: Plus, label: 'Following', href: '/saved' },
     { icon: Users, label: 'Community', href: '/community' },
     { icon: User, label: 'Profile', href: '/profile' },
   ]
