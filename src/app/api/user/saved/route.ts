@@ -97,6 +97,7 @@ export async function GET(req: Request) {
       id: item.id,
       title: item.title,
       slug: item.slug,
+      category: item.category,
       categories: item.categories,
       type: item.type,
       status: item.status,
