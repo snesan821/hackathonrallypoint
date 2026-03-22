@@ -11,6 +11,9 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test:bugfix": "node --import tsx --test tests/bugfix/follow-support-fixes.test.ts",
+    "test:preservation": "node --import tsx --test tests/bugfix/follow-support-preservation.test.ts",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
@@ -22,7 +25,9 @@
     "prisma:studio": "prisma studio",
     "create-test-users": "tsx scripts/create-test-users.ts",
     "reset-all-users": "tsx scripts/reset-user-data.ts",
-    "reset-user": "tsx scripts/reset-specific-user.ts"
+    "reset-user": "tsx scripts/reset-specific-user.ts",
+    "clean-items": "tsx scripts/clean-low-quality-items.ts",
+    "clean-items:execute": "tsx scripts/clean-low-quality-items.ts --execute"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

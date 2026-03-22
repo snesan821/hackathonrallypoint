@@ -50,7 +50,7 @@ export interface ProfilePageData {
 }
 
 export async function getProfilePageData(userId: string): Promise<ProfilePageData | null> {
-  const [userProfile, engagements, recentActivityRows, recentSavedEvents] = await Promise.all([
+  const [userProfile, engagements, recentActivityRows, saveUnsaveEvents] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -96,19 +96,20 @@ export async function getProfilePageData(userId: string): Promise<ProfilePageDat
         },
       },
     }),
+    // Get all SAVE and UNSAVE events to determine currently saved items
     prisma.engagementEvent.findMany({
       where: {
         userId,
-        action: 'SAVE',
+        action: { in: ['SAVE', 'UNSAVE'] },
       },
       select: {
         civicItemId: true,
+        action: true,
         timestamp: true,
       },
       orderBy: {
         timestamp: 'desc',
       },
-      take: 3,
     }),
   ])
 
@@ -116,11 +117,29 @@ export async function getProfilePageData(userId: string): Promise<ProfilePageDat
     return null
   }
 
-  const savedItems = recentSavedEvents.length
+  // Determine currently saved items from most recent SAVE/UNSAVE per item
+  const latestSaveActionByItem = new Map<string, { action: string; timestamp: Date }>()
+  for (const event of saveUnsaveEvents) {
+    if (!latestSaveActionByItem.has(event.civicItemId)) {
+      latestSaveActionByItem.set(event.civicItemId, {
+        action: event.action,
+        timestamp: event.timestamp,
+      })
+    }
+  }
+
+  // Filter to only items where most recent action is SAVE
+  const currentlySavedItems = Array.from(latestSaveActionByItem.entries())
+    .filter(([_, data]) => data.action === 'SAVE')
+    .map(([civicItemId, data]) => ({ civicItemId, timestamp: data.timestamp }))
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    .slice(0, 3)
+
+  const savedItems = currentlySavedItems.length > 0
     ? await prisma.civicItem.findMany({
         where: {
           id: {
-            in: recentSavedEvents.map((event) => event.civicItemId),
+            in: currentlySavedItems.map((item) => item.civicItemId),
           },
         },
         select: {
@@ -133,7 +152,7 @@ export async function getProfilePageData(userId: string): Promise<ProfilePageDat
     : []
 
   const savedItemOrder = new Map(
-    recentSavedEvents.map((event, index) => [event.civicItemId, index])
+    currentlySavedItems.map((item, index) => [item.civicItemId, index])
   )
 
   savedItems.sort(
@@ -144,6 +163,15 @@ export async function getProfilePageData(userId: string): Promise<ProfilePageDat
     acc[current.action.toLowerCase()] = current._count.action
     return acc
   }, {} as Record<string, number>)
+
+  // Calculate net saves (SAVE - UNSAVE) and net supports (SUPPORT - UNSUPPORT)
+  const saveCount = engagementStats.save || 0
+  const unsaveCount = engagementStats.unsave || 0
+  const netSaves = Math.max(0, saveCount - unsaveCount)
+
+  const supportCount = engagementStats.support || 0
+  const unsupportCount = engagementStats.unsupport || 0
+  const netSupports = Math.max(0, supportCount - unsupportCount)
 
   return {
     profile: {
@@ -157,8 +185,8 @@ export async function getProfilePageData(userId: string): Promise<ProfilePageDat
       primaryAddress: userProfile.addresses[0] || null,
       stats: {
         issuesViewed: engagementStats.view || 0,
-        issuesSaved: engagementStats.save || 0,
-        issuesSupported: engagementStats.support || 0,
+        issuesSaved: netSaves,
+        issuesSupported: netSupports,
         commentsPosted: userProfile._count.comments,
         actionsCompleted: Object.values(engagementStats).reduce((sum, count) => sum + count, 0),
       },
