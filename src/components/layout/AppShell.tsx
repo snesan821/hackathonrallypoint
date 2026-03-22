@@ -89,12 +89,12 @@ export function AppShell({ user, children }: AppShellProps) {
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-grow flex-col overflow-y-auto border-r border-outline-variant/15 bg-surface-container-lowest">
           {/* Logo */}
-          <div className="flex h-16 items-center gap-3 border-b border-outline-variant/15 px-6">
+          <Link href="/" className="flex h-16 items-center gap-3 border-b border-outline-variant/15 px-6">
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
             <span className="text-xl font-bold tracking-tight text-on-surface">RallyPoint</span>
-          </div>
+          </Link>
 
           {/* User info */}
           {user && (
@@ -202,12 +202,12 @@ export function AppShell({ user, children }: AppShellProps) {
       >
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center justify-between border-b border-outline-variant/15 px-4">
-            <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <div className="size-6 text-primary">
                 <RallyPointLogo />
               </div>
               <span className="text-xl font-bold tracking-tight text-on-surface">RallyPoint</span>
-            </div>
+            </Link>
             <button
               onClick={() => setSidebarOpen(false)}
               className="text-on-surface-variant hover:text-on-surface"
@@ -253,12 +253,12 @@ export function AppShell({ user, children }: AppShellProps) {
             <Menu className="h-6 w-6" />
           </button>
 
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
             <span className="text-lg font-bold tracking-tight text-on-surface">RallyPoint</span>
-          </div>
+          </Link>
 
           <div className="w-6" />
         </header>

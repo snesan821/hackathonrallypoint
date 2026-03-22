@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Category, CivicItemType, CivicItemStatus, JurisdictionLevel, EngagementAction } from '@prisma/client'
 import { CategoryBadge } from './CategoryBadge'
 import { SupportBar } from './SupportBar'
@@ -41,6 +43,7 @@ interface CivicItemCardProps {
 
 export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps) {
   const router = useRouter()
+  const [expanded, setExpanded] = useState(false)
   const primaryCategory = item.categories[0]
   const jurisdiction = item.jurisdictionTags[0] || 'Unknown'
 
@@ -103,10 +106,28 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
           </Link>
         )}
 
-        {/* Summary */}
-        <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-on-surface-variant">
-          {item.summary}
-        </p>
+        {/* Summary — expandable */}
+        <div className="mb-4" onClick={(e) => e.stopPropagation()}>
+          <p className={cn(
+            'text-sm leading-relaxed text-on-surface-variant',
+            !expanded && 'line-clamp-3'
+          )}>
+            {item.summary}
+          </p>
+          {item.summary.length > 150 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
+              className="mt-1 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-container transition-colors"
+            >
+              {expanded ? (
+                <><ChevronUp className="h-3.5 w-3.5" />Show less</>
+              ) : (
+                <><ChevronDown className="h-3.5 w-3.5" />Read more</>
+              )}
+            </button>
+          )}
+        </div>
 
         {/* Deadline */}
         {item.deadline && (
