@@ -22,6 +22,7 @@ export const iconMap: Record<string, LucideIcon> = {
   // Action icons
   Eye: LucideIcons.Eye,
   Bookmark: LucideIcons.Bookmark,
+  Plus: LucideIcons.Plus,
   Share2: LucideIcons.Share2,
   ThumbsUp: LucideIcons.ThumbsUp,
   Phone: LucideIcons.Phone,
@@ -86,6 +87,7 @@ export {
   MoreHorizontal,
   Eye,
   Bookmark,
+  Plus,
   Share2,
   ThumbsUp,
   Phone,

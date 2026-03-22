@@ -13,7 +13,7 @@ export default function AboutPage() {
         {[
           { step: '1', title: 'Discover Local Issues', description: 'Browse civic issues relevant to your neighborhood — from housing ordinances to school board decisions. Filter by category, jurisdiction, or deadline.', icon: '🔍' },
           { step: '2', title: 'Understand What Matters', description: 'AI-powered summaries break down complex policy documents into plain language. See who is affected, what changes, and why it matters — with links to original sources.', icon: '💡' },
-          { step: '3', title: 'Take Action', description: 'Our progressive engagement ladder lets you start small and build up. Save issues, show support, share with friends, RSVP to hearings, or contact your representative.', icon: '✊' },
+          { step: '3', title: 'Take Action', description: 'Our progressive engagement ladder lets you start small and build up. Follow issues, show support, share with friends, RSVP to hearings, or contact your representative.', icon: '✊' },
           { step: '4', title: 'Track Your Impact', description: 'See your civic participation history, track issues you care about, and watch community engagement grow over time.', icon: '📊' },
         ].map((item) => (
           <div key={item.step} className="flex gap-6">
