@@ -127,32 +127,13 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="bg-surface rounded-2xl p-2 shadow-inner border border-outline-variant/10">
-              <div className="rounded-xl w-full bg-surface-container-lowest p-6">
-                <h3 className="text-xl font-bold text-on-surface font-headline mb-5">Categories You&rsquo;re Engaged With</h3>
-                <div className="space-y-3">
-                  {[
-                    { label: 'Education', emoji: '🎓', color: 'bg-purple-500', width: '100%', count: 9 },
-                    { label: 'Environment', emoji: '🌿', color: 'bg-emerald-500', width: '56%', count: 5 },
-                    { label: 'Housing', emoji: '🏠', color: 'bg-emerald-500', width: '56%', count: 5 },
-                    { label: 'Healthcare', emoji: '💗', color: 'bg-pink-500', width: '44%', count: 4 },
-                    { label: 'Public Safety', emoji: '🛡️', color: 'bg-red-500', width: '33%', count: 3 },
-                    { label: 'Civil Rights', emoji: '⚖️', color: 'bg-indigo-500', width: '22%', count: 2 },
-                    { label: 'Transit', emoji: '🚌', color: 'bg-emerald-600', width: '22%', count: 2 },
-                    { label: 'Budget & Taxes', emoji: '💰', color: 'bg-yellow-500', width: '11%', count: 1 },
-                  ].map((cat) => (
-                    <div key={cat.label} className="flex items-center gap-3">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full ${cat.color} px-3 py-1 text-xs font-semibold text-white whitespace-nowrap`}>
-                        <span>{cat.emoji}</span> {cat.label}
-                      </span>
-                      <div className="flex-1">
-                        <div className="h-2 w-full rounded-full bg-surface-container-highest overflow-hidden">
-                          <div className="h-full rounded-full bg-primary" style={{ width: cat.width }} />
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium text-on-surface-variant w-5 text-right">{cat.count}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="rounded-xl w-full bg-surface-container-lowest overflow-hidden">
+                <img
+                  src="/images/asustudents01.png"
+                  alt="ASU students engaged in civic action"
+                  className="w-full h-auto rounded-xl object-cover"
+                  draggable={false}
+                />
               </div>
             </div>
           </div>

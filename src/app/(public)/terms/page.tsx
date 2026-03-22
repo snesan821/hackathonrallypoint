@@ -89,7 +89,7 @@ export default function TermsPage() {
           </p>
           <div className="bg-surface-container-low p-4 rounded-2xl">
             <p className="text-on-surface-variant">Email: legal@rallypoint.app</p>
-            <p className="text-on-surface-variant">Address: 123 Civic Center Dr, Tempe, AZ 85281</p>
+            <p className="text-on-surface-variant">Address: 123 Civic Center Dr</p>
           </div>
         </section>
       </div>
