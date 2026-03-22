@@ -1,64 +1,68 @@
 'use client'
 
 import { useState, type PointerEvent } from 'react'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 
-type MotionState = {
-  rotateX: number
-  rotateY: number
-  shiftX: number
-  shiftY: number
-}
-
-const restingMotion: MotionState = {
-  rotateX: 0,
-  rotateY: 0,
-  shiftX: 0,
-  shiftY: 0,
-}
+const RESTING_ROTATE_X = 4
+const RESTING_ROTATE_Y = -10
 
 export function HeroStabilizer() {
-  const [motion, setMotion] = useState<MotionState>(restingMotion)
+  const [isHovered, setIsHovered] = useState(false)
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect()
-    const x = (event.clientX - bounds.left) / bounds.width
-    const y = (event.clientY - bounds.top) / bounds.height
-
-    const offsetX = x - 0.5
-    const offsetY = y - 0.5
-
-    setMotion({
-      rotateX: offsetY * -12,
-      rotateY: offsetX * 14,
-      shiftX: offsetX * 16,
-      shiftY: offsetY * 16,
-    })
-  }
-
-  const handlePointerLeave = () => {
-    setMotion(restingMotion)
-  }
+  const handlePointerEnter = () => setIsHovered(true)
+  const handlePointerLeave = () => setIsHovered(false)
 
   return (
     <div
-      className="w-full aspect-[4/3] rounded-3xl bg-gradient-to-br from-primary/10 via-surface-container to-surface-container-high shadow-2xl overflow-hidden flex items-center justify-center [perspective:1200px]"
-      onPointerMove={handlePointerMove}
+      className="relative flex w-full items-center justify-center [perspective:1200px]"
+      onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
     >
+      {/* Soft glow behind card */}
+      <div className="absolute -inset-4 rounded-[3rem] bg-primary/45 blur-3xl -z-10" />
+
       <div
-        className="relative flex size-[68%] max-h-[320px] max-w-[320px] items-center justify-center rounded-[2rem] border border-outline-variant/40 bg-surface-container-lowest/70 shadow-[0_24px_60px_rgba(28,27,27,0.12)] transition-transform duration-150 ease-out [transform-style:preserve-3d]"
+        className="relative z-10 w-full max-w-sm bg-surface-container-lowest p-6 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-outline-variant/10 transition-transform duration-500 ease-out [transform-style:preserve-3d]"
         style={{
-          transform: `translate3d(${motion.shiftX}px, ${motion.shiftY}px, 0) rotateX(${motion.rotateX}deg) rotateY(${motion.rotateY}deg)`,
+          transform: isHovered
+            ? 'rotateX(0deg) rotateY(0deg)'
+            : `rotateX(${RESTING_ROTATE_X}deg) rotateY(${RESTING_ROTATE_Y}deg)`,
         }}
       >
-        <div className="absolute inset-4 rounded-[1.6rem] border border-outline-variant/35 bg-surface/55" />
-        <div className="absolute inset-10 rounded-[1.2rem] border border-primary/25" />
-        <div
-          className="absolute h-16 w-16 rounded-2xl border border-primary/35 bg-primary/10 shadow-[0_0_0_1px_rgba(161,58,0,0.05)] transition-transform duration-150 ease-out"
-          style={{
-            transform: `translate3d(${motion.shiftX * -0.45}px, ${motion.shiftY * -0.45}px, 24px)`,
-          }}
-        />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-primary text-[10px] font-bold tracking-[0.2em] uppercase">
+              Trending Issue
+            </span>
+            <span className="text-on-surface-variant text-[10px] font-medium">
+              2.4k active
+            </span>
+          </div>
+          <h3 className="text-on-surface text-2xl font-bold leading-tight font-headline">
+            Rent Stabilization Ordinance
+          </h3>
+          <p className="text-on-surface-variant text-sm leading-normal">
+            Discussion on proposed amendments to local housing stability and tenant protections.
+          </p>
+          <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden mt-2">
+            <div className="h-full bg-primary w-3/4" />
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex -space-x-2">
+              <div className="size-6 rounded-full border-2 border-surface bg-surface-container-high" />
+              <div className="size-6 rounded-full border-2 border-surface bg-surface-container-highest" />
+              <div className="size-6 rounded-full border-2 border-surface bg-outline" />
+            </div>
+            <Link
+              href="/discover"
+              className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary-container transition-colors"
+            >
+              View Discussion
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )
