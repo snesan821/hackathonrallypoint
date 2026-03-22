@@ -5,56 +5,26 @@ interface EmptyStateProps {
   icon?: LucideIcon
   title: string
   description?: string
-  action?: {
-    label: string
-    onClick?: () => void
-    href?: string
-  }
+  action?: { label: string; onClick?: () => void; href?: string }
   className?: string
 }
 
-export function EmptyState({
-  icon: Icon,
-  title,
-  description,
-  action,
-  className,
-}: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 text-center',
-        className
-      )}
-    >
+    <div className={cn('flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center', className)}>
       {Icon && (
-        <div className="mb-4 rounded-full bg-slate-100 p-4">
-          <Icon className="h-8 w-8 text-slate-400" />
+        <div className="mb-4 rounded-full bg-surface-container-high p-4">
+          <Icon className="h-8 w-8 text-on-surface-variant" />
         </div>
       )}
-
-      <h3 className="mb-2 text-lg font-semibold text-slate-900">{title}</h3>
-
-      {description && (
-        <p className="mb-6 max-w-md text-sm text-slate-600">{description}</p>
-      )}
-
+      <h3 className="mb-2 text-lg font-semibold text-on-surface">{title}</h3>
+      {description && <p className="mb-6 max-w-md text-sm text-on-surface-variant">{description}</p>}
       {action && (
         <>
           {action.href ? (
-            <a
-              href={action.href}
-              className="inline-flex items-center gap-2 rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-            >
-              {action.label}
-            </a>
+            <a href={action.href} className="btn btn-primary">{action.label}</a>
           ) : (
-            <button
-              onClick={action.onClick}
-              className="inline-flex items-center gap-2 rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-            >
-              {action.label}
-            </button>
+            <button onClick={action.onClick} className="btn btn-primary">{action.label}</button>
           )}
         </>
       )}

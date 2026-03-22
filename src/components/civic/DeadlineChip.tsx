@@ -21,11 +21,11 @@ export function DeadlineChip({
   const formattedDeadline = formatDeadline(deadline)
 
   const urgencyStyles = {
-    critical: 'bg-red-100 text-red-800 border-red-200',
-    high: 'bg-orange-100 text-orange-800 border-orange-200',
+    critical: 'bg-[var(--co-error)]/10 text-[var(--co-error)] border-[var(--co-error)]/20',
+    high: 'bg-[var(--co-warning)]/10 text-[var(--co-warning)] border-[var(--co-warning)]/20',
     medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    low: 'bg-green-100 text-green-800 border-green-200',
-    ended: 'bg-slate-100 text-slate-600 border-slate-200',
+    low: 'bg-[var(--co-success)]/10 text-[var(--co-success)] border-[var(--co-success)]/20',
+    ended: 'bg-surface-container-high text-on-surface-variant border-outline-variant',
   }
 
   const Icon = urgency === 'ended' ? XCircle : Clock

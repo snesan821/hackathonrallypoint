@@ -7,33 +7,26 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="max-w-[960px] mx-auto px-6 py-12">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-4">Terms & Conditions</h1>
-        <p className="text-slate-600">Last updated: March 21, 2026</p>
+        <h1 className="text-4xl font-bold text-on-surface font-headline mb-4">Terms & Conditions</h1>
+        <p className="text-on-surface-variant">Last updated: March 21, 2026</p>
       </div>
 
-      <div className="prose prose-slate max-w-none">
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">1. Acceptance of Terms</h2>
-          <p className="text-slate-700 mb-4">
-            By accessing and using RallyPoint (&quot;the Platform&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this service.
-          </p>
-        </section>
+      <div className="prose prose-neutral max-w-none">
+        {[
+          { title: '1. Acceptance of Terms', content: 'By accessing and using RallyPoint ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this service.' },
+          { title: '2. Description of Service', content: 'RallyPoint is a civic engagement platform that provides information about local government initiatives, petitions, and civic issues. The Platform aggregates publicly available information and provides AI-powered summaries to make civic documents more accessible.' },
+        ].map((section, i) => (
+          <section key={i} className="mb-8">
+            <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">{section.title}</h2>
+            <p className="text-on-surface-variant mb-4">{section.content}</p>
+          </section>
+        ))}
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">2. Description of Service</h2>
-          <p className="text-slate-700 mb-4">
-            RallyPoint is a civic engagement platform that provides information about local government initiatives, petitions, and civic issues. The Platform aggregates publicly available information and provides AI-powered summaries to make civic documents more accessible.
-          </p>
-          <p className="text-slate-700 mb-4">
-            <strong>Important:</strong> RallyPoint does not provide legal advice. All information is for educational and informational purposes only. Always refer to official government sources for authoritative information.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">3. User Accounts</h2>
-          <ul className="list-disc pl-6 text-slate-700 mb-4 space-y-2">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">3. User Accounts</h2>
+          <ul className="list-disc pl-6 text-on-surface-variant mb-4 space-y-2">
             <li>You must be at least 13 years old to use this service</li>
             <li>You are responsible for maintaining the confidentiality of your account</li>
             <li>You agree to provide accurate and complete information during registration</li>
@@ -42,9 +35,9 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">4. User Conduct</h2>
-          <p className="text-slate-700 mb-4">You agree not to:</p>
-          <ul className="list-disc pl-6 text-slate-700 mb-4 space-y-2">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">4. User Conduct</h2>
+          <p className="text-on-surface-variant mb-4">You agree not to:</p>
+          <ul className="list-disc pl-6 text-on-surface-variant mb-4 space-y-2">
             <li>Use the Platform for any illegal purpose</li>
             <li>Post harassing, abusive, or threatening content</li>
             <li>Impersonate any person or entity</li>
@@ -55,11 +48,9 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">5. Content and AI Summaries</h2>
-          <p className="text-slate-700 mb-4">
-            AI-generated summaries are provided to help make civic documents more accessible. These summaries:
-          </p>
-          <ul className="list-disc pl-6 text-slate-700 mb-4 space-y-2">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">5. Content and AI Summaries</h2>
+          <p className="text-on-surface-variant mb-4">AI-generated summaries are provided to help make civic documents more accessible. These summaries:</p>
+          <ul className="list-disc pl-6 text-on-surface-variant mb-4 space-y-2">
             <li>Are generated by artificial intelligence and may contain errors</li>
             <li>Are not legal advice or official interpretations</li>
             <li>Should be verified against original source documents</li>
@@ -68,37 +59,37 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">6. Intellectual Property</h2>
-          <p className="text-slate-700 mb-4">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">6. Intellectual Property</h2>
+          <p className="text-on-surface-variant mb-4">
             The Platform and its original content, features, and functionality are owned by RallyPoint and are protected by international copyright, trademark, and other intellectual property laws.
           </p>
-          <p className="text-slate-700 mb-4">
+          <p className="text-on-surface-variant mb-4">
             Government documents and public information displayed on the Platform remain the property of their respective government entities.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">7. Limitation of Liability</h2>
-          <p className="text-slate-700 mb-4">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">7. Limitation of Liability</h2>
+          <p className="text-on-surface-variant mb-4">
             RallyPoint shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">8. Changes to Terms</h2>
-          <p className="text-slate-700 mb-4">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">8. Changes to Terms</h2>
+          <p className="text-on-surface-variant mb-4">
             We reserve the right to modify these terms at any time. We will notify users of any material changes by posting the new terms on the Platform. Your continued use of the Platform after such changes constitutes your acceptance of the new terms.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">9. Contact Information</h2>
-          <p className="text-slate-700 mb-4">
+          <h2 className="text-2xl font-semibold text-on-surface font-headline mb-4">9. Contact Information</h2>
+          <p className="text-on-surface-variant mb-4">
             If you have any questions about these Terms & Conditions, please contact us at:
           </p>
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <p className="text-slate-700">Email: legal@rallypoint.app</p>
-            <p className="text-slate-700">Address: 123 Civic Center Dr, Tempe, AZ 85281</p>
+          <div className="bg-surface-container-low p-4 rounded-2xl">
+            <p className="text-on-surface-variant">Email: legal@rallypoint.app</p>
+            <p className="text-on-surface-variant">Address: 123 Civic Center Dr, Tempe, AZ 85281</p>
           </div>
         </section>
       </div>

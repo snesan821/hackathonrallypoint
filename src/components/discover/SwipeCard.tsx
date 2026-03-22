@@ -109,7 +109,7 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
     <div
       ref={cardRef}
       className={cn(
-        'absolute inset-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card',
+        'absolute inset-0 overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card',
         isTop ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none'
       )}
       style={{
@@ -129,8 +129,8 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
         className="pointer-events-none absolute inset-0 z-10 flex items-start justify-start rounded-2xl p-6"
         style={{ opacity: saveOpacity }}
       >
-        <div className="rounded-xl border-4 border-green-500 px-4 py-2" style={{ transform: 'rotate(-14deg)' }}>
-          <span className="text-2xl font-bold uppercase tracking-widest text-green-500">Save</span>
+        <div className="rounded-xl border-4 border-[var(--co-success)] px-4 py-2" style={{ transform: 'rotate(-14deg)' }}>
+          <span className="text-2xl font-bold uppercase tracking-widest text-[var(--co-success)]">Save</span>
         </div>
       </div>
 
@@ -139,8 +139,8 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
         className="pointer-events-none absolute inset-0 z-10 flex items-start justify-end rounded-2xl p-6"
         style={{ opacity: skipOpacity }}
       >
-        <div className="rounded-xl border-4 border-slate-400 px-4 py-2" style={{ transform: 'rotate(14deg)' }}>
-          <span className="text-2xl font-bold uppercase tracking-widest text-slate-400">Skip</span>
+        <div className="rounded-xl border-4 border-outline-variant px-4 py-2" style={{ transform: 'rotate(14deg)' }}>
+          <span className="text-2xl font-bold uppercase tracking-widest text-on-surface-variant">Skip</span>
         </div>
       </div>
 
@@ -150,14 +150,14 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
           {/* Category + meta badges */}
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {item.categories[0] && <CategoryBadge category={item.categories[0]} size="sm" />}
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+            <span className="rounded bg-surface-container-high px-2 py-0.5 text-xs font-medium text-on-surface-variant">
               {item.jurisdictionTags[0] || item.jurisdictionLevel}
             </span>
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+            <span className="rounded bg-surface-container-high px-2 py-0.5 text-xs font-medium text-on-surface-variant">
               {item.type.replace(/_/g, ' ')}
             </span>
             {item.isVerified && (
-              <span className="ml-auto flex items-center gap-1 text-xs font-medium text-green-600">
+              <span className="ml-auto flex items-center gap-1 text-xs font-medium text-[var(--co-success)]">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Verified
               </span>
@@ -165,27 +165,27 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
           </div>
 
           {/* Title */}
-          <h2 className="mb-2 text-xl font-bold leading-tight text-slate-900">
+          <h2 className="mb-2 text-xl font-bold leading-tight text-on-surface">
             {item.title}
           </h2>
 
           {/* Summary */}
-          <p className="mb-3 line-clamp-4 text-sm leading-relaxed text-slate-600">
+          <p className="mb-3 line-clamp-4 text-sm leading-relaxed text-on-surface-variant">
             {displaySummary}
           </p>
 
           {/* Who's affected callout */}
           {item.aiSummary?.whoAffected && (
-            <div className="mb-3 rounded-lg bg-orange-50 px-3 py-2">
-              <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-orange-700">
+            <div className="mb-3 rounded-lg bg-primary/10 px-3 py-2">
+              <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
                 Who&rsquo;s affected
               </p>
-              <p className="line-clamp-2 text-sm text-slate-700">{item.aiSummary.whoAffected}</p>
+              <p className="line-clamp-2 text-sm text-on-surface-variant">{item.aiSummary.whoAffected}</p>
             </div>
           )}
 
           {/* Meta row */}
-          <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+          <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
             {item.currentSupport > 0 && (
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
@@ -201,10 +201,10 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
           </div>
 
           {/* Action links */}
-          <div className="flex items-center gap-2 border-t border-slate-100 pt-3 pb-3">
+          <div className="flex items-center gap-2 border-t border-outline-variant/15 pt-3 pb-3">
             <Link
               href={`/issues/${item.slug}`}
-              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
+              className="rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               View details
@@ -214,7 +214,7 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
                 href={contactUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
+                className="flex items-center gap-1 rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink className="h-3 w-3" />
@@ -226,11 +226,11 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
 
         {/* Swipe buttons — fixed at bottom, inside card flow */}
         {isTop && (
-          <div className="flex items-center justify-center gap-6 border-t border-slate-100 bg-white px-5 py-3">
+          <div className="flex items-center justify-center gap-6 border-t border-outline-variant/15 bg-surface-container-lowest px-5 py-3">
             <button
               type="button"
               aria-label="Skip"
-              className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-slate-300 bg-white text-slate-500 shadow-sm transition-all hover:border-slate-400 hover:text-slate-700"
+              className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm transition-all hover:border-outline hover:text-on-surface"
               onClick={(e) => { e.stopPropagation(); triggerSwipeLeft() }}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
             <button
               type="button"
               aria-label="Save"
-              className="flex h-13 w-13 items-center justify-center rounded-full border-2 border-green-400 bg-white text-green-500 shadow-sm transition-all hover:border-green-500 hover:text-green-600"
+              className="flex h-13 w-13 items-center justify-center rounded-full border-2 border-[var(--co-success)] bg-surface-container-lowest text-[var(--co-success)] shadow-sm transition-all hover:border-[var(--co-success)] hover:text-[var(--co-success)]"
               onClick={(e) => { e.stopPropagation(); triggerSwipeRight() }}
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
