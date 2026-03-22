@@ -16,8 +16,8 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid PostgreSQL connection string'),
 
-  // Redis
-  REDIS_URL: z.string().url('REDIS_URL must be a valid Redis connection string'),
+  // Redis (optional — app degrades gracefully without it)
+  REDIS_URL: z.string().url('REDIS_URL must be a valid Redis connection string').optional().default('redis://localhost:6379'),
 
   // Clerk Authentication
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z

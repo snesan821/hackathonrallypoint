@@ -31,7 +31,7 @@ export default async function PublicLayout({
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
-            <h2 className="text-xl font-bold tracking-tight">RallyPoint</h2>
+            <h2 className="text-xl font-bold tracking-tight font-headline">RallyPoint</h2>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
             {[

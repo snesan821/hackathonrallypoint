@@ -16,7 +16,7 @@ export function Footer() {
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
-            <h2 className="text-xl font-bold tracking-tight">RallyPoint</h2>
+            <h2 className="text-xl font-bold tracking-tight font-headline">RallyPoint</h2>
           </div>
           <p className="text-on-surface-variant max-w-sm">
             Empowering communities through digital democracy and transparent civic participation.
