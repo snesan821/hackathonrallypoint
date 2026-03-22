@@ -68,12 +68,20 @@ export function SwipeStack() {
   }, [])
 
   const recordSave = useCallback(async (item: SwipeItem) => {
+    // Record both SUPPORT (swipe tracking) and SAVE (shows on saved page)
     try {
-      await fetch(`/api/civic-items/${item.slug}/engage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'SAVE' }),
-      })
+      await Promise.all([
+        fetch('/api/swipe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ civicItemId: item.id, action: 'SUPPORT' }),
+        }),
+        fetch(`/api/civic-items/${item.slug}/engage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'SAVE' }),
+        }),
+      ])
     } catch {
       // Fire-and-forget
     }
