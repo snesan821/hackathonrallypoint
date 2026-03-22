@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { SwipeCard, type SwipeItem } from './SwipeCard'
+import { SwipeCard, type SwipeItem, type SwipeCardHandle } from './SwipeCard'
 import { CategoryBadge } from '@/components/civic/CategoryBadge'
 import { ExternalLink, BookmarkCheck, RefreshCw, Inbox } from 'lucide-react'
 
@@ -15,6 +15,7 @@ export function SwipeStack() {
   const [isLoading, setIsLoading] = useState(true)
   const [isEmpty, setIsEmpty] = useState(false)
   const isFetchingRef = useRef(false)
+  const topCardRef = useRef<SwipeCardHandle>(null)
 
   const fetchBatch = useCallback(async (nextCursor?: string | null) => {
     if (isFetchingRef.current) return
@@ -68,12 +69,20 @@ export function SwipeStack() {
   }, [])
 
   const recordSave = useCallback(async (item: SwipeItem) => {
+    // Record both SUPPORT (swipe tracking) and SAVE (shows on saved page)
     try {
-      await fetch(`/api/civic-items/${item.slug}/engage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'SAVE' }),
-      })
+      await Promise.all([
+        fetch('/api/swipe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ civicItemId: item.id, action: 'SUPPORT' }),
+        }),
+        fetch(`/api/civic-items/${item.slug}/engage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'SAVE' }),
+        }),
+      ])
     } catch {
       // Fire-and-forget
     }
@@ -115,7 +124,7 @@ export function SwipeStack() {
     <div className="flex flex-col gap-10">
       {/* Swipe deck */}
       <div className="flex flex-col items-center">
-        <div className="relative w-full max-w-sm" style={{ height: 480 }}>
+        <div className="relative w-full max-w-sm overflow-visible" style={{ height: 480 }}>
           {isLoading && visibleCards.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-outline-variant border-t-primary" />
@@ -145,6 +154,7 @@ export function SwipeStack() {
               return (
                 <SwipeCard
                   key={item.id}
+                  ref={stackIndex === 0 ? topCardRef : null}
                   item={item}
                   isTop={stackIndex === 0}
                   stackIndex={stackIndex}
@@ -154,6 +164,32 @@ export function SwipeStack() {
               )
             })}
         </div>
+
+        {/* Swipe buttons — below the deck, not inside the card */}
+        {!isLoading && visibleCards.length > 0 && (
+          <div className="mt-5 flex items-center justify-center gap-10">
+            <button
+              type="button"
+              aria-label="Skip"
+              className="flex h-14 w-14 items-center justify-center text-on-surface-variant transition-all hover:scale-110 hover:text-on-surface active:scale-95"
+              onClick={() => topCardRef.current?.triggerSwipeLeft()}
+            >
+              <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Save"
+              className="flex h-14 w-14 items-center justify-center text-[var(--co-success)] transition-all hover:scale-110 active:scale-95"
+              onClick={() => topCardRef.current?.triggerSwipeRight()}
+            >
+              <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* Swipe hint */}
         {!isLoading && visibleCards.length > 0 && (
