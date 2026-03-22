@@ -1,4 +1,4 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from './clerk-server-proxy'
 import { prisma } from '@/lib/db/prisma'
 import { redirect } from 'next/navigation'
 

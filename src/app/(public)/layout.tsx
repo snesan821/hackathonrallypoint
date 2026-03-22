@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Footer } from '@/components/layout/Footer'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth/clerk-server-proxy'
 
 const IS_LOCAL_DEV =
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_test_') &&
