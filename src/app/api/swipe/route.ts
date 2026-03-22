@@ -17,12 +17,13 @@ export async function GET(req: Request) {
     const user = await requireAuth()
     const { searchParams } = new URL(req.url)
     const cursor = searchParams.get('cursor') || undefined
+    const categoryParam = searchParams.get('category') || undefined
 
-    // IDs of items already acted on (SUPPORT or SKIP)
+    // IDs of items already acted on (exclude SUPPORT, SKIP, and SAVE from swipe queue)
     const seenEngagements = await prisma.engagementEvent.findMany({
       where: {
         userId: user.id,
-        action: { in: ['SUPPORT', 'SKIP'] },
+        action: { in: ['SUPPORT', 'SKIP', 'SAVE'] },
       },
       select: { civicItemId: true },
     })
@@ -31,6 +32,7 @@ export async function GET(req: Request) {
     const items = await prisma.civicItem.findMany({
       where: {
         status: 'ACTIVE',
+        ...(categoryParam ? { category: categoryParam as any } : {}),
         id: {
           notIn: seenIds.length > 0 ? seenIds : undefined,
           ...(cursor ? { gt: cursor } : {}),

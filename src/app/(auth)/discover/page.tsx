@@ -57,18 +57,20 @@ export default function DiscoverPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Page header */}
-      <div className="mb-6">
+      <div className="mb-2">
         <h1
           className="mb-1 text-4xl font-bold text-slate-900"
           style={{ fontFamily: 'var(--font-serif, serif)' }}
         >
           Discover
         </h1>
-        <p className="text-slate-500">Local campaigns, initiatives, and propositions near you</p>
+        <p className="text-slate-500">
+          Local campaigns, initiatives, and propositions near you
+        </p>
       </div>
 
-      {/* View mode toggle */}
-      <div className="mb-8 flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 w-fit">
+      {/* View toggle */}
+      <div className="mb-8 mt-5 flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 w-fit">
         <button
           type="button"
           onClick={() => setViewMode('swipe')}
@@ -93,13 +95,13 @@ export default function DiscoverPage() {
           )}
         >
           <LayoutGrid className="h-4 w-4" />
-          Browse
+          Browse all
         </button>
       </div>
 
       {/* SWIPE MODE */}
       {viewMode === 'swipe' && (
-        <div className="mx-auto max-w-lg">
+        <div className="mx-auto max-w-md">
           <SwipeStack />
         </div>
       )}
@@ -112,10 +114,7 @@ export default function DiscoverPage() {
             <button
               type="button"
               onClick={() => updateFilter('category', null)}
-              className={cn(
-                'pill',
-                !category ? 'pill-active' : ''
-              )}
+              className={cn('pill', !category && 'pill-active')}
             >
               All
             </button>
@@ -124,10 +123,7 @@ export default function DiscoverPage() {
                 key={cat.value}
                 type="button"
                 onClick={() => updateFilter('category', cat.value)}
-                className={cn(
-                  'pill',
-                  category === cat.value ? 'pill-active' : ''
-                )}
+                className={cn('pill', category === cat.value && 'pill-active')}
               >
                 {cat.label}
               </button>
