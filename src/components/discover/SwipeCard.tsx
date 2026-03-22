@@ -84,7 +84,6 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
     }
   }, [onSwipeLeft, onSwipeRight])
 
-  // Trigger swipe via buttons (keyboard/desktop)
   const triggerSwipeRight = useCallback(() => {
     setDragX(EXIT_X)
     setTimeout(onSwipeRight, 280)
@@ -99,8 +98,8 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
   const saveOpacity = Math.min(Math.max(dragX / SWIPE_THRESHOLD, 0), 1)
   const skipOpacity = Math.min(Math.max(-dragX / SWIPE_THRESHOLD, 0), 1)
 
-  const stackOffsetY = stackIndex * 10
-  const stackScale = 1 - stackIndex * 0.045
+  const stackOffsetY = stackIndex * 8
+  const stackScale = 1 - stackIndex * 0.04
 
   const deadline = item.deadline ? new Date(item.deadline) : null
   const displaySummary = item.aiSummary?.plainSummary || item.summary
@@ -130,10 +129,7 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
         className="pointer-events-none absolute inset-0 z-10 flex items-start justify-start rounded-2xl p-6"
         style={{ opacity: saveOpacity }}
       >
-        <div
-          className="rounded-xl border-4 border-green-500 px-4 py-2"
-          style={{ transform: 'rotate(-14deg)' }}
-        >
+        <div className="rounded-xl border-4 border-green-500 px-4 py-2" style={{ transform: 'rotate(-14deg)' }}>
           <span className="text-2xl font-bold uppercase tracking-widest text-green-500">Save</span>
         </div>
       </div>
@@ -143,141 +139,117 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
         className="pointer-events-none absolute inset-0 z-10 flex items-start justify-end rounded-2xl p-6"
         style={{ opacity: skipOpacity }}
       >
-        <div
-          className="rounded-xl border-4 border-slate-400 px-4 py-2"
-          style={{ transform: 'rotate(14deg)' }}
-        >
+        <div className="rounded-xl border-4 border-slate-400 px-4 py-2" style={{ transform: 'rotate(14deg)' }}>
           <span className="text-2xl font-bold uppercase tracking-widest text-slate-400">Skip</span>
         </div>
       </div>
 
-      {/* Card body */}
-      <div className="flex h-full flex-col p-6 select-none">
-        {/* Category + meta badges */}
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {item.categories[0] && <CategoryBadge category={item.categories[0]} size="sm" />}
-          <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-            {item.jurisdictionTags[0] || item.jurisdictionLevel}
-          </span>
-          <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-            {item.type.replace(/_/g, ' ')}
-          </span>
-          {item.isVerified && (
-            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-green-600">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Verified
+      {/* Card content — scrollable area above the fixed bottom buttons */}
+      <div className="flex h-full flex-col select-none">
+        <div className="flex-1 overflow-y-auto p-5 pb-0">
+          {/* Category + meta badges */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {item.categories[0] && <CategoryBadge category={item.categories[0]} size="sm" />}
+            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {item.jurisdictionTags[0] || item.jurisdictionLevel}
             </span>
-          )}
-        </div>
-
-        {/* Title */}
-        <h2
-          className="mb-3 text-2xl font-bold leading-tight text-slate-900"
-          style={{ fontFamily: 'var(--font-serif, serif)' }}
-        >
-          {item.title}
-        </h2>
-
-        {/* Summary */}
-        <p className="mb-4 line-clamp-5 flex-1 text-sm leading-relaxed text-slate-600">
-          {displaySummary}
-        </p>
-
-        {/* Who's affected callout */}
-        {item.aiSummary?.whoAffected && (
-          <div className="mb-4 rounded-lg bg-orange-50 px-4 py-3">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-orange-700">
-              Who&rsquo;s affected
-            </p>
-            <p className="line-clamp-2 text-sm text-slate-700">{item.aiSummary.whoAffected}</p>
+            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {item.type.replace(/_/g, ' ')}
+            </span>
+            {item.isVerified && (
+              <span className="ml-auto flex items-center gap-1 text-xs font-medium text-green-600">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Verified
+              </span>
+            )}
           </div>
-        )}
 
-        {/* Meta row */}
-        <div className="mb-4 flex flex-wrap items-center gap-4 text-xs text-slate-500">
-          {item.currentSupport > 0 && (
-            <span className="flex items-center gap-1">
-              <Users className="h-3.5 w-3.5" />
-              {item.currentSupport.toLocaleString()} supporters
-            </span>
-          )}
-          {deadline && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
-              {deadline.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </span>
-          )}
-        </div>
+          {/* Title */}
+          <h2 className="mb-2 text-xl font-bold leading-tight text-slate-900">
+            {item.title}
+          </h2>
 
-        {/* Action links */}
-        <div className="flex items-center gap-2 border-t border-slate-100 pt-4">
-          <Link
-            href={`/issues/${item.slug}`}
-            className="btn btn-secondary flex-1 justify-center text-center text-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            View article
-          </Link>
-          {contactUrl && (
-            <a
-              href={contactUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary flex items-center gap-1.5 text-sm"
+          {/* Summary */}
+          <p className="mb-3 line-clamp-4 text-sm leading-relaxed text-slate-600">
+            {displaySummary}
+          </p>
+
+          {/* Who's affected callout */}
+          {item.aiSummary?.whoAffected && (
+            <div className="mb-3 rounded-lg bg-orange-50 px-3 py-2">
+              <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-orange-700">
+                Who&rsquo;s affected
+              </p>
+              <p className="line-clamp-2 text-sm text-slate-700">{item.aiSummary.whoAffected}</p>
+            </div>
+          )}
+
+          {/* Meta row */}
+          <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+            {item.currentSupport > 0 && (
+              <span className="flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" />
+                {item.currentSupport.toLocaleString()} supporters
+              </span>
+            )}
+            {deadline && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5" />
+                {deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            )}
+          </div>
+
+          {/* Action links */}
+          <div className="flex items-center gap-2 border-t border-slate-100 pt-3 pb-3">
+            <Link
+              href={`/issues/${item.slug}`}
+              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
-              <ExternalLink className="h-3.5 w-3.5" />
-              Source
-            </a>
-          )}
+              View details
+            </Link>
+            {contactUrl && (
+              <a
+                href={contactUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="h-3 w-3" />
+                Source
+              </a>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Swipe button controls (accessible, desktop-friendly) */}
-      {isTop && (
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 px-6 pb-5 pt-2">
-          <button
-            type="button"
-            aria-label="Skip"
-            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-300 bg-white text-slate-500 shadow-sm transition-all hover:border-slate-400 hover:text-slate-700"
-            onClick={(e) => {
-              e.stopPropagation()
-              triggerSwipeLeft()
-            }}
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            aria-label="Save"
-            className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-400 bg-white text-green-500 shadow-sm transition-all hover:border-green-500 hover:text-green-600"
-            onClick={(e) => {
-              e.stopPropagation()
-              triggerSwipeRight()
-            }}
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-          </button>
-        </div>
-      )}
+        {/* Swipe buttons — fixed at bottom, inside card flow */}
+        {isTop && (
+          <div className="flex items-center justify-center gap-6 border-t border-slate-100 bg-white px-5 py-3">
+            <button
+              type="button"
+              aria-label="Skip"
+              className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-slate-300 bg-white text-slate-500 shadow-sm transition-all hover:border-slate-400 hover:text-slate-700"
+              onClick={(e) => { e.stopPropagation(); triggerSwipeLeft() }}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Save"
+              className="flex h-13 w-13 items-center justify-center rounded-full border-2 border-green-400 bg-white text-green-500 shadow-sm transition-all hover:border-green-500 hover:text-green-600"
+              onClick={(e) => { e.stopPropagation(); triggerSwipeRight() }}
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
