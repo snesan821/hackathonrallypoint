@@ -1,0 +1,242 @@
+﻿'use client'
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import { SwipeCard, type SwipeItem } from './SwipeCard'
+import { CategoryBadge } from '@/components/civic/CategoryBadge'
+import { ExternalLink, BookmarkCheck, RefreshCw, Inbox } from 'lucide-react'
+
+const REFETCH_THRESHOLD = 3 // fetch next batch when this many cards remain
+
+export function SwipeStack() {
+  const [queue, setQueue] = useState<SwipeItem[]>([])
+  const [matches, setMatches] = useState<SwipeItem[]>([])
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isEmpty, setIsEmpty] = useState(false)
+  const isFetchingRef = useRef(false)
+
+  const fetchBatch = useCallback(async (nextCursor?: string | null) => {
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+    try {
+      const params = new URLSearchParams()
+      if (nextCursor) params.set('cursor', nextCursor)
+      const res = await fetch(`/api/swipe?${params}`)
+      const data = await res.json()
+      if (data.success) {
+        const incoming: SwipeItem[] = data.data
+        setQueue((prev) => {
+          const existingIds = new Set(prev.map((i) => i.id))
+          return [...prev, ...incoming.filter((i) => !existingIds.has(i.id))]
+        })
+        setCursor(data.nextCursor ?? null)
+        if (incoming.length === 0) setIsEmpty(true)
+      }
+    } catch (err) {
+      console.error('SwipeStack fetch error:', err)
+    } finally {
+      isFetchingRef.current = false
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchBatch(null)
+  }, [fetchBatch])
+
+  // Fetch more when queue is getting low
+  useEffect(() => {
+    if (!isLoading && queue.length <= REFETCH_THRESHOLD && cursor) {
+      fetchBatch(cursor)
+    }
+    if (!isLoading && queue.length === 0) {
+      setIsEmpty(true)
+    }
+  }, [queue.length, cursor, isLoading, fetchBatch])
+
+  const recordSkip = useCallback(async (item: SwipeItem) => {
+    try {
+      await fetch('/api/swipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ civicItemId: item.id, action: 'SKIP' }),
+      })
+    } catch {
+      // Fire-and-forget ΓÇö skip failures are non-critical
+    }
+  }, [])
+
+  const recordSave = useCallback(async (item: SwipeItem) => {
+    try {
+      await fetch(`/api/civic-items/${item.slug}/engage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'SAVE' }),
+      })
+    } catch {
+      // Fire-and-forget
+    }
+  }, [])
+
+  const handleSwipeLeft = useCallback(() => {
+    setQueue((prev) => {
+      const [top, ...rest] = prev
+      if (top) recordSkip(top)
+      return rest
+    })
+  }, [recordSkip])
+
+  const handleSwipeRight = useCallback(() => {
+    setQueue((prev) => {
+      const [top, ...rest] = prev
+      if (top) {
+        recordSave(top)
+        setMatches((m) => [top, ...m])
+      }
+      return rest
+    })
+  }, [recordSave])
+
+  const handleReset = useCallback(() => {
+    setQueue([])
+    setMatches([])
+    setCursor(null)
+    setIsEmpty(false)
+    setIsLoading(true)
+    isFetchingRef.current = false
+    fetchBatch(null)
+  }, [fetchBatch])
+
+  // Visible cards: top 3
+  const visibleCards = queue.slice(0, 3)
+
+  return (
+    <div className="flex flex-col gap-10">
+      {/* Swipe deck */}
+      <div className="flex flex-col items-center">
+        <div className="relative w-full max-w-sm" style={{ height: 560 }}>
+          {isLoading && visibleCards.length === 0 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white shadow-card">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
+              <p className="text-sm text-slate-500">Loading issues&hellip;</p>
+            </div>
+          )}
+
+          {!isLoading && isEmpty && visibleCards.length === 0 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+              <Inbox className="h-10 w-10 text-slate-400" />
+              <div>
+                <p className="font-semibold text-slate-700">You&rsquo;re all caught up</p>
+                <p className="mt-1 text-sm text-slate-500">No more issues in your queue right now.</p>
+              </div>
+              <button type="button" onClick={handleReset} className="btn btn-secondary gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Start over
+              </button>
+            </div>
+          )}
+
+          {visibleCards
+            .slice()
+            .reverse()
+            .map((item, reversedIdx) => {
+              const stackIndex = visibleCards.length - 1 - reversedIdx
+              return (
+                <SwipeCard
+                  key={item.id}
+                  item={item}
+                  isTop={stackIndex === 0}
+                  stackIndex={stackIndex}
+                  onSwipeLeft={handleSwipeLeft}
+                  onSwipeRight={handleSwipeRight}
+                />
+              )
+            })}
+        </div>
+
+        {/* Swipe hint */}
+        {!isLoading && visibleCards.length > 0 && (
+          <p className="mt-4 text-center text-xs text-slate-400">
+            Swipe right to save &middot; swipe left to skip
+          </p>
+        )}
+
+        {/* Remaining count */}
+        {!isLoading && queue.length > 0 && (
+          <p className="mt-1 text-center text-xs text-slate-400">
+            {queue.length} {queue.length === 1 ? 'issue' : 'issues'} remaining
+          </p>
+        )}
+      </div>
+
+      {/* Saved matches */}
+      {matches.length > 0 && (
+        <div>
+          <div className="mb-4 flex items-center gap-2">
+            <BookmarkCheck className="h-5 w-5 text-orange-500" />
+            <h2 className="text-lg font-semibold text-slate-900">
+              Saved this session
+            </h2>
+            <span className="ml-1 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-700">
+              {matches.length}
+            </span>
+          </div>
+
+          <div className="flex flex-col divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white overflow-hidden">
+            {matches.map((item) => {
+              const contactUrl = item.officialActionUrl || item.sourceUrl
+              return (
+                <div key={item.id} className="flex items-start gap-4 p-4">
+                  <div className="flex-1 min-w-0">
+                    {item.categories[0] && (
+                      <div className="mb-1.5">
+                        <CategoryBadge category={item.categories[0]} size="sm" showIcon={false} />
+                      </div>
+                    )}
+                    <p
+                      className="font-semibold text-slate-900 leading-snug mb-1 line-clamp-2"
+                      style={{ fontFamily: 'var(--font-serif, serif)' }}
+                    >
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-slate-500 line-clamp-1">
+                      {item.jurisdictionTags[0] || item.jurisdictionLevel} &middot;{' '}
+                      {item.type.replace(/_/g, ' ')}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <Link
+                      href={`/issues/${item.slug}`}
+                      className="btn btn-primary px-3 py-1.5 text-xs whitespace-nowrap"
+                    >
+                      Read article
+                    </Link>
+                    {contactUrl && (
+                      <a
+                        href={contactUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary flex items-center gap-1 px-3 py-1.5 text-xs whitespace-nowrap"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Source
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="mt-4 text-center">
+            <Link href="/saved" className="text-sm font-medium text-orange-600 hover:text-orange-700">
+              View all saved issues &rarr;
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { requireAuth } from '@/lib/auth/server'
 import { errorResponse } from '@/lib/api/middleware'
@@ -55,6 +55,8 @@ export async function GET(req: Request) {
         allowsOnlineSignature: true,
         tags: true,
         isVerified: true,
+        sourceUrl: true,
+        officialActionUrl: true,
         aiSummary: {
           select: {
             plainSummary: true,
@@ -93,7 +95,7 @@ export async function POST(req: Request) {
 
     const { civicItemId, action } = validation.data
 
-    // Upsert — if they already acted on this item (e.g. re-swiped), just update
+    // Upsert ΓÇö if they already acted on this item (e.g. re-swiped), just update
     await prisma.engagementEvent.upsert({
       where: { userId_civicItemId_action: { userId: user.id, civicItemId, action } },
       create: { userId: user.id, civicItemId, action },
