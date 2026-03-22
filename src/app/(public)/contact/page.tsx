@@ -65,7 +65,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-semibold text-on-surface mb-1">Office</h3>
                 <p className="text-on-surface-variant">123 Civic Center Dr</p>
-                <p className="text-on-surface-variant">Tempe, AZ 85281</p>
+                <p className="text-on-surface-variant">Your Local Area</p>
                 <p className="text-sm text-on-surface-variant">By appointment only</p>
               </div>
             </div>

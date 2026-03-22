@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   Scale,
   Eye,
-  ArrowRight,
 } from 'lucide-react'
 
 const trustFeatures = [
@@ -65,43 +64,6 @@ export default function LandingPage() {
           </div>
           <div className="relative order-1 lg:order-2">
             <HeroStabilizer />
-            {/* Floating card */}
-            <div className="absolute -bottom-10 -left-6 lg:-left-20 w-full max-w-sm bg-surface-container-lowest p-6 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant/10">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-primary text-[10px] font-bold tracking-[0.2em] uppercase">
-                    Trending Issue
-                  </span>
-                  <span className="text-on-surface-variant text-[10px] font-medium">
-                    2.4k active
-                  </span>
-                </div>
-                <h3 className="text-on-surface text-2xl font-bold leading-tight font-headline">
-                  Rent Stabilization Ordinance
-                </h3>
-                <p className="text-on-surface-variant text-sm leading-normal">
-                  Discussion on proposed amendments to local housing stability and tenant
-                  protections.
-                </p>
-                <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden mt-2">
-                  <div className="h-full bg-primary w-3/4" />
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex -space-x-2">
-                    <div className="size-6 rounded-full border-2 border-surface bg-surface-container-high" />
-                    <div className="size-6 rounded-full border-2 border-surface bg-surface-container-highest" />
-                    <div className="size-6 rounded-full border-2 border-surface bg-outline" />
-                  </div>
-                  <Link
-                    href="/discover"
-                    className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary-container transition-colors"
-                  >
-                    View Discussion
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -153,20 +115,25 @@ export default function LandingPage() {
               </p>
               <div className="grid grid-cols-2 gap-12">
                 <div className="flex flex-col">
-                  <span className="text-primary text-5xl font-black italic font-headline">42</span>
-                  <span className="text-on-surface font-bold text-lg mt-2">Policy Changes</span>
-                  <p className="text-on-surface-variant text-sm">Directly influenced by community discussions.</p>
+                  <span className="text-primary text-5xl font-black italic font-headline">30+</span>
+                  <span className="text-on-surface font-bold text-lg mt-2">Policies Tracked</span>
+                  <p className="text-on-surface-variant text-sm">Local bills, ordinances, and initiatives monitored.</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-primary text-5xl font-black italic font-headline">12k+</span>
-                  <span className="text-on-surface font-bold text-lg mt-2">Active Neighbors</span>
-                  <p className="text-on-surface-variant text-sm">Engaging in verified civil debate daily.</p>
+                  <span className="text-primary text-5xl font-black italic font-headline">100+</span>
+                  <span className="text-on-surface font-bold text-lg mt-2">Engagements</span>
+                  <p className="text-on-surface-variant text-sm">Community actions taken on civic issues.</p>
                 </div>
               </div>
             </div>
             <div className="bg-surface rounded-2xl p-2 shadow-inner border border-outline-variant/10">
-              <div className="rounded-xl w-full h-[400px] bg-gradient-to-br from-primary/5 via-surface-container to-surface-container-high flex items-center justify-center">
-                <p className="text-on-surface-variant text-sm">Community Forum Image</p>
+              <div className="rounded-xl w-full bg-surface-container-lowest overflow-hidden">
+                <img
+                  src="/images/asustudents01.png"
+                  alt="ASU students engaged in civic action"
+                  className="w-full h-auto rounded-xl object-cover"
+                  draggable={false}
+                />
               </div>
             </div>
           </div>
