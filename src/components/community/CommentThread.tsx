@@ -95,10 +95,10 @@ function CommentCard({ id, body, author, threadType, upvotes, status, createdAt,
   }
 
   const threadTypeBadge = threadType ? {
-    QUESTION: { color: 'bg-blue-100 text-blue-700', label: 'Question' },
+    QUESTION: { color: 'bg-[var(--co-info)]/10 text-[var(--co-info)]', label: 'Question' },
     SUPPORT: { color: 'bg-[var(--co-success)]/10 text-[var(--co-success)]', label: 'Support' },
     CONCERN: { color: 'bg-[var(--co-warning)]/10 text-[var(--co-warning)]', label: 'Concern' },
-    EVIDENCE: { color: 'bg-purple-100 text-purple-700', label: 'Evidence' },
+    EVIDENCE: { color: 'bg-[var(--co-accent)]/10 text-[var(--co-accent)]', label: 'Evidence' },
   }[threadType] : null
 
   if (status === 'FLAGGED' || status === 'HIDDEN') {
