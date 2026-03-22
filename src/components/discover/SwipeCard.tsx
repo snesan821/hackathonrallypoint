@@ -226,24 +226,24 @@ export function SwipeCard({ item, onSwipeLeft, onSwipeRight, isTop, stackIndex }
 
         {/* Swipe buttons — fixed at bottom, inside card flow */}
         {isTop && (
-          <div className="flex items-center justify-center gap-6 border-t border-outline-variant/15 bg-surface-container-lowest px-5 py-3">
+          <div className="flex items-center justify-center gap-8 border-t border-outline-variant/15 bg-surface-container-lowest px-5 py-3">
             <button
               type="button"
               aria-label="Skip"
-              className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm transition-all hover:border-outline hover:text-on-surface"
+              className="flex h-12 w-12 items-center justify-center text-on-surface-variant transition-all hover:scale-110 hover:text-on-surface active:scale-95"
               onClick={(e) => { e.stopPropagation(); triggerSwipeLeft() }}
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             <button
               type="button"
               aria-label="Save"
-              className="flex h-13 w-13 items-center justify-center rounded-full border-2 border-[var(--co-success)] bg-surface-container-lowest text-[var(--co-success)] shadow-sm transition-all hover:border-[var(--co-success)] hover:text-[var(--co-success)]"
+              className="flex h-12 w-12 items-center justify-center text-[var(--co-success)] transition-all hover:scale-110 active:scale-95"
               onClick={(e) => { e.stopPropagation(); triggerSwipeRight() }}
             >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
