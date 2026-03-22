@@ -264,16 +264,16 @@ export const ACTION_LABELS: Record<EngagementAction, ActionMeta> = {
   },
   SAVE: {
     action: 'SAVE',
-    label: 'Save for Later',
-    description: 'Bookmark this issue',
-    icon: 'Bookmark',
+    label: 'Follow',
+    description: 'Follow this issue',
+    icon: 'Plus',
     level: 2,
   },
   UNSAVE: {
     action: 'UNSAVE',
-    label: 'Remove Bookmark',
-    description: 'Remove from saved items',
-    icon: 'BookmarkX',
+    label: 'Unfollow',
+    description: 'Unfollow this issue',
+    icon: 'Plus',
     level: 0,
   },
   SHARE: {

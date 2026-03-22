@@ -196,7 +196,7 @@ export function ProfilePageClient({
             </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <StatCard label="Viewed" value={profile.stats.issuesViewed} />
-              <StatCard label="Saved" value={profile.stats.issuesSaved} />
+              <StatCard label="Following" value={profile.stats.issuesSaved} />
               <StatCard label="Supported" value={profile.stats.issuesSupported} />
               <StatCard label="Comments" value={profile.stats.commentsPosted} />
             </div>
@@ -237,7 +237,7 @@ export function ProfilePageClient({
         <div className="lg:col-span-1">
           <div className="rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-on-surface font-headline">Saved Issues</h2>
+              <h2 className="text-xl font-bold text-on-surface font-headline">Following</h2>
               <Link
                 href="/saved"
                 className="text-sm font-medium text-primary hover:text-primary-container"
@@ -260,7 +260,7 @@ export function ProfilePageClient({
                 </Link>
               ))}
               {savedItems.length === 0 && (
-                <p className="text-center text-sm text-on-surface-variant">No saved items yet</p>
+                <p className="text-center text-sm text-on-surface-variant">Not following any issues yet</p>
               )}
             </div>
           </div>
@@ -282,7 +282,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 function getActionLabel(action: string): string {
   const labels: Record<string, string> = {
     VIEW: 'Viewed',
-    SAVE: 'Saved',
+    SAVE: 'Followed',
     SUPPORT: 'Supported',
     COMMENT: 'Commented on',
     SHARE: 'Shared',

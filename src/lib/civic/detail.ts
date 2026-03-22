@@ -13,6 +13,7 @@ export interface CivicItemDetail {
   title: string
   slug: string
   categories: Category[]
+  category?: Category
   type: CivicItemType
   status: CivicItemStatus
   jurisdictionTags: string[]
@@ -174,6 +175,7 @@ export async function getCivicItemDetail(
     title: civicItem.title,
     slug: civicItem.slug,
     categories: civicItem.categories,
+    category: civicItem.category,
     type: civicItem.type,
     status: civicItem.status,
     jurisdictionTags: civicItem.jurisdictionTags,
