@@ -196,8 +196,8 @@ export function ActionLadder({
   return (
     <div className={cn('space-y-3', className)}>
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-slate-900">Take Action</h3>
-        <p className="text-sm text-slate-600">
+        <h3 className="text-lg font-bold text-on-surface">Take Action</h3>
+        <p className="text-sm text-on-surface-variant">
           Follow the steps below to make your voice heard
         </p>
       </div>
@@ -217,15 +217,15 @@ export function ActionLadder({
                 'group relative w-full rounded-lg border-2 p-4 text-left transition-all',
                 'hover:shadow-md active:scale-[0.98]',
                 completed
-                  ? 'border-green-500 bg-green-50'
+                  ? 'border-[var(--co-success)] bg-[var(--co-success)]/5'
                   : step.available
-                  ? 'border-slate-200 bg-white hover:border-orange-500'
-                  : 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-60',
+                  ? 'border-outline-variant/15 bg-surface-container-lowest hover:border-primary'
+                  : 'border-outline-variant/15 bg-surface-container-low cursor-not-allowed opacity-60',
                 isLoading && 'opacity-50 cursor-wait'
               )}
             >
               {/* Step number */}
-              <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+              <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-on-surface text-xs font-bold text-surface">
                 {index + 1}
               </div>
 
@@ -235,10 +235,10 @@ export function ActionLadder({
                   className={cn(
                     'rounded-lg p-2',
                     completed
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-[var(--co-success)] text-white'
                       : step.available
-                      ? 'bg-orange-100 text-orange-700 group-hover:bg-orange-500 group-hover:text-white'
-                      : 'bg-slate-200 text-slate-500'
+                      ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-on-primary'
+                      : 'bg-surface-container-high text-on-surface-variant'
                   )}
                 >
                   {completed ? (
@@ -253,22 +253,22 @@ export function ActionLadder({
                 {/* Content */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-slate-900">{step.label}</h4>
+                    <h4 className="font-semibold text-on-surface">{step.label}</h4>
                     {completed && (
-                      <span className="text-xs font-medium text-green-600">Completed</span>
+                      <span className="text-xs font-medium text-[var(--co-success)]">Completed</span>
                     )}
                     {!step.available && step.requiresPrerequisite && (
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="text-xs font-medium text-on-surface-variant">
                         Complete previous steps first
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-600">{step.description}</p>
+                  <p className="text-sm text-on-surface-variant">{step.description}</p>
                 </div>
 
                 {/* External link indicator */}
                 {step.externalUrl && (
-                  <ExternalLink className="h-4 w-4 text-slate-400" />
+                  <ExternalLink className="h-4 w-4 text-on-surface-variant" />
                 )}
               </div>
             </button>
@@ -277,16 +277,16 @@ export function ActionLadder({
       </div>
 
       {/* Progress indicator */}
-      <div className="mt-6 rounded-lg bg-slate-50 p-4">
+      <div className="mt-6 rounded-2xl bg-surface-container-low p-4">
         <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="font-medium text-slate-700">Your Progress</span>
-          <span className="text-slate-600">
+          <span className="font-medium text-on-surface">Your Progress</span>
+          <span className="text-on-surface-variant">
             {userActions.length} of {steps.length} completed
           </span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+        <div className="progress-track">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-600 transition-all duration-500"
+            className="progress-fill transition-all duration-500"
             style={{
               width: `${(userActions.length / steps.length) * 100}%`,
             }}

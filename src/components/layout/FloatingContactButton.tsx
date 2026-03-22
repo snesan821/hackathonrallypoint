@@ -13,7 +13,7 @@ export function FloatingContactButton() {
       {/* Floating Action Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-orange-600 text-white shadow-lg transition-all hover:bg-orange-700 hover:shadow-xl"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg transition-all hover:bg-primary-container hover:shadow-xl"
         aria-label="Contact us"
       >
         {isOpen ? (
@@ -28,22 +28,22 @@ export function FloatingContactButton() {
         <div className="fixed bottom-24 right-6 z-40 space-y-2">
           <Link
             href="/contact"
-            className="flex items-center gap-2 rounded-lg bg-white p-4 shadow-lg transition-all hover:bg-slate-50"
+            className="flex items-center gap-2 rounded-lg bg-surface-container-lowest p-4 shadow-lg transition-all hover:bg-surface-container-low"
           >
-            <Mail className="h-5 w-5 text-slate-600" />
-            <span className="font-medium text-slate-900">Contact Us</span>
+            <Mail className="h-5 w-5 text-on-surface-variant" />
+            <span className="font-medium text-on-surface">Contact Us</span>
           </Link>
           <Link
             href="/privacy"
-            className="flex items-center gap-2 rounded-lg bg-white p-4 shadow-lg transition-all hover:bg-slate-50"
+            className="flex items-center gap-2 rounded-lg bg-surface-container-lowest p-4 shadow-lg transition-all hover:bg-surface-container-low"
           >
-            <span className="font-medium text-slate-900">Privacy Policy</span>
+            <span className="font-medium text-on-surface">Privacy Policy</span>
           </Link>
           <Link
             href="/terms"
-            className="flex items-center gap-2 rounded-lg bg-white p-4 shadow-lg transition-all hover:bg-slate-50"
+            className="flex items-center gap-2 rounded-lg bg-surface-container-lowest p-4 shadow-lg transition-all hover:bg-surface-container-low"
           >
-            <span className="font-medium text-slate-900">Terms & Conditions</span>
+            <span className="font-medium text-on-surface">Terms & Conditions</span>
           </Link>
         </div>
       )}

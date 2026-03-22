@@ -56,28 +56,23 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="site-wrap py-8">
       {/* Page header */}
       <div className="mb-6">
-        <h1
-          className="mb-1 text-4xl font-bold text-slate-900"
-          style={{ fontFamily: 'var(--font-serif, serif)' }}
-        >
-          Discover
-        </h1>
-        <p className="text-slate-500">Local campaigns, initiatives, and propositions near you</p>
+        <h1 className="mb-2 text-3xl font-bold text-on-surface font-headline">Discover Issues</h1>
+        <p className="text-on-surface-variant">Local campaigns, initiatives, and propositions near you</p>
       </div>
 
       {/* View mode toggle */}
-      <div className="mb-8 flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 w-fit">
+      <div className="mb-8 flex items-center gap-1 rounded-xl border border-outline-variant/15 bg-surface-container-low p-1 w-fit">
         <button
           type="button"
           onClick={() => setViewMode('swipe')}
           className={cn(
             'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
             viewMode === 'swipe'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+              : 'text-on-surface-variant hover:text-on-surface'
           )}
         >
           <Layers className="h-4 w-4" />
@@ -89,8 +84,8 @@ export default function DiscoverPage() {
           className={cn(
             'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
             viewMode === 'browse'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+              : 'text-on-surface-variant hover:text-on-surface'
           )}
         >
           <LayoutGrid className="h-4 w-4" />
@@ -113,10 +108,7 @@ export default function DiscoverPage() {
             <button
               type="button"
               onClick={() => updateFilter('category', null)}
-              className={cn(
-                'pill',
-                !category ? 'pill-active' : ''
-              )}
+              className={cn('pill', !category ? 'pill-active' : '')}
             >
               All
             </button>
@@ -136,7 +128,7 @@ export default function DiscoverPage() {
           </div>
 
           {!isLoading && (
-            <p className="mb-4 text-sm text-slate-500">
+            <p className="mb-4 text-sm text-on-surface-variant">
               {totalCount} {totalCount === 1 ? 'issue' : 'issues'} found
             </p>
           )}
@@ -151,10 +143,10 @@ export default function DiscoverPage() {
           </div>
 
           {!isLoading && items.length === 0 && (
-            <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
-              <Filter className="mx-auto mb-4 h-10 w-10 text-slate-400" />
-              <h3 className="mb-2 text-lg font-semibold text-slate-900">No issues found</h3>
-              <p className="text-sm text-slate-500">
+            <div className="rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low p-12 text-center">
+              <Filter className="mx-auto mb-4 h-12 w-12 text-on-surface-variant" />
+              <h3 className="mb-2 text-lg font-semibold text-on-surface">No issues found</h3>
+              <p className="text-on-surface-variant">
                 Check back later for new civic issues in your area
               </p>
             </div>
