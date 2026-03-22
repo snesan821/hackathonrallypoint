@@ -1062,21 +1062,16 @@ async function main() {
 
   await prisma.engagementEvent.createMany({
     data: [
+      // Student only has VIEW/SHARE events — no SAVE/SUPPORT so the IS_LOCAL_DEV
+      // user (Alex Martinez) starts with a fully-populated swipe queue.
       { userId: student.id, civicItemId: rentStabilization.id, action: 'VIEW', timestamp: new Date('2026-03-01') },
-      { userId: student.id, civicItemId: rentStabilization.id, action: 'SAVE', timestamp: new Date('2026-03-01') },
-      { userId: student.id, civicItemId: rentStabilization.id, action: 'SUPPORT', timestamp: new Date('2026-03-02') },
       { userId: student.id, civicItemId: asuTransit.id, action: 'VIEW', timestamp: new Date('2026-03-05') },
-      { userId: student.id, civicItemId: asuTransit.id, action: 'SUPPORT', timestamp: new Date('2026-03-05') },
       { userId: student.id, civicItemId: asuTransit.id, action: 'SHARE', timestamp: new Date('2026-03-06') },
       { userId: student.id, civicItemId: affordableHousing.id, action: 'VIEW', timestamp: new Date('2026-03-08') },
-      { userId: student.id, civicItemId: affordableHousing.id, action: 'SUPPORT', timestamp: new Date('2026-03-08') },
       { userId: student.id, civicItemId: tuitionCap.id, action: 'VIEW', timestamp: new Date('2026-03-10') },
-      { userId: student.id, civicItemId: tuitionCap.id, action: 'SUPPORT', timestamp: new Date('2026-03-11') },
       { userId: student.id, civicItemId: azStudentLoans.id, action: 'VIEW', timestamp: new Date('2026-03-12') },
-      { userId: student.id, civicItemId: azStudentLoans.id, action: 'SAVE', timestamp: new Date('2026-03-12') },
       { userId: student.id, civicItemId: azMinimumWage.id, action: 'VIEW', timestamp: new Date('2026-03-13') },
       { userId: student.id, civicItemId: phoenixArts.id, action: 'VIEW', timestamp: new Date('2026-03-14') },
-      { userId: student.id, civicItemId: phoenixArts.id, action: 'SUPPORT', timestamp: new Date('2026-03-14') },
 
       { userId: organizer.id, civicItemId: waterConservation.id, action: 'VIEW', timestamp: new Date('2026-03-03') },
       { userId: organizer.id, civicItemId: waterConservation.id, action: 'SAVE', timestamp: new Date('2026-03-03') },
