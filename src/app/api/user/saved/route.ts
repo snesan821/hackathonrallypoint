@@ -22,28 +22,28 @@ export async function GET(req: Request) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get('pageSize') || '20')))
 
-    // Get all SAVE engagement events for this user
-    const savedEngagements = await prisma.engagementEvent.findMany({
-      where: {
-        userId: user.id,
-        action: 'SAVE',
-      },
-      select: {
-        civicItemId: true,
-        timestamp: true,
-      },
-      orderBy: {
-        timestamp: 'desc',
-      },
-    })
+    const saveWhere = {
+      userId: user.id,
+      action: 'SAVE' as const,
+    }
 
-    const savedItemIds = savedEngagements.map((e) => e.civicItemId)
+    const [totalCount, savedEngagements] = await Promise.all([
+      prisma.engagementEvent.count({ where: saveWhere }),
+      prisma.engagementEvent.findMany({
+        where: saveWhere,
+        select: {
+          civicItemId: true,
+          timestamp: true,
+        },
+        orderBy: {
+          timestamp: 'desc',
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ])
 
-    // Get total count
-    const totalCount = savedItemIds.length
-
-    // Paginate
-    const paginatedIds = savedItemIds.slice((page - 1) * pageSize, page * pageSize)
+    const paginatedIds = savedEngagements.map((engagement) => engagement.civicItemId)
 
     // Fetch civic items
     const items = await prisma.civicItem.findMany({

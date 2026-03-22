@@ -16,8 +16,9 @@ import {
   Menu,
   X,
 } from 'lucide-react'
-import { UserRole } from '@prisma/client'
 import { FloatingContactButton } from './FloatingContactButton'
+
+type UserRole = 'USER' | 'ORGANIZER' | 'MODERATOR' | 'ADMIN'
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>
@@ -93,7 +94,7 @@ export function AppShell({ user, children }: AppShellProps) {
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
-            <span className="text-xl font-bold tracking-tight text-on-surface">RallyPoint</span>
+            <span className="text-xl font-bold tracking-tight text-on-surface font-headline">RallyPoint</span>
           </Link>
 
           {/* User info */}
@@ -206,7 +207,7 @@ export function AppShell({ user, children }: AppShellProps) {
               <div className="size-6 text-primary">
                 <RallyPointLogo />
               </div>
-              <span className="text-xl font-bold tracking-tight text-on-surface">RallyPoint</span>
+              <span className="text-xl font-bold tracking-tight text-on-surface font-headline">RallyPoint</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -257,7 +258,7 @@ export function AppShell({ user, children }: AppShellProps) {
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
-            <span className="text-lg font-bold tracking-tight text-on-surface">RallyPoint</span>
+            <span className="text-xl font-bold tracking-tight text-on-surface font-headline">RallyPoint</span>
           </Link>
 
           <div className="w-6" />

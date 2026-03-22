@@ -51,6 +51,10 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
     router.push(`/issues/${item.slug}`)
   }
 
+  const prefetchDetailPage = () => {
+    router.prefetch(`/issues/${item.slug}`)
+  }
+
   return (
     <article
       className={cn(
@@ -59,6 +63,7 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
         className
       )}
       onClick={handleCardClick}
+      onMouseEnter={prefetchDetailPage}
     >
       <div className="p-5 pb-0">
         {/* Top metadata row */}
