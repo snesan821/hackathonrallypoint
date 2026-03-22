@@ -8,6 +8,7 @@ import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { Filter, LayoutGrid, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { renderIcon } from '@/lib/utils/icons'
+import { LocationPrompt } from '@/components/civic/LocationPrompt'
 import type { Category } from '@prisma/client'
 
 type ViewMode = 'swipe' | 'browse'
@@ -19,6 +20,7 @@ export default function DiscoverPage() {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
+  const [locationFilter, setLocationFilter] = useState<{ city?: string; county?: string; state?: string } | null>(null)
 
   const category = searchParams.get('category') as Category | null
   const search = searchParams.get('q') || ''
@@ -28,6 +30,9 @@ export default function DiscoverPage() {
     const params = new URLSearchParams()
     if (category) params.set('category', category)
     if (search) params.set('search', search)
+    if (locationFilter?.city) params.set('city', locationFilter.city)
+    if (locationFilter?.county) params.set('county', locationFilter.county)
+    if (locationFilter?.state) params.set('state', locationFilter.state)
     params.set('pageSize', '20')
 
     try {
@@ -46,7 +51,7 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     if (viewMode === 'browse') fetchItems()
-  }, [category, search, viewMode])
+  }, [category, search, viewMode, locationFilter])
 
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -61,6 +66,14 @@ export default function DiscoverPage() {
       <div className="mb-6">
         <h1 className="mb-2 text-3xl font-bold text-on-surface font-headline">Discover Issues</h1>
         <p className="text-on-surface-variant">Local campaigns, initiatives, and propositions near you</p>
+      </div>
+
+      {/* Location prompt */}
+      <div className="mb-6">
+        <LocationPrompt
+          onLocationResolved={(loc) => setLocationFilter(loc)}
+          onLocationCleared={() => setLocationFilter(null)}
+        />
       </div>
 
       {/* View mode toggle */}

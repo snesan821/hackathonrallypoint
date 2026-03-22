@@ -13,6 +13,9 @@ export interface CategoryMeta {
   label: string
   icon: string // Lucide icon name
   color: string // Tailwind color class
+  iconColor: string
+  iconSurface: string
+  selectedState: string
   description: string
 }
 
@@ -22,6 +25,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Housing',
     icon: 'Home',
     color: 'bg-blue-500',
+    iconColor: 'text-amber-700',
+    iconSurface: 'border-amber-100 bg-amber-50',
+    selectedState: 'border-amber-300 bg-amber-50 shadow-[0_18px_45px_rgba(180,83,9,0.12)]',
     description: 'Rent control, affordable housing, tenant rights',
   },
   {
@@ -29,6 +35,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Education',
     icon: 'GraduationCap',
     color: 'bg-purple-500',
+    iconColor: 'text-violet-700',
+    iconSurface: 'border-violet-100 bg-violet-50',
+    selectedState: 'border-violet-300 bg-violet-50 shadow-[0_18px_45px_rgba(109,40,217,0.12)]',
     description: 'School funding, curriculum, college affordability',
   },
   {
@@ -36,6 +45,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Transit',
     icon: 'Bus',
     color: 'bg-green-500',
+    iconColor: 'text-emerald-700',
+    iconSurface: 'border-emerald-100 bg-emerald-50',
+    selectedState: 'border-emerald-300 bg-emerald-50 shadow-[0_18px_45px_rgba(4,120,87,0.12)]',
     description: 'Public transportation, bike lanes, walkability',
   },
   {
@@ -43,6 +55,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Public Safety',
     icon: 'Shield',
     color: 'bg-red-500',
+    iconColor: 'text-rose-700',
+    iconSurface: 'border-rose-100 bg-rose-50',
+    selectedState: 'border-rose-300 bg-rose-50 shadow-[0_18px_45px_rgba(190,24,93,0.12)]',
     description: 'Police, fire services, emergency response',
   },
   {
@@ -50,6 +65,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Healthcare',
     icon: 'Heart',
     color: 'bg-pink-500',
+    iconColor: 'text-pink-700',
+    iconSurface: 'border-pink-100 bg-pink-50',
+    selectedState: 'border-pink-300 bg-pink-50 shadow-[0_18px_45px_rgba(190,24,93,0.12)]',
     description: 'Mental health, community health, access to care',
   },
   {
@@ -57,6 +75,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Jobs & Economy',
     icon: 'Briefcase',
     color: 'bg-amber-500',
+    iconColor: 'text-orange-700',
+    iconSurface: 'border-orange-100 bg-orange-50',
+    selectedState: 'border-orange-300 bg-orange-50 shadow-[0_18px_45px_rgba(194,65,12,0.12)]',
     description: 'Employment, minimum wage, worker protections',
   },
   {
@@ -64,6 +85,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Environment',
     icon: 'Leaf',
     color: 'bg-emerald-500',
+    iconColor: 'text-lime-700',
+    iconSurface: 'border-lime-100 bg-lime-50',
+    selectedState: 'border-lime-300 bg-lime-50 shadow-[0_18px_45px_rgba(77,124,15,0.12)]',
     description: 'Climate, conservation, sustainability',
   },
   {
@@ -71,6 +95,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Civil Rights',
     icon: 'Scale',
     color: 'bg-indigo-500',
+    iconColor: 'text-indigo-700',
+    iconSurface: 'border-indigo-100 bg-indigo-50',
+    selectedState: 'border-indigo-300 bg-indigo-50 shadow-[0_18px_45px_rgba(67,56,202,0.12)]',
     description: 'Equity, discrimination, voting rights',
   },
   {
@@ -78,6 +105,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'City Services',
     icon: 'Building2',
     color: 'bg-cyan-500',
+    iconColor: 'text-cyan-700',
+    iconSurface: 'border-cyan-100 bg-cyan-50',
+    selectedState: 'border-cyan-300 bg-cyan-50 shadow-[0_18px_45px_rgba(14,116,144,0.12)]',
     description: 'Parks, utilities, waste management',
   },
   {
@@ -85,6 +115,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Budget & Taxes',
     icon: 'DollarSign',
     color: 'bg-yellow-500',
+    iconColor: 'text-yellow-700',
+    iconSurface: 'border-yellow-100 bg-yellow-50',
+    selectedState: 'border-yellow-300 bg-yellow-50 shadow-[0_18px_45px_rgba(161,98,7,0.12)]',
     description: 'Municipal budgets, taxes, fiscal policy',
   },
   {
@@ -92,6 +125,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Zoning & Development',
     icon: 'MapPin',
     color: 'bg-orange-500',
+    iconColor: 'text-orange-700',
+    iconSurface: 'border-orange-100 bg-orange-50',
+    selectedState: 'border-orange-300 bg-orange-50 shadow-[0_18px_45px_rgba(194,65,12,0.12)]',
     description: 'Land use, construction, urban planning',
   },
   {
@@ -99,6 +135,9 @@ export const CIVIC_CATEGORIES: CategoryMeta[] = [
     label: 'Other',
     icon: 'MoreHorizontal',
     color: 'bg-gray-500',
+    iconColor: 'text-slate-600',
+    iconSurface: 'border-slate-200 bg-slate-50',
+    selectedState: 'border-slate-300 bg-slate-50 shadow-[0_18px_45px_rgba(71,85,105,0.10)]',
     description: 'Other civic issues',
   },
 ]
