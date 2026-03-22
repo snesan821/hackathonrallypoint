@@ -12,84 +12,24 @@ import {
   Calendar,
 } from 'lucide-react'
 
-export default async function ImpactPage() {
-  const user = await getCurrentUserCached()
-  if (!user) redirect('/sign-in')
+export default function ImpactPage() {
+  const [impact, setImpact] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [
-    engagementsByAction,
-    ,
-    recentActivity,
-    engagementDates,
-    commentCount,
-    ,
-    engagementsByCategory,
-  ] = await Promise.all([
-    prisma.engagementEvent.groupBy({
-      by: ['action'],
-      where: { userId: user.id },
-      _count: { action: true },
-    }),
-    prisma.engagementEvent.findMany({
-      where: { userId: user.id },
-      distinct: ['civicItemId'],
-      select: { civicItemId: true },
-    }),
-    prisma.engagementEvent.findMany({
-      where: { userId: user.id },
-      orderBy: { timestamp: 'desc' },
-      take: 20,
-      include: {
-        civicItem: {
-          select: { id: true, title: true, slug: true, type: true },
-        },
-      },
-    }),
-    prisma.$queryRaw<Array<{ date: Date }>>`
-      SELECT DISTINCT DATE("createdAt") as date
-      FROM "EngagementEvent"
-      WHERE "userId" = ${user.id}::uuid
-      ORDER BY date DESC
-      LIMIT 365
-    `,
-    prisma.comment.count({ where: { authorId: user.id } }),
-    prisma.comment.findMany({
-      where: { authorId: user.id },
-      distinct: ['civicItemId'],
-      select: { civicItemId: true },
-    }),
-    prisma.$queryRaw<Array<{ category: string; count: bigint }>>`
-      SELECT ci.category::text as category, COUNT(*) as count
-      FROM "EngagementEvent" ee
-      JOIN "CivicItem" ci ON ee."civicItemId" = ci.id
-      WHERE ee."userId" = ${user.id}::uuid
-      GROUP BY ci.category
-      ORDER BY count DESC
-    `,
-  ])
+  const fetchImpact = async () => {
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/user/impact')
+      const data = await res.json()
 
-  const actionCounts = engagementsByAction.reduce((acc, curr) => {
-    acc[curr.action] = curr._count.action
-    return acc
-  }, {} as Record<string, number>)
-
-  const categoryDistribution = engagementsByCategory.map((item) => ({
-    category: item.category,
-    count: Number(item.count),
-  }))
-
-  const actionsCompleted = Object.values(actionCounts).reduce((a, b) => a + b, 0)
-
-  // Calculate streak
-  let streak = 0
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  for (let i = 0; i < engagementDates.length; i++) {
-    const date = new Date(engagementDates[i].date)
-    date.setHours(0, 0, 0, 0)
-    const daysDiff = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
-    if (daysDiff === i) streak++
-    else break
+      if (data.success) {
+        setImpact(data.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch impact:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const totals = {
