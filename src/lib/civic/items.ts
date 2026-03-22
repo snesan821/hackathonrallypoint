@@ -46,6 +46,9 @@ export interface CivicItemCardRecord {
   longitude: number | null
   commentCount: number
   engagementCount: number
+  viewCount?: number
+  saveCount?: number
+  supporterCount?: number
   createdAt: Date
   userActions?: EngagementAction[]
 }
@@ -178,6 +181,32 @@ export async function getCivicItemsPage(
       : Promise.resolve(null),
   ])
 
+  // Get engagement count statistics for these items
+  const itemIds = rawItems.map((item) => item.id)
+  const engagementCounts = itemIds.length > 0
+    ? await prisma.engagementEvent.groupBy({
+        by: ['civicItemId', 'action'],
+        where: {
+          civicItemId: { in: itemIds },
+        },
+        _count: {
+          action: true,
+        },
+      })
+    : []
+
+  // Map engagement counts to items
+  const statsMap = new Map<string, { viewCount: number; saveCount: number; supporterCount: number }>()
+  for (const count of engagementCounts) {
+    if (!statsMap.has(count.civicItemId)) {
+      statsMap.set(count.civicItemId, { viewCount: 0, saveCount: 0, supporterCount: 0 })
+    }
+    const stats = statsMap.get(count.civicItemId)!
+    if (count.action === 'VIEW') stats.viewCount = count._count.action
+    if (count.action === 'SAVE') stats.saveCount = count._count.action
+    if (count.action === 'SUPPORT') stats.supporterCount = count._count.action
+  }
+
   let items = rawItems
 
   if (sort === 'trending' && items.length > 0) {
@@ -249,30 +278,36 @@ export async function getCivicItemsPage(
   }
 
   return {
-    items: items.map((item) => ({
-      id: item.id,
-      title: item.title,
-      slug: item.slug,
-      category: item.category,
-      categories: item.categories,
-      type: item.type,
-      status: item.status,
-      jurisdictionTags: item.jurisdictionTags,
-      jurisdictionLevel: item.jurisdictionLevel,
-      summary: item.summary,
-      sourceUrl: item.sourceUrl,
-      deadline: item.deadline,
-      currentSupport: item.currentSupport,
-      targetSupport: item.targetSupport,
-      allowsOnlineSignature: item.allowsOnlineSignature,
-      tags: item.tags,
-      districtIds: toStringArray(item.districtIds),
-      latitude: item.latitude,
-      longitude: item.longitude,
-      commentCount: item._count.comments,
-      engagementCount: item._count.engagements,
-      createdAt: item.createdAt,
-    })),
+    items: items.map((item) => {
+      const stats = statsMap.get(item.id) || { viewCount: 0, saveCount: 0, supporterCount: 0 }
+      return {
+        id: item.id,
+        title: item.title,
+        slug: item.slug,
+        category: item.category,
+        categories: item.categories,
+        type: item.type,
+        status: item.status,
+        jurisdictionTags: item.jurisdictionTags,
+        jurisdictionLevel: item.jurisdictionLevel,
+        summary: item.summary,
+        sourceUrl: item.sourceUrl,
+        deadline: item.deadline,
+        currentSupport: item.currentSupport,
+        targetSupport: item.targetSupport,
+        allowsOnlineSignature: item.allowsOnlineSignature,
+        tags: item.tags,
+        districtIds: toStringArray(item.districtIds),
+        latitude: item.latitude,
+        longitude: item.longitude,
+        commentCount: item._count.comments,
+        engagementCount: item._count.engagements,
+        viewCount: stats.viewCount,
+        saveCount: stats.saveCount,
+        supporterCount: stats.supporterCount,
+        createdAt: item.createdAt,
+      }
+    }),
     totalCount,
     page,
     pageSize,

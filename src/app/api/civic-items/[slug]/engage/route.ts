@@ -67,47 +67,59 @@ export async function POST(
 
     // Check for UNSAVE action (toggle off SAVE)
     if (action === 'UNSAVE') {
-      // Find and delete the SAVE engagement
+      // Find the most recent SAVE engagement to verify user has saved this item
       const saveEngagement = await prisma.engagementEvent.findFirst({
         where: {
           userId: user.id,
           civicItemId: civicItem.id,
           action: 'SAVE',
         },
+        orderBy: { timestamp: 'desc' },
       })
 
       if (!saveEngagement) {
         return errorResponse('No save engagement found to remove', 404)
       }
 
-      // Delete engagement
-      await prisma.engagementEvent.delete({
-        where: { id: saveEngagement.id },
+      // Create UNSAVE engagement event (don't delete SAVE - keep for activity history)
+      await prisma.engagementEvent.create({
+        data: {
+          userId: user.id,
+          civicItemId: civicItem.id,
+          action: 'UNSAVE',
+          metadata: metadata || {},
+        },
       })
 
       // Invalidate cache
       try {
         await redis.del(`civic_item:${slug}`)
         await redis.del(`user:${user.id}:saved`)
+        await redis.del(`user:${user.id}:activity`)
       } catch {
         // Redis unavailable - continue
       }
 
-      // Get updated engagement state
-      const remainingEngagements = await prisma.engagementEvent.findMany({
+      // Get updated engagement state - find most recent SAVE/UNSAVE to determine current state
+      const allEngagements = await prisma.engagementEvent.findMany({
         where: {
           userId: user.id,
           civicItemId: civicItem.id,
         },
-        select: { action: true },
+        select: { action: true, timestamp: true },
+        orderBy: { timestamp: 'desc' },
       })
+
+      // Determine current save state from most recent SAVE/UNSAVE event
+      const saveUnsaveEvents = allEngagements.filter(e => e.action === 'SAVE' || e.action === 'UNSAVE')
+      const currentlySaved = saveUnsaveEvents.length > 0 && saveUnsaveEvents[0].action === 'SAVE'
 
       return successResponse({
         message: 'Item unfollowed',
         userEngagement: {
-          actions: remainingEngagements.map((e) => e.action),
-          hasSupported: remainingEngagements.some((e) => e.action === 'SUPPORT'),
-          hasSaved: false,
+          actions: allEngagements.map((e) => e.action),
+          hasSupported: allEngagements.some((e) => e.action === 'SUPPORT'),
+          hasSaved: currentlySaved,
         },
         currentSupport: civicItem.currentSupport,
       })
@@ -115,23 +127,29 @@ export async function POST(
 
     // Check for UNSUPPORT action
     if (action === 'UNSUPPORT') {
-      // Find and delete the SUPPORT engagement
+      // Find the most recent SUPPORT engagement to verify user has supported this item
       const supportEngagement = await prisma.engagementEvent.findFirst({
         where: {
           userId: user.id,
           civicItemId: civicItem.id,
           action: 'SUPPORT',
         },
+        orderBy: { timestamp: 'desc' },
       })
 
       if (!supportEngagement) {
         return errorResponse('No support engagement found to remove', 404)
       }
 
-      // Delete engagement and decrement support count atomically
+      // Create UNSUPPORT engagement event and decrement support count atomically
       await prisma.$transaction([
-        prisma.engagementEvent.delete({
-          where: { id: supportEngagement.id },
+        prisma.engagementEvent.create({
+          data: {
+            userId: user.id,
+            civicItemId: civicItem.id,
+            action: 'UNSUPPORT',
+            metadata: metadata || {},
+          },
         }),
         prisma.civicItem.update({
           where: { id: civicItem.id },
@@ -143,25 +161,35 @@ export async function POST(
       try {
         await redis.del(`civic_item:${slug}`)
         await redis.del(`user:${user.id}:impact`)
+        await redis.del(`user:${user.id}:activity`)
       } catch {
         // Redis unavailable - continue
       }
 
-      // Get updated engagement state
-      const remainingEngagements = await prisma.engagementEvent.findMany({
+      // Get updated engagement state - find most recent SUPPORT/UNSUPPORT to determine current state
+      const allEngagements = await prisma.engagementEvent.findMany({
         where: {
           userId: user.id,
           civicItemId: civicItem.id,
         },
-        select: { action: true },
+        select: { action: true, timestamp: true },
+        orderBy: { timestamp: 'desc' },
       })
+
+      // Determine current support state from most recent SUPPORT/UNSUPPORT event
+      const supportUnsupportEvents = allEngagements.filter(e => e.action === 'SUPPORT' || e.action === 'UNSUPPORT')
+      const currentlySupported = supportUnsupportEvents.length > 0 && supportUnsupportEvents[0].action === 'SUPPORT'
+
+      // Determine current save state from most recent SAVE/UNSAVE event
+      const saveUnsaveEvents = allEngagements.filter(e => e.action === 'SAVE' || e.action === 'UNSAVE')
+      const currentlySaved = saveUnsaveEvents.length > 0 && saveUnsaveEvents[0].action === 'SAVE'
 
       return successResponse({
         message: 'Support removed',
         userEngagement: {
-          actions: remainingEngagements.map((e) => e.action),
-          hasSupported: false,
-          hasSaved: remainingEngagements.some((e) => e.action === 'SAVE'),
+          actions: allEngagements.map((e) => e.action),
+          hasSupported: currentlySupported,
+          hasSaved: currentlySaved,
         },
         currentSupport: civicItem.currentSupport - 1,
       })
@@ -174,37 +202,53 @@ export async function POST(
         civicItemId: civicItem.id,
         action,
       },
+      orderBy: { timestamp: 'desc' },
     })
 
     if (existingEngagement) {
-      // For toggle actions like SAVE, treat as remove
+      // For toggle actions like SAVE, treat as remove (create UNSAVE event)
       if (action === 'SAVE') {
-        await prisma.engagementEvent.delete({
-          where: { id: existingEngagement.id },
+        await prisma.engagementEvent.create({
+          data: {
+            userId: user.id,
+            civicItemId: civicItem.id,
+            action: 'UNSAVE',
+            metadata: metadata || {},
+          },
         })
 
         // Invalidate cache
         try {
           await redis.del(`civic_item:${slug}`)
           await redis.del(`user:${user.id}:saved`)
+          await redis.del(`user:${user.id}:activity`)
         } catch {
           // Redis unavailable - continue
         }
 
-        const remainingEngagements = await prisma.engagementEvent.findMany({
+        const allEngagements = await prisma.engagementEvent.findMany({
           where: {
             userId: user.id,
             civicItemId: civicItem.id,
           },
-          select: { action: true },
+          select: { action: true, timestamp: true },
+          orderBy: { timestamp: 'desc' },
         })
+
+        // Determine current save state from most recent SAVE/UNSAVE event
+        const saveUnsaveEvents = allEngagements.filter(e => e.action === 'SAVE' || e.action === 'UNSAVE')
+        const currentlySaved = saveUnsaveEvents.length > 0 && saveUnsaveEvents[0].action === 'SAVE'
+
+        // Determine current support state from most recent SUPPORT/UNSUPPORT event
+        const supportUnsupportEvents = allEngagements.filter(e => e.action === 'SUPPORT' || e.action === 'UNSUPPORT')
+        const currentlySupported = supportUnsupportEvents.length > 0 && supportUnsupportEvents[0].action === 'SUPPORT'
 
         return successResponse({
           message: 'Item unfollowed',
           userEngagement: {
-            actions: remainingEngagements.map((e) => e.action),
-            hasSupported: remainingEngagements.some((e) => e.action === 'SUPPORT'),
-            hasSaved: false,
+            actions: allEngagements.map((e) => e.action),
+            hasSupported: currentlySupported,
+            hasSaved: currentlySaved,
           },
         })
       }
@@ -259,8 +303,17 @@ export async function POST(
         userId: user.id,
         civicItemId: civicItem.id,
       },
-      select: { action: true },
+      select: { action: true, timestamp: true },
+      orderBy: { timestamp: 'desc' },
     })
+
+    // Determine current save state from most recent SAVE/UNSAVE event
+    const saveUnsaveEvents = allEngagements.filter(e => e.action === 'SAVE' || e.action === 'UNSAVE')
+    const currentlySaved = saveUnsaveEvents.length > 0 && saveUnsaveEvents[0].action === 'SAVE'
+
+    // Determine current support state from most recent SUPPORT/UNSUPPORT event
+    const supportUnsupportEvents = allEngagements.filter(e => e.action === 'SUPPORT' || e.action === 'UNSUPPORT')
+    const currentlySupported = supportUnsupportEvents.length > 0 && supportUnsupportEvents[0].action === 'SUPPORT'
 
     // Invalidate relevant caches
     try {
@@ -271,6 +324,8 @@ export async function POST(
       if (HIGH_VALUE_ACTIONS.includes(action)) {
         await redis.del(`user:${user.id}:impact`)
       }
+      // Always invalidate activity cache for new engagements
+      await redis.del(`user:${user.id}:activity`)
     } catch {
       // Redis unavailable - continue
     }
@@ -279,8 +334,8 @@ export async function POST(
       message: `${action} recorded successfully`,
       userEngagement: {
         actions: allEngagements.map((e) => e.action),
-        hasSupported: allEngagements.some((e) => e.action === 'SUPPORT'),
-        hasSaved: allEngagements.some((e) => e.action === 'SAVE'),
+        hasSupported: currentlySupported,
+        hasSaved: currentlySaved,
         hasCommented: allEngagements.some((e) => e.action === 'COMMENT'),
       },
       currentSupport: updatedSupport,
