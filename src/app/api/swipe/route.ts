@@ -65,12 +65,46 @@ export async function GET(req: Request) {
             whyItMatters: true,
           },
         },
+        _count: {
+          select: {
+            engagements: true,
+          },
+        },
       },
+    })
+
+    // Enrich items with per-action engagement counts
+    const itemIds = items.map((i) => i.id)
+    const engagementCounts = itemIds.length > 0
+      ? await prisma.engagementEvent.groupBy({
+          by: ['civicItemId', 'action'],
+          where: { civicItemId: { in: itemIds } },
+          _count: { action: true },
+        })
+      : []
+
+    const countMap = new Map<string, { views: number; saves: number; supporters: number }>()
+    for (const e of engagementCounts) {
+      const entry = countMap.get(e.civicItemId) ?? { views: 0, saves: 0, supporters: 0 }
+      if (e.action === 'VIEW') entry.views = e._count.action
+      else if (e.action === 'SAVE') entry.saves = e._count.action
+      else if (e.action === 'SUPPORT') entry.supporters = e._count.action
+      countMap.set(e.civicItemId, entry)
+    }
+
+    const enrichedItems = items.map((item) => {
+      const counts = countMap.get(item.id) ?? { views: 0, saves: 0, supporters: 0 }
+      return {
+        ...item,
+        viewCount: counts.views,
+        saveCount: counts.saves,
+        supporterCount: counts.supporters,
+      }
     })
 
     const nextCursor = items.length === BATCH_SIZE ? items[items.length - 1].id : null
 
-    return NextResponse.json({ success: true, data: items, nextCursor })
+    return NextResponse.json({ success: true, data: enrichedItems, nextCursor })
   } catch (error: any) {
     if (error.message?.includes('Unauthorized')) return errorResponse('Unauthorized', 401)
     console.error('GET /api/swipe error:', error)

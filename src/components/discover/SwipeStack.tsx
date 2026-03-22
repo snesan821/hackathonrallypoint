@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { SwipeCard, type SwipeItem, type SwipeCardHandle } from './SwipeCard'
 import { CategoryBadge } from '@/components/civic/CategoryBadge'
-import { ExternalLink, BookmarkCheck, RefreshCw, Inbox } from 'lucide-react'
+import { ExternalLink, RefreshCw, Inbox, Plus } from 'lucide-react'
 
-const REFETCH_THRESHOLD = 3 // fetch next batch when this many cards remain
+const REFETCH_THRESHOLD = 3
 
 export function SwipeStack() {
   const [queue, setQueue] = useState<SwipeItem[]>([])
@@ -42,19 +42,25 @@ export function SwipeStack() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchBatch(null)
-  }, [fetchBatch])
+  useEffect(() => { fetchBatch(null) }, [fetchBatch])
 
-  // Fetch more when queue is getting low
   useEffect(() => {
-    if (!isLoading && queue.length <= REFETCH_THRESHOLD && cursor) {
-      fetchBatch(cursor)
-    }
-    if (!isLoading && queue.length === 0) {
-      setIsEmpty(true)
-    }
+    if (!isLoading && queue.length <= REFETCH_THRESHOLD && cursor) fetchBatch(cursor)
+    if (!isLoading && queue.length === 0) setIsEmpty(true)
   }, [queue.length, cursor, isLoading, fetchBatch])
+
+  // Right swipe = FOLLOW (maps to SAVE action in backend)
+  const recordFollow = useCallback(async (item: SwipeItem) => {
+    try {
+      await fetch(`/api/civic-items/${item.slug}/engage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'SAVE' }),
+      })
+    } catch {
+      // Fire-and-forget
+    }
+  }, [])
 
   const recordSkip = useCallback(async (item: SwipeItem) => {
     try {
@@ -63,29 +69,18 @@ export function SwipeStack() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ civicItemId: item.id, action: 'SKIP' }),
       })
-    } catch {
-      // Fire-and-forget ΓÇö skip failures are non-critical
-    }
+    } catch {}
   }, [])
 
-  const recordSave = useCallback(async (item: SwipeItem) => {
-    // Record both SUPPORT (swipe tracking) and SAVE (shows on saved page)
+  // Support button on card face — independent from swipe
+  const recordSupport = useCallback(async (item: SwipeItem) => {
     try {
-      await Promise.all([
-        fetch('/api/swipe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ civicItemId: item.id, action: 'SUPPORT' }),
-        }),
-        fetch(`/api/civic-items/${item.slug}/engage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'SAVE' }),
-        }),
-      ])
-    } catch {
-      // Fire-and-forget
-    }
+      await fetch(`/api/civic-items/${item.slug}/engage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'SUPPORT' }),
+      })
+    } catch {}
   }, [])
 
   const handleSwipeLeft = useCallback(() => {
@@ -111,7 +106,7 @@ export function SwipeStack() {
       }
       return rest
     })
-  }, [recordSave])
+  }, [recordFollow])
 
   const handleReset = useCallback(() => {
     setQueue([])
@@ -123,12 +118,10 @@ export function SwipeStack() {
     fetchBatch(null)
   }, [fetchBatch])
 
-  // Visible cards: top 3
   const visibleCards = queue.slice(0, 3)
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Swipe deck */}
       <div className="flex flex-col items-center">
         <div className="relative w-full max-w-sm overflow-visible" style={{ height: 480 }}>
           {isLoading && visibleCards.length === 0 && (
@@ -152,26 +145,24 @@ export function SwipeStack() {
             </div>
           )}
 
-          {visibleCards
-            .slice()
-            .reverse()
-            .map((item, reversedIdx) => {
-              const stackIndex = visibleCards.length - 1 - reversedIdx
-              return (
-                <SwipeCard
-                  key={item.id}
-                  ref={stackIndex === 0 ? topCardRef : null}
-                  item={item}
-                  isTop={stackIndex === 0}
-                  stackIndex={stackIndex}
-                  onSwipeLeft={handleSwipeLeft}
-                  onSwipeRight={handleSwipeRight}
-                />
-              )
-            })}
+          {visibleCards.slice().reverse().map((item, reversedIdx) => {
+            const stackIndex = visibleCards.length - 1 - reversedIdx
+            return (
+              <SwipeCard
+                key={item.id}
+                ref={stackIndex === 0 ? topCardRef : null}
+                item={item}
+                isTop={stackIndex === 0}
+                stackIndex={stackIndex}
+                onSwipeLeft={handleSwipeLeft}
+                onSwipeRight={handleSwipeRight}
+                onSupport={recordSupport}
+              />
+            )
+          })}
         </div>
 
-        {/* Swipe buttons — below the deck, not inside the card */}
+        {/* Swipe buttons — X (skip) and + (follow) */}
         {!isLoading && visibleCards.length > 0 && (
           <div className="mt-5 flex items-center justify-center gap-10">
             <button
@@ -186,25 +177,21 @@ export function SwipeStack() {
             </button>
             <button
               type="button"
-              aria-label="Save"
+              aria-label="Follow"
               className="flex h-14 w-14 items-center justify-center text-[var(--co-success)] transition-all hover:scale-110 active:scale-95"
               onClick={() => topCardRef.current?.triggerSwipeRight()}
             >
-              <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
+              <Plus className="h-9 w-9" strokeWidth={2.5} />
             </button>
           </div>
         )}
 
-        {/* Swipe hint */}
         {!isLoading && visibleCards.length > 0 && (
           <p className="mt-4 text-center text-xs text-on-surface-variant">
-            Swipe right to save &middot; swipe left to skip
+            Swipe right to follow &middot; swipe left to skip
           </p>
         )}
 
-        {/* Remaining count */}
         {!isLoading && queue.length > 0 && (
           <p className="mt-1 text-center text-xs text-on-surface-variant">
             {queue.length} {queue.length === 1 ? 'issue' : 'issues'} remaining
@@ -212,14 +199,12 @@ export function SwipeStack() {
         )}
       </div>
 
-      {/* Saved matches */}
+      {/* Following this session */}
       {matches.length > 0 && (
         <div>
           <div className="mb-4 flex items-center gap-2">
-            <BookmarkCheck className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold text-on-surface">
-              Saved this session
-            </h2>
+            <Plus className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-on-surface">Following this session</h2>
             <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
               {matches.length}
             </span>
@@ -231,37 +216,24 @@ export function SwipeStack() {
               return (
                 <div key={item.id} className="flex items-start gap-4 p-4">
                   <div className="flex-1 min-w-0">
-                    {item.categories[0] && (
+                    {(item.categories[0] || item.category) && (
                       <div className="mb-1.5">
-                        <CategoryBadge category={item.categories[0]} size="sm" showIcon={false} />
+                        <CategoryBadge category={item.categories[0] || item.category} size="sm" showIcon={false} />
                       </div>
                     )}
-                    <p
-                      className="font-semibold text-on-surface leading-snug mb-1 line-clamp-2"
-                      style={{ fontFamily: 'var(--font-serif, serif)' }}
-                    >
+                    <p className="font-semibold text-on-surface leading-snug mb-1 line-clamp-2" style={{ fontFamily: 'var(--font-serif, serif)' }}>
                       {item.title}
                     </p>
                     <p className="text-xs text-on-surface-variant line-clamp-1">
-                      {item.jurisdictionTags[0] || item.jurisdictionLevel} &middot;{' '}
-                      {item.type.replace(/_/g, ' ')}
+                      {item.jurisdictionTags[0] || item.jurisdictionLevel} &middot; {item.type.replace(/_/g, ' ')}
                     </p>
                   </div>
-
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <Link
-                      href={`/issues/${item.slug}`}
-                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-on-primary hover:bg-primary-container transition-colors whitespace-nowrap"
-                    >
+                    <Link href={`/issues/${item.slug}`} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-on-primary hover:bg-primary-container transition-colors whitespace-nowrap">
                       Read article
                     </Link>
                     {contactUrl && (
-                      <a
-                        href={contactUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 rounded-lg border border-outline-variant/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-colors whitespace-nowrap"
-                      >
+                      <a href={contactUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-outline-variant/15 bg-surface-container-lowest px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-colors whitespace-nowrap">
                         <ExternalLink className="h-3 w-3" />
                         Source
                       </a>
@@ -274,7 +246,7 @@ export function SwipeStack() {
 
           <div className="mt-4 text-center">
             <Link href="/saved" className="text-sm font-medium text-primary hover:text-primary-container">
-              View all saved issues &rarr;
+              View all followed issues &rarr;
             </Link>
           </div>
         </div>
