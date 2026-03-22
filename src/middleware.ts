@@ -1,10 +1,5 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
-
-export default clerkMiddleware()
-
-export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
-}
+// This file is intentionally minimal.
+// next.config.js swaps the actual implementation via webpack alias:
+//   hasValidClerkKey=true  → src/lib/middleware-clerk.ts   (real Clerk)
+//   hasValidClerkKey=false → src/lib/middleware-passthrough.ts (no-op)
+export { default, config } from '#middleware-impl'

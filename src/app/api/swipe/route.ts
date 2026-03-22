@@ -17,12 +17,15 @@ export async function GET(req: Request) {
     const user = await requireAuth()
     const { searchParams } = new URL(req.url)
     const cursor = searchParams.get('cursor') || undefined
+    const categoryParam = searchParams.get('category') || undefined
 
-    // IDs of items already acted on (SUPPORT or SKIP)
+    // IDs of items the user has already SAVED or SUPPORTED (permanent — no need to revisit).
+    // SKIP is intentionally excluded from this filter so "Start Over" works:
+    // skipped items are tracked client-side only and cleared on reset.
     const seenEngagements = await prisma.engagementEvent.findMany({
       where: {
         userId: user.id,
-        action: { in: ['SUPPORT', 'SKIP'] },
+        action: { in: ['SUPPORT', 'SAVE'] },
       },
       select: { civicItemId: true },
     })
@@ -31,6 +34,7 @@ export async function GET(req: Request) {
     const items = await prisma.civicItem.findMany({
       where: {
         status: 'ACTIVE',
+        ...(categoryParam ? { category: categoryParam as any } : {}),
         id: {
           notIn: seenIds.length > 0 ? seenIds : undefined,
           ...(cursor ? { gt: cursor } : {}),
@@ -55,6 +59,8 @@ export async function GET(req: Request) {
         allowsOnlineSignature: true,
         tags: true,
         isVerified: true,
+        sourceUrl: true,
+        officialActionUrl: true,
         aiSummary: {
           select: {
             plainSummary: true,

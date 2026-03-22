@@ -1,10 +1,35 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+
+const hasValidClerkKey =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_test_') ||
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_')
+
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+  },
+  webpack(config, { isServer, nextRuntime }) {
+    const clerkStub = path.resolve(__dirname, 'src/lib/clerk-stub.tsx')
+    const clerkServerStub = path.resolve(__dirname, 'src/lib/clerk-stub-server.ts')
+    const middlewareImpl = hasValidClerkKey
+      ? path.resolve(__dirname, 'src/lib/middleware-clerk.ts')
+      : path.resolve(__dirname, 'src/lib/middleware-passthrough.ts')
+
+    if (!hasValidClerkKey) {
+      // Apply to ALL compilation layers (client, server, edge)
+      config.resolve.alias['@clerk/nextjs'] = clerkStub
+      config.resolve.alias['@clerk/nextjs/server'] = clerkServerStub
+      // Also try with $ suffix for exact match
+      config.resolve.alias['@clerk/nextjs/server$'] = clerkServerStub
+      // Alias the proxy file to the stub so RSC never sees @clerk/nextjs/server
+      config.resolve.alias[path.resolve(__dirname, 'src/lib/auth/clerk-server-proxy.ts')] = clerkServerStub
+    }
+    config.resolve.alias['#middleware-impl'] = middlewareImpl
+    return config
   },
   async headers() {
     return [

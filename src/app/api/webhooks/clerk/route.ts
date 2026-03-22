@@ -1,8 +1,10 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { Webhook } from 'svix'
-import type { WebhookEvent } from '@clerk/nextjs/server'
 import { syncClerkUser, deleteUser } from '@/lib/auth/sync'
+
+// Inline the type so we don't need @clerk/nextjs/server at import time
+type WebhookEvent = { type: string; data: any }
 
 export async function POST(req: Request) {
   // Get webhook secret from environment

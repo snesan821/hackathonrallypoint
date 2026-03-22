@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { Footer } from '@/components/layout/Footer'
-import { UserButton } from '@clerk/nextjs'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth/clerk-server-proxy'
+
+const IS_LOCAL_DEV =
+  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_test_') &&
+  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_')
 
 export default async function PublicLayout({
   children,
@@ -9,11 +12,13 @@ export default async function PublicLayout({
   children: React.ReactNode
 }) {
   let userId: string | null = null
-  try {
-    const authResult = await auth()
-    userId = authResult.userId
-  } catch {
-    // Clerk may not be available yet during environment setup
+  if (!IS_LOCAL_DEV) {
+    try {
+      const authResult = await auth()
+      userId = authResult.userId
+    } catch {
+      // auth not available
+    }
   }
 
   return (
@@ -76,7 +81,6 @@ export default async function PublicLayout({
                 >
                   Go to Feed
                 </Link>
-                <UserButton afterSignOutUrl="/" />
               </>
             ) : (
               <>
