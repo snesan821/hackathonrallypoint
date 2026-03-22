@@ -20,18 +20,14 @@ export default function ImpactPage() {
   const fetchImpact = async () => {
     setIsLoading(true)
     try {
-      console.log('📊 Fetching impact stats...')
-      const res = await fetch('/api/user/impact', { cache: 'no-store' })
+      const res = await fetch('/api/user/impact')
       const data = await res.json()
 
       if (data.success) {
-        console.log('✅ Impact stats loaded:', data.data.totals)
         setImpact(data.data)
-      } else {
-        console.error('❌ Failed to fetch impact:', data.error)
       }
     } catch (error) {
-      console.error('❌ Failed to fetch impact:', error)
+      console.error('Failed to fetch impact:', error)
     } finally {
       setIsLoading(false)
     }
