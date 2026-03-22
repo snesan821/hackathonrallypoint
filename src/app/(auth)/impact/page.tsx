@@ -208,7 +208,7 @@ export default async function ImpactPage() {
               <p className="mt-1 text-sm text-on-surface-variant">
                 Start engaging with issues to track your impact
               </p>
-              <Link href="/feed" className="btn btn-primary mt-4 inline-flex">
+              <Link href="/feed" className="btn btn-primary mt-4 inline-flex select-none [-webkit-tap-highlight-color:transparent] transition-all duration-300 ease-in-out active:scale-95">
                 Explore Issues
               </Link>
             </div>
