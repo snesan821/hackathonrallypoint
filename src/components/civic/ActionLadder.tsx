@@ -5,7 +5,7 @@ import { EngagementAction } from '@prisma/client'
 import { cn } from '@/lib/utils/cn'
 import {
   BookOpen,
-  Bookmark,
+  Plus,
   Share2,
   MessageCircle,
   Heart,
@@ -69,9 +69,9 @@ export function ActionLadder({
     },
     {
       action: 'SAVE',
-      icon: Bookmark,
-      label: 'Save for Later',
-      description: 'Bookmark this issue to review later',
+      icon: Plus,
+      label: 'Follow',
+      description: 'Follow this issue to stay updated',
       available: true,
     },
     {

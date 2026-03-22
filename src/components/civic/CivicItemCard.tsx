@@ -15,6 +15,7 @@ export interface CivicItemCardData {
   id: string
   title: string
   slug: string
+  category?: Category
   categories: Category[]
   type: CivicItemType
   status: CivicItemStatus
@@ -44,7 +45,7 @@ interface CivicItemCardProps {
 export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps) {
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
-  const primaryCategory = item.categories[0]
+  const primaryCategory = item.categories[0] || item.category
   const jurisdiction = item.jurisdictionTags[0] || 'Unknown'
 
   const handleCardClick = () => {
@@ -68,11 +69,9 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
       <div className="p-5 pb-0">
         {/* Top metadata row */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          {primaryCategory && <CategoryBadge category={primaryCategory} size="sm" />}
-          <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-            <span className="rounded bg-surface-container-high px-2 py-0.5 font-medium">{jurisdiction}</span>
-            <span className="rounded bg-surface-container-high px-2 py-0.5 font-medium">{item.type.replace('_', ' ')}</span>
-          </div>
+          {primaryCategory && <CategoryBadge category={primaryCategory} size="sm" showIcon />}
+          <span className="rounded bg-surface-container-high px-2 py-0.5 text-xs font-medium text-on-surface-variant">{jurisdiction}</span>
+          <span className="rounded bg-surface-container-high px-2 py-0.5 text-xs font-medium text-on-surface-variant">{item.type.replace('_', ' ')}</span>
           {item.status === 'ACTIVE' && (
             <span className="ml-auto flex items-center gap-1 text-xs font-medium text-[var(--co-success)]">
               <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
@@ -188,12 +187,6 @@ export function CivicItemCard({ item, onEngage, className }: CivicItemCardProps)
         )}
       </div>
 
-      {/* Online signature indicator */}
-      {item.allowsOnlineSignature && (
-        <div className="absolute right-3 top-3 rounded-full bg-[var(--co-success)]/10 px-2.5 py-1 text-xs font-medium text-[var(--co-success)]">
-          Sign online
-        </div>
-      )}
     </article>
   )
 }

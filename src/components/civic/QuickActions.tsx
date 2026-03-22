@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bookmark, Share2, Heart } from 'lucide-react'
+import { Plus, Share2, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { EngagementAction } from '@prisma/client'
 
@@ -27,7 +27,7 @@ export function QuickActions({
   const [isLoading, setIsLoading] = useState<EngagementAction | null>(null)
 
   const hasSupported = optimisticActions.has('SUPPORT')
-  const hasSaved = optimisticActions.has('SAVE')
+  const hasFollowed = optimisticActions.has('SAVE')
 
   const handleAction = async (action: EngagementAction) => {
     if (!onEngage || isLoading) return
@@ -37,7 +37,7 @@ export function QuickActions({
       if (hasSupported) { newActions.delete('SUPPORT'); setOptimisticSupport((prev) => prev - 1) }
       else { newActions.add('SUPPORT'); setOptimisticSupport((prev) => prev + 1) }
     } else if (action === 'SAVE') {
-      if (hasSaved) newActions.delete('SAVE')
+      if (hasFollowed) newActions.delete('SAVE')
       else newActions.add('SAVE')
     }
     setOptimisticActions(newActions)
@@ -65,15 +65,15 @@ export function QuickActions({
         className={cn(
           'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
           'hover:scale-105 active:scale-95',
-          hasSaved
+          hasFollowed
             ? 'bg-primary/10 text-primary hover:bg-primary/15'
             : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant',
           isLoading === 'SAVE' && 'opacity-50 cursor-not-allowed'
         )}
-        title={hasSaved ? 'Unsave' : 'Save for later'}
+        title={hasFollowed ? 'Unfollow' : 'Follow'}
       >
-        <Bookmark className={cn('h-4 w-4', hasSaved && 'fill-current')} />
-        <span className="hidden sm:inline">{hasSaved ? 'Saved' : 'Save'}</span>
+        <Plus className={cn('h-4 w-4', hasFollowed && 'text-primary')} />
+        <span className="hidden sm:inline">{hasFollowed ? 'Following' : 'Follow'}</span>
       </button>
 
       <button
