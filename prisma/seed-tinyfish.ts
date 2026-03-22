@@ -9,7 +9,7 @@
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const TINYFISH_API_KEY = 'sk-tinyfish-IeEHr8KeVNEGkGMDkA5jdYTssPszjH8n'
+const TINYFISH_API_KEY = 'sk-tinyfish-iWUhyV0zZpTcsLZHulh7DEJGPxF7h1kC'
 const TINYFISH_URL = 'https://agent.tinyfish.ai/v1/automation/run-sse'
 const TIMEOUT = 420_000 // 7 min per scrape
 
