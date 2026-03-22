@@ -8,7 +8,11 @@ import { ExternalLink, RefreshCw, Inbox, Plus } from 'lucide-react'
 
 const REFETCH_THRESHOLD = 3
 
-export function SwipeStack() {
+interface SwipeStackProps {
+  onCategoryChange?: (category: string | null) => void
+}
+
+export function SwipeStack({ onCategoryChange }: SwipeStackProps) {
   const [queue, setQueue] = useState<SwipeItem[]>([])
   const [matches, setMatches] = useState<SwipeItem[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
@@ -119,6 +123,12 @@ export function SwipeStack() {
   }, [fetchBatch])
 
   const visibleCards = queue.slice(0, 3)
+
+  // Notify parent of top card's category for background color changes
+  useEffect(() => {
+    const topCategory = visibleCards[0]?.category ?? null
+    onCategoryChange?.(topCategory)
+  }, [visibleCards[0]?.id, onCategoryChange])
 
   return (
     <div className="flex flex-col gap-10 pb-6">
