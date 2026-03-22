@@ -48,13 +48,52 @@ export function QuickActions({
 
   const handleShare = async () => {
     const url = `${window.location.origin}/issues/${civicItemSlug}`
+    
+    // Try native share API first (mobile)
     if (navigator.share) {
-      try { await navigator.share({ title: 'Check out this civic issue', url }) }
-      catch { console.log('Share cancelled') }
-    } else {
-      try { await navigator.clipboard.writeText(url); alert('Link copied to clipboard!') }
-      catch (error) { console.error('Failed to copy link:', error) }
+      try { 
+        await navigator.share({ title: 'Check out this civic issue', url }) 
+      }
+      catch { 
+        console.log('Share cancelled') 
+      }
+      return
     }
+    
+    // Fallback to clipboard API (desktop)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try { 
+        await navigator.clipboard.writeText(url)
+        alert('Link copied to clipboard!') 
+      }
+      catch (error) { 
+        console.error('Failed to copy link:', error)
+        fallbackCopyToClipboard(url)
+      }
+      return
+    }
+    
+    // Final fallback for older browsers or insecure contexts
+    fallbackCopyToClipboard(url)
+  }
+
+  const fallbackCopyToClipboard = (text: string) => {
+    const textArea = document.createElement('textarea')
+    textArea.value = text
+    textArea.style.position = 'fixed'
+    textArea.style.left = '-999999px'
+    textArea.style.top = '-999999px'
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      alert('Link copied to clipboard!')
+    } catch (error) {
+      console.error('Fallback copy failed:', error)
+      alert('Could not copy link. Please copy manually: ' + text)
+    }
+    document.body.removeChild(textArea)
   }
 
   return (

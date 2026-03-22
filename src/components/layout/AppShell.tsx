@@ -246,30 +246,21 @@ export function AppShell({ user, children }: AppShellProps) {
       {/* Main Content */}
       <div className="flex flex-1 flex-col lg:pl-64">
         {/* Mobile Top Bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-outline-variant/15 bg-surface/80 backdrop-blur-md px-4 lg:hidden">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="text-on-surface-variant hover:text-on-surface"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-center border-b border-outline-variant/15 bg-surface/80 backdrop-blur-md px-4 lg:hidden">
           <Link href="/" className="flex items-center gap-3">
             <div className="size-6 text-primary">
               <RallyPointLogo />
             </div>
             <span className="text-xl font-bold tracking-tight text-on-surface font-headline">RallyPoint</span>
           </Link>
-
-          <div className="w-6" />
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+        <main className="flex-1 pb-24 lg:pb-0">{children}</main>
 
         {/* Mobile Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-outline-variant/15 bg-surface-container-lowest lg:hidden">
-          <div className="flex items-center justify-around">
+        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-outline-variant/15 bg-surface-container-lowest/95 backdrop-blur-md flex lg:hidden safe-bottom">
+          <div className="flex w-full items-center justify-around">
             {navItems.slice(0, 5).map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -279,7 +270,7 @@ export function AppShell({ user, children }: AppShellProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'flex flex-col items-center gap-1 px-3 py-3 text-xs font-medium transition-colors',
+                    'flex flex-col items-center gap-1 px-3 py-3 text-xs font-medium transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent]',
                     active ? 'text-primary' : 'text-on-surface-variant'
                   )}
                 >

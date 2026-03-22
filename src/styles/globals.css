@@ -121,6 +121,28 @@
 
   .section-gap  { padding-block: var(--sp-24); }
   .section-gap-sm { padding-block: var(--sp-16); }
+
+  /* Mobile safe area support */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Native app feel - disable text selection on interactive elements */
+  .select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Remove mobile tap highlight */
+  .\[-webkit-tap-highlight-color\:transparent\] {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* ── Component classes ── */
@@ -169,15 +191,20 @@
     font-weight: 600;
     border-radius: var(--radius-lg);
     padding: 0.625rem 1.25rem;
-    transition: background 0.2s var(--ease-out-quart),
-                color     0.2s var(--ease-out-quart),
-                box-shadow 0.2s var(--ease-out-quart),
-                transform  0.15s var(--ease-out-quart);
+    transition: background 0.3s var(--ease-out-quart),
+                color     0.3s var(--ease-out-quart),
+                box-shadow 0.3s var(--ease-out-quart),
+                transform  0.3s var(--ease-out-quart);
     cursor: pointer;
     border: none;
     outline: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
-  .btn:active { transform: scale(0.98); }
+  .btn:active { transform: scale(0.95); }
 
   .btn-primary {
     background: var(--co-primary);
@@ -221,13 +248,21 @@
     background: var(--co-surface-container-lowest);
     color: var(--co-on-surface-variant);
     cursor: pointer;
-    transition: all 0.18s var(--ease-out-quart);
+    transition: all 0.3s var(--ease-out-quart);
     white-space: nowrap;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
   .pill:hover {
     border-color: var(--co-outline);
     color: var(--co-on-surface);
     background: var(--co-surface-container);
+  }
+  .pill:active {
+    transform: scale(0.95);
   }
   .pill-active {
     background: rgba(161, 58, 0, 0.08);
@@ -267,6 +302,12 @@
     box-shadow:
       0 1px 3px rgba(28, 27, 27, 0.06),
       0 4px 16px rgba(28, 27, 27, 0.04);
+  }
+  
+  .shadow-card-hover {
+    box-shadow:
+      0 4px 8px rgba(28, 27, 27, 0.08),
+      0 8px 24px rgba(28, 27, 27, 0.06);
   }
 
   /* Rule divider */

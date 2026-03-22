@@ -146,7 +146,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
     <div
       ref={cardRef}
       className={cn(
-        'absolute inset-0 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card',
+        'absolute inset-0 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-card select-none [-webkit-tap-highlight-color:transparent]',
         isTop ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none'
       )}
       style={{
@@ -253,7 +253,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
               type="button"
               onClick={handleSupportClick}
               className={cn(
-                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
+                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent]',
                 'hover:scale-105 active:scale-95',
                 hasSupported
                   ? 'bg-primary text-on-primary hover:bg-primary-container'
@@ -270,7 +270,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
           <div className="flex items-center justify-center gap-2 border-t border-outline-variant/15 pt-3 pb-3">
             <Link
               href={`/issues/${item.slug}`}
-              className="rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+              className="rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent] active:scale-95"
               onClick={(e) => e.stopPropagation()}
             >
               View details
@@ -280,7 +280,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
                 href={contactUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+                className="flex items-center gap-1 rounded-lg bg-surface-container-high px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest transition-all duration-300 ease-in-out select-none [-webkit-tap-highlight-color:transparent] active:scale-95"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink className="h-3 w-3" />

@@ -78,12 +78,12 @@ export default function DiscoverPage() {
       </div>
 
       {/* View mode toggle */}
-      <div className="mb-8 flex items-center gap-1 rounded-xl border border-outline-variant/15 bg-surface-container-low p-1 w-fit">
+      <div className="mb-8 flex items-center gap-1 rounded-xl border border-outline-variant/15 bg-surface-container-low p-1 w-full max-w-xs">
         <button
           type="button"
           onClick={() => setViewMode('swipe')}
           className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+            'flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out flex-1 select-none [-webkit-tap-highlight-color:transparent]',
             viewMode === 'swipe'
               ? 'bg-surface-container-lowest text-on-surface shadow-sm'
               : 'text-on-surface-variant hover:text-on-surface'
@@ -96,7 +96,7 @@ export default function DiscoverPage() {
           type="button"
           onClick={() => setViewMode('browse')}
           className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+            'flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out flex-1 select-none [-webkit-tap-highlight-color:transparent]',
             viewMode === 'browse'
               ? 'bg-surface-container-lowest text-on-surface shadow-sm'
               : 'text-on-surface-variant hover:text-on-surface'
@@ -122,7 +122,7 @@ export default function DiscoverPage() {
             <button
               type="button"
               onClick={() => updateFilter('category', null)}
-              className={cn('pill', !category ? 'pill-active' : '')}
+              className={cn('pill select-none [-webkit-tap-highlight-color:transparent]', !category ? 'pill-active' : '')}
             >
               All
             </button>
@@ -132,7 +132,7 @@ export default function DiscoverPage() {
                 type="button"
                 onClick={() => updateFilter('category', cat.value)}
                 className={cn(
-                  'pill flex items-center gap-2',
+                  'pill flex items-center gap-2 select-none [-webkit-tap-highlight-color:transparent]',
                   category === cat.value ? 'pill-active' : ''
                 )}
               >
