@@ -1,255 +1,228 @@
 import Link from 'next/link'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
-import { CivicItemCard } from '@/components/civic/CivicItemCard'
+import { renderIcon } from '@/lib/utils/icons'
+import { HeroStabilizer } from '@/components/landing/HeroStabilizer'
+import {
+  ShieldCheck,
+  Scale,
+  Eye,
+  ArrowRight,
+} from 'lucide-react'
+
+const trustFeatures = [
+  {
+    title: 'Verified Residency',
+    desc: 'We use address verification to ensure only real neighbors are voting and debating on local issues.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Civil Discourse',
+    desc: 'Our AI moderation flags harassment while preserving heated, passionate policy debate.',
+    icon: Scale,
+  },
+  {
+    title: 'Full Transparency',
+    desc: 'See exactly how your feedback is being processed and shared with city council members.',
+    icon: Eye,
+  },
+]
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-24 md:py-32">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-            backgroundSize: '32px 32px'
-          }} />
-        </div>
-
-        <div className="container relative mx-auto max-w-6xl">
-          <div className="grid items-center gap-12 md:grid-cols-2">
-            {/* Left: Hero content */}
-            <div>
-              <h1 className="mb-6 text-5xl font-bold leading-tight text-white md:text-6xl">
-                Your voice matters here.
+      <section className="max-w-[1280px] w-full mx-auto px-6 py-12 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+          <div className="flex flex-col gap-8 order-2 lg:order-1">
+            <div className="flex flex-col gap-4">
+              <span className="text-primary font-bold tracking-widest text-xs uppercase">
+                Your Voice Matters Here
+              </span>
+              <h1 className="text-on-surface text-5xl lg:text-7xl font-black leading-[1.1] tracking-[-0.03em]">
+                Join the <br />
+                <span className="text-primary italic font-headline">conversation</span> that
+                shapes your city.
               </h1>
-              <p className="mb-8 text-xl leading-relaxed text-slate-300">
-                Discover local issues, understand their impact, and take meaningful action
-                in your community. Built for first-time voters and civic newcomers.
+              <p className="text-on-surface-variant text-lg lg:text-xl leading-relaxed max-w-lg">
+                A modern space for community engagement, transparent policy discussion, and
+                collective action. Connect with neighbors and influence real change.
               </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/sign-up"
-                  className="rounded-lg bg-orange-600 px-6 py-3 font-semibold text-white shadow-lg hover:bg-orange-700"
-                >
-                  Get Started
-                </Link>
-                <Link
-                  href="/discover"
-                  className="rounded-lg border-2 border-white/20 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm hover:bg-white/20"
-                >
-                  Explore Issues
-                </Link>
-              </div>
             </div>
-
-            {/* Right: Floating card preview */}
-            <div className="hidden md:block">
-              <div className="rotate-2 transform transition-transform hover:rotate-0">
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xl">
-                  <div className="mb-3 flex items-center gap-2">
-                    <div className="rounded-full bg-orange-500 px-2.5 py-1 text-xs font-medium text-white">
-                      Housing
-                    </div>
-                    <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                      Tempe
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-lg font-bold text-slate-900">
-                    Rent Stabilization Ordinance
-                  </h3>
-                  <p className="mb-3 text-sm text-slate-600">
-                    A proposed city ordinance to limit annual rent increases and provide
-                    tenant protections...
-                  </p>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                    <div className="h-full w-3/4 bg-gradient-to-r from-orange-500 to-orange-600" />
-                  </div>
-                  <p className="mt-2 text-xs text-slate-600">234 of 500 supporters (47%)</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="bg-white px-4 py-20">
-        <div className="container mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-slate-900">How It Works</h2>
-            <p className="text-lg text-slate-600">
-              Making civic participation accessible and impactful
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-4">
-            {[
-              {
-                step: '1',
-                title: 'Discover',
-                description: 'Find local issues relevant to your community and interests',
-                icon: '🔍',
-              },
-              {
-                step: '2',
-                title: 'Understand',
-                description: 'Get AI-powered summaries that break down complex policies',
-                icon: '💡',
-              },
-              {
-                step: '3',
-                title: 'Engage',
-                description: 'Take action through our progressive engagement ladder',
-                icon: '✊',
-              },
-              {
-                step: '4',
-                title: 'Impact',
-                description: 'Track your civic participation and community influence',
-                icon: '📊',
-              },
-            ].map((step, i) => (
-              <div
-                key={i}
-                className="group relative rounded-xl border-2 border-slate-200 bg-white p-6 transition-all hover:border-orange-500 hover:shadow-lg"
-              >
-                <div className="mb-4 text-5xl">{step.icon}</div>
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-sm font-bold text-white">
-                    {step.step}
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900">{step.title}</h3>
-                </div>
-                <p className="text-slate-600">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Issue Categories */}
-      <section className="bg-slate-50 px-4 py-20">
-        <div className="container mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-slate-900">
-              See what's happening near you
-            </h2>
-            <p className="text-lg text-slate-600">
-              Explore civic issues across 12 key categories
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {CIVIC_CATEGORIES.map((category) => (
+            <div className="flex flex-wrap gap-4">
               <Link
-                key={category.value}
-                href={`/discover?category=${category.value}`}
-                className="group flex flex-col items-center gap-3 rounded-xl border-2 border-slate-200 bg-white p-6 transition-all hover:border-orange-500 hover:shadow-lg"
+                href="/sign-up"
+                className="px-8 py-4 bg-primary text-on-primary text-base font-bold rounded-xl shadow-lg hover:-translate-y-0.5 transition-all"
               >
-                <div className={`rounded-lg ${category.color} p-3 text-2xl`}>
-                  {category.icon}
-                </div>
-                <div className="text-center">
-                  <h3 className="font-semibold text-slate-900">{category.label}</h3>
-                  <p className="mt-1 text-xs text-slate-600">{category.description}</p>
-                </div>
+                Get Started
               </Link>
-            ))}
+              <Link
+                href="/discover"
+                className="px-8 py-4 bg-surface-container-highest text-on-surface text-base font-bold rounded-xl hover:bg-surface-variant transition-all"
+              >
+                Explore Issues
+              </Link>
+            </div>
+          </div>
+          <div className="relative order-1 lg:order-2">
+            <HeroStabilizer />
+            {/* Floating card */}
+            <div className="absolute -bottom-10 -left-6 lg:-left-20 w-full max-w-sm bg-surface-container-lowest p-6 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant/10">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-primary text-[10px] font-bold tracking-[0.2em] uppercase">
+                    Trending Issue
+                  </span>
+                  <span className="text-on-surface-variant text-[10px] font-medium">
+                    2.4k active
+                  </span>
+                </div>
+                <h3 className="text-on-surface text-2xl font-bold leading-tight font-headline">
+                  Rent Stabilization Ordinance
+                </h3>
+                <p className="text-on-surface-variant text-sm leading-normal">
+                  Discussion on proposed amendments to local housing stability and tenant
+                  protections.
+                </p>
+                <div className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden mt-2">
+                  <div className="h-full bg-primary w-3/4" />
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex -space-x-2">
+                    <div className="size-6 rounded-full border-2 border-surface bg-surface-container-high" />
+                    <div className="size-6 rounded-full border-2 border-surface bg-surface-container-highest" />
+                    <div className="size-6 rounded-full border-2 border-surface bg-outline" />
+                  </div>
+                  <Link
+                    href="/discover"
+                    className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary-container transition-colors"
+                  >
+                    View Discussion
+                    <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Impact Stats */}
-      <section className="bg-gradient-to-br from-orange-600 to-orange-700 px-4 py-20 text-white">
-        <div className="container mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold">Making an Impact</h2>
-            <p className="text-lg text-orange-100">
-              Join thousands of engaged citizens in Arizona
+      {/* Categories Section — uses CIVIC_CATEGORIES from constants */}
+      <section className="max-w-[1280px] w-full mx-auto px-6 py-20 border-t border-outline-variant/15">
+        <div className="flex flex-col lg:flex-row justify-between items-end mb-12 gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-4 font-headline">Browse by category</h2>
+            <p className="text-on-surface-variant text-lg">
+              Filter discussions by the topics that affect your daily life most. Every category is moderated for constructive dialogue.
             </p>
           </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              { number: '2,400+', label: 'Students Engaged' },
-              { number: '180+', label: 'Local Issues Tracked' },
-              { number: '15', label: 'Districts Covered' },
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="mb-2 text-5xl font-bold">{stat.number}</div>
-                <div className="text-lg text-orange-100">{stat.label}</div>
+          <Link href="/discover" className="text-primary font-bold flex items-center gap-2 pb-1 border-b-2 border-primary/20 hover:border-primary transition-all">
+            View all categories
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {CIVIC_CATEGORIES.map((cat) => (
+            <Link
+              key={cat.value}
+              href={`/discover?category=${cat.value}`}
+              className="group bg-surface-container-low p-6 rounded-2xl flex flex-col gap-4 hover:bg-primary transition-all cursor-pointer"
+            >
+              <div className="size-12 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary group-hover:bg-on-primary transition-colors">
+                {renderIcon(cat.icon, 24, "h-6 w-6")}
               </div>
-            ))}
-          </div>
+              <div>
+                <span className="font-bold text-on-surface group-hover:text-on-primary transition-colors">{cat.label}</span>
+                {cat.description && (
+                  <p className="mt-1 text-xs text-on-surface-variant group-hover:text-on-primary/70 transition-colors">{cat.description}</p>
+                )}
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* Trust & Safety */}
-      <section className="bg-white px-4 py-20">
-        <div className="container mx-auto max-w-4xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-slate-900">
-              Built for real civic participation
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {[
-              {
-                title: 'Verified Actions',
-                description: 'All civic items are verified by organizers or officials',
-                icon: '✓',
-              },
-              {
-                title: 'AI Transparency',
-                description: 'Summaries are clearly labeled and link to original sources',
-                icon: '🤖',
-              },
-              {
-                title: 'Community Moderation',
-                description: 'Automated and human moderation keeps discussions constructive',
-                icon: '🛡️',
-              },
-              {
-                title: 'No Spam',
-                description: 'Fraud detection and rate limiting prevent abuse',
-                icon: '🚫',
-              },
-            ].map((feature, i) => (
-              <div key={i} className="flex gap-4 rounded-xl border border-slate-200 p-6">
-                <div className="text-3xl">{feature.icon}</div>
-                <div>
-                  <h3 className="mb-2 font-semibold text-slate-900">{feature.title}</h3>
-                  <p className="text-sm text-slate-600">{feature.description}</p>
+      {/* Impact Section */}
+      <section className="max-w-[1280px] w-full mx-auto px-6">
+        <div className="py-24 bg-surface-container-low rounded-3xl px-8 lg:px-20 my-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl lg:text-6xl font-bold mb-8 leading-tight font-headline">
+                Civic engagement that actually works.
+              </h2>
+              <p className="text-on-surface-variant text-lg mb-12">
+                We bridge the gap between residents and city officials. Our platform ensures every verified voice is heard, documented, and delivered to decision-makers.
+              </p>
+              <div className="grid grid-cols-2 gap-12">
+                <div className="flex flex-col">
+                  <span className="text-primary text-5xl font-black italic font-headline">42</span>
+                  <span className="text-on-surface font-bold text-lg mt-2">Policy Changes</span>
+                  <p className="text-on-surface-variant text-sm">Directly influenced by community discussions.</p>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-primary text-5xl font-black italic font-headline">12k+</span>
+                  <span className="text-on-surface font-bold text-lg mt-2">Active Neighbors</span>
+                  <p className="text-on-surface-variant text-sm">Engaging in verified civil debate daily.</p>
                 </div>
               </div>
-            ))}
+            </div>
+            <div className="bg-surface rounded-2xl p-2 shadow-inner border border-outline-variant/10">
+              <div className="rounded-xl w-full h-[400px] bg-gradient-to-br from-primary/5 via-surface-container to-surface-container-high flex items-center justify-center">
+                <p className="text-on-surface-variant text-sm">Community Forum Image</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="bg-slate-900 px-4 py-20">
-        <div className="container mx-auto max-w-3xl text-center">
-          <h2 className="mb-6 text-4xl font-bold text-white">
-            Ready to make your voice heard?
-          </h2>
-          <p className="mb-8 text-lg text-slate-300">
-            Join RallyPoint and start engaging with your local community today
+      {/* Trust & Safety Section */}
+      <section className="max-w-[1280px] w-full mx-auto px-6 py-20">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4 font-headline">A safer space for citizens</h2>
+          <p className="text-on-surface-variant text-lg">
+            We prioritize accountability and respect. Our community standards are enforced by both technology and human moderation.
           </p>
-          <Link
-            href="/sign-up"
-            className="inline-block rounded-lg bg-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-orange-700"
-          >
-            Get Started Free
-          </Link>
-          <p className="mt-4 text-sm text-slate-400">
-            Already have an account?{' '}
-            <Link href="/sign-in" className="text-orange-400 hover:text-orange-300">
-              Sign in
-            </Link>
-          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {trustFeatures.map((feature) => (
+            <div key={feature.title} className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/10 hover:shadow-xl transition-all">
+              <feature.icon className="text-primary mb-6" size={36} strokeWidth={1.5} />
+              <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+              <p className="text-on-surface-variant leading-relaxed">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="max-w-[1280px] w-full mx-auto px-6 py-20">
+        <div className="relative bg-primary text-on-primary p-12 lg:p-24 rounded-[3rem] overflow-hidden">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <svg height="100%" width="100%" xmlns="http://www.w3.org/2000/svg">
+              <pattern height="40" id="pattern-grid" patternUnits="userSpaceOnUse" width="40" x="0" y="0">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
+              </pattern>
+              <rect fill="url(#pattern-grid)" height="100%" width="100%" />
+            </svg>
+          </div>
+          <div className="relative z-10 flex flex-col items-center gap-8 text-center">
+            <h2 className="text-5xl lg:text-7xl font-black tracking-tight leading-none font-headline">Ready to lead?</h2>
+            <p className="text-lg lg:text-xl max-w-xl opacity-90">
+              Start a discussion today or join one in progress. Your community is waiting to hear from you.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/sign-up"
+                className="px-10 py-5 bg-surface-container-lowest text-primary text-lg font-black rounded-2xl hover:bg-surface-bright transition-all"
+              >
+                Create My Account
+              </Link>
+              <Link
+                href="/about"
+                className="px-10 py-5 border-2 border-on-primary text-on-primary text-lg font-black rounded-2xl hover:bg-on-primary hover:text-primary transition-all"
+              >
+                Learn More
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>

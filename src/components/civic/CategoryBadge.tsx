@@ -1,6 +1,7 @@
 import { Category } from '@prisma/client'
 import { CIVIC_CATEGORIES } from '@/constants/categories'
 import { cn } from '@/lib/utils/cn'
+import { renderIcon } from '@/lib/utils/icons'
 
 interface CategoryBadgeProps {
   category: Category
@@ -27,6 +28,12 @@ export function CategoryBadge({
     lg: 'px-3 py-1.5 text-base',
   }
 
+  const iconSize = {
+    sm: 12,
+    md: 14,
+    lg: 16,
+  }[size]
+
   return (
     <div
       className={cn(
@@ -37,7 +44,9 @@ export function CategoryBadge({
       )}
     >
       {showIcon && categoryMeta.icon && (
-        <span className="text-current">{categoryMeta.icon}</span>
+        <span className="text-current">
+          {renderIcon(categoryMeta.icon, iconSize)}
+        </span>
       )}
       <span>{categoryMeta.label}</span>
     </div>
@@ -76,7 +85,7 @@ export function CategoryBadgeList({
         />
       ))}
       {remainingCount > 0 && (
-        <span className="text-xs text-slate-500">+{remainingCount} more</span>
+        <span className="text-xs text-on-surface-variant">+{remainingCount} more</span>
       )}
     </div>
   )

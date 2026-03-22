@@ -15,56 +15,75 @@ export async function GET(req: Request) {
       return errorResponse('Unauthorized', 401)
     }
 
-    // Get total engagement stats by action
-    const engagementsByAction = await prisma.engagementEvent.groupBy({
-      by: ['action'],
-      where: { userId: user.id },
-      _count: { action: true },
-    })
+    const [
+      engagementsByAction,
+      uniqueIssues,
+      recentActivity,
+      engagementDates,
+      commentCount,
+      commentedIssues,
+      engagementsByCategory,
+    ] = await Promise.all([
+      prisma.engagementEvent.groupBy({
+        by: ['action'],
+        where: { userId: user.id },
+        _count: { action: true },
+      }),
+      prisma.engagementEvent.findMany({
+        where: { userId: user.id },
+        distinct: ['civicItemId'],
+        select: { civicItemId: true },
+      }),
+      prisma.engagementEvent.findMany({
+        where: { userId: user.id },
+        orderBy: { timestamp: 'desc' },
+        take: 20,
+        include: {
+          civicItem: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              type: true,
+            },
+          },
+        },
+      }),
+      prisma.$queryRaw<Array<{ date: Date }>>`
+        SELECT DISTINCT DATE("timestamp") as date
+        FROM "EngagementEvent"
+        WHERE "userId" = ${user.id}
+        ORDER BY date DESC
+        LIMIT 365
+      `,
+      prisma.comment.count({
+        where: { authorId: user.id },
+      }),
+      prisma.comment.findMany({
+        where: { authorId: user.id },
+        distinct: ['civicItemId'],
+        select: { civicItemId: true },
+      }),
+      prisma.$queryRaw<Array<{ category: string; count: bigint }>>`
+        SELECT DISTINCT unnest(ci.categories::text[]) as category, COUNT(*) as count
+        FROM "EngagementEvent" ee
+        JOIN "CivicItem" ci ON ee."civicItemId" = ci.id
+        WHERE ee."userId" = ${user.id}
+        GROUP BY category
+        ORDER BY count DESC
+      `,
+    ])
 
     const actionCounts = engagementsByAction.reduce((acc, curr) => {
       acc[curr.action] = curr._count.action
       return acc
     }, {} as Record<EngagementAction, number>)
 
-    // Get total issues engaged with
-    const uniqueIssues = await prisma.engagementEvent.findMany({
-      where: { userId: user.id },
-      distinct: ['civicItemId'],
-      select: { civicItemId: true },
-    })
-
     // Get engagement by category
-    const engagementsByCategory = await prisma.$queryRaw<Array<{ category: string; count: bigint }>>`
-      SELECT DISTINCT unnest(ci.categories::text[]) as category, COUNT(*) as count
-      FROM "EngagementEvent" ee
-      JOIN "CivicItem" ci ON ee."civicItemId" = ci.id
-      WHERE ee."userId" = ${user.id}
-      GROUP BY category
-      ORDER BY count DESC
-    `
-
     const categoryDistribution = engagementsByCategory.map((item) => ({
       category: item.category,
       count: Number(item.count),
     }))
-
-    // Get recent activity timeline (last 20 engagements)
-    const recentActivity = await prisma.engagementEvent.findMany({
-      where: { userId: user.id },
-      orderBy: { timestamp: 'desc' },
-      take: 20,
-      include: {
-        civicItem: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            type: true,
-          },
-        },
-      },
-    })
 
     const timeline = recentActivity.map((event) => ({
       action: event.action,
@@ -73,14 +92,6 @@ export async function GET(req: Request) {
     }))
 
     // Calculate engagement streak (consecutive days with at least one engagement)
-    const engagementDates = await prisma.$queryRaw<Array<{ date: Date }>>`
-      SELECT DISTINCT DATE("timestamp") as date
-      FROM "EngagementEvent"
-      WHERE "userId" = ${user.id}
-      ORDER BY date DESC
-      LIMIT 365
-    `
-
     let streak = 0
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -98,17 +109,13 @@ export async function GET(req: Request) {
       }
     }
 
-    // Get comment count
-    const commentCount = await prisma.comment.count({
-      where: { authorId: user.id },
-    })
-
     const impact = {
       totals: {
         issuesViewed: actionCounts['VIEW'] || 0,
         issuesSaved: actionCounts['SAVE'] || 0,
         issuesSupported: actionCounts['SUPPORT'] || 0,
         commentsPosted: commentCount,
+        issuesCommented: commentedIssues.length,
         actionsCompleted: Object.values(actionCounts).reduce((a, b) => a + b, 0),
         uniqueIssuesEngaged: uniqueIssues.length,
       },

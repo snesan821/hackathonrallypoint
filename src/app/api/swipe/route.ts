@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { requireAuth } from '@/lib/auth/server'
 import { errorResponse } from '@/lib/api/middleware'
@@ -18,26 +18,27 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const cursor = searchParams.get('cursor') || undefined
 
-    // IDs of items already acted on (SUPPORT or SKIP)
-    const seenEngagements = await prisma.engagementEvent.findMany({
-      where: {
-        userId: user.id,
-        action: { in: ['SUPPORT', 'SKIP'] },
-      },
-      select: { civicItemId: true },
-    })
-    const seenIds = seenEngagements.map((e) => e.civicItemId)
-
     const items = await prisma.civicItem.findMany({
       where: {
         status: 'ACTIVE',
-        id: {
-          notIn: seenIds.length > 0 ? seenIds : undefined,
-          ...(cursor ? { gt: cursor } : {}),
+        engagements: {
+          none: {
+            userId: user.id,
+            action: { in: ['SUPPORT', 'SKIP'] },
+          },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { createdAt: 'desc' },
+        { id: 'desc' },
+      ],
       take: BATCH_SIZE,
+      ...(cursor
+        ? {
+            cursor: { id: cursor },
+            skip: 1,
+          }
+        : {}),
       select: {
         id: true,
         title: true,
@@ -55,6 +56,8 @@ export async function GET(req: Request) {
         allowsOnlineSignature: true,
         tags: true,
         isVerified: true,
+        sourceUrl: true,
+        officialActionUrl: true,
         aiSummary: {
           select: {
             plainSummary: true,
@@ -93,7 +96,7 @@ export async function POST(req: Request) {
 
     const { civicItemId, action } = validation.data
 
-    // Upsert — if they already acted on this item (e.g. re-swiped), just update
+    // Upsert ΓÇö if they already acted on this item (e.g. re-swiped), just update
     await prisma.engagementEvent.upsert({
       where: { userId_civicItemId_action: { userId: user.id, civicItemId, action } },
       create: { userId: user.id, civicItemId, action },
